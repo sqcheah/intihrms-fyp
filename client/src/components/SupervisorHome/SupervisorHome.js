@@ -54,14 +54,10 @@ const Home = () => {
   const history = useHistory();
   const [loading, setIsloading] = useState(true);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  let empLeaveData = [],
-    max = 0;
+  var deptId;
 
   useEffect(() => {
-    console.log(user);
-    dispatch(fetchAllLeaves()).then(
-      () => (empLeaveData = calcGraph(user.department._id))
-    );
+    dispatch(fetchAllLeaves());
     dispatch(fetchTodayLeaves());
     dispatch(fetchDeptUsers(user.department._id)).then(() =>
       setIsloading(false)
@@ -73,19 +69,22 @@ const Home = () => {
     }
   }, [dispatch]);
   const onFinish = (values) => {
-    //dispatch(fetchDeptUsers(values.department)).then(
-    //() => calcGraph(values.department)
-    //console.log(values.department)
-    //);
-    //setIsModalVisible(false);
+    dispatch(fetchDeptUsers(values.department));
+    setIsModalVisible(false);
   };
 
   const handleCancel = () => {
     history.goBack();
   };
 
+  const showModal = () => {
+    setIsModalVisible(true);
+  };
+
+  if (!users.length) deptId = user.department._id;
+  else deptId = users[0].department._id;
   const filterDept = todayLeaves.filter(
-    (todayLeaves) => todayLeaves.department.name == user.department.name
+    (todayLeaves) => todayLeaves.department._id == deptId
   );
 
   const top3Users = users.slice(0, 3);
@@ -96,122 +95,118 @@ const Home = () => {
       supervisorNames.push(`${element.first_name} ${element.last_name}`);
   });
 
-  const calcGraph = (dept) => {
-    console.log(dept);
-    var pass2MonthC = 0,
-      pass2MonthM = 0,
-      pass1MonthC = 0,
-      pass1MonthM = 0,
-      currentMonthC = 0,
-      currentMonthM = 0,
-      next1MonthC = 0,
-      next1MonthM = 0,
-      next2MonthC = 0,
-      next2MonthM = 0,
-      next3MonthC = 0,
-      next3MonthM = 0;
+  var pass2MonthC = 0,
+    pass2MonthM = 0,
+    pass1MonthC = 0,
+    pass1MonthM = 0,
+    currentMonthC = 0,
+    currentMonthM = 0,
+    next1MonthC = 0,
+    next1MonthM = 0,
+    next2MonthC = 0,
+    next2MonthM = 0,
+    next3MonthC = 0,
+    next3MonthM = 0,
     max = 0;
 
-    leaves.map((element) => {
-      var d = new Date(element.fromDate);
-      if (element.status == 'approve' && element.department._id == dept) {
-        if (
-          element.leaveType == 'casual' &&
-          d.getMonth() == moment().subtract(2, 'months').month()
-        )
-          max = Math.max(++pass2MonthC, max);
-        else if (
-          element.leaveType == 'medical' &&
-          d.getMonth() == moment().subtract(2, 'months').month()
-        )
-          max = Math.max(++pass2MonthM, max);
-        else if (
-          element.leaveType == 'casual' &&
-          d.getMonth() == moment().subtract(1, 'months').month()
-        )
-          max = Math.max(++pass1MonthC, max);
-        else if (
-          element.leaveType == 'medical' &&
-          d.getMonth() == moment().subtract(1, 'months').month()
-        )
-          max = Math.max(++pass1MonthM, max);
-        else if (
-          element.leaveType == 'casual' &&
-          d.getMonth() == moment().month()
-        )
-          max = Math.max(++currentMonthC, max);
-        else if (
-          element.leaveType == 'medical' &&
-          d.getMonth() == moment().month()
-        )
-          max = Math.max(++currentMonthM, max);
-        else if (
-          element.leaveType == 'casual' &&
-          d.getMonth() == moment().add(1, 'months').month()
-        )
-          max = Math.max(++next1MonthC, max);
-        else if (
-          element.leaveType == 'medical' &&
-          d.getMonth() == moment().add(1, 'months').month()
-        )
-          max = Math.max(++next1MonthM, max);
-        else if (
-          element.leaveType == 'casual' &&
-          d.getMonth() == moment().add(2, 'months').month()
-        )
-          max = Math.max(++next2MonthC, max);
-        else if (
-          element.leaveType == 'medical' &&
-          d.getMonth() == moment().add(2, 'months').month()
-        )
-          max = Math.max(++next2MonthM, max);
-        else if (
-          element.leaveType == 'casual' &&
-          d.getMonth() == moment().add(3, 'months').month()
-        )
-          max = Math.max(++next3MonthC, max);
-        else if (
-          element.leaveType == 'medical' &&
-          d.getMonth() == moment().add(3, 'months').month()
-        )
-          max = Math.max(++next3MonthM, max);
-      }
-    });
+  leaves.map((element) => {
+    var d = new Date(element.fromDate);
+    if (element.status == 'approve' && element.department._id == deptId) {
+      if (
+        element.leaveType == 'casual' &&
+        d.getMonth() == moment().subtract(2, 'months').month()
+      )
+        max = Math.max(++pass2MonthC, max);
+      else if (
+        element.leaveType == 'medical' &&
+        d.getMonth() == moment().subtract(2, 'months').month()
+      )
+        max = Math.max(++pass2MonthM, max);
+      else if (
+        element.leaveType == 'casual' &&
+        d.getMonth() == moment().subtract(1, 'months').month()
+      )
+        max = Math.max(++pass1MonthC, max);
+      else if (
+        element.leaveType == 'medical' &&
+        d.getMonth() == moment().subtract(1, 'months').month()
+      )
+        max = Math.max(++pass1MonthM, max);
+      else if (
+        element.leaveType == 'casual' &&
+        d.getMonth() == moment().month()
+      )
+        max = Math.max(++currentMonthC, max);
+      else if (
+        element.leaveType == 'medical' &&
+        d.getMonth() == moment().month()
+      )
+        max = Math.max(++currentMonthM, max);
+      else if (
+        element.leaveType == 'casual' &&
+        d.getMonth() == moment().add(1, 'months').month()
+      )
+        max = Math.max(++next1MonthC, max);
+      else if (
+        element.leaveType == 'medical' &&
+        d.getMonth() == moment().add(1, 'months').month()
+      )
+        max = Math.max(++next1MonthM, max);
+      else if (
+        element.leaveType == 'casual' &&
+        d.getMonth() == moment().add(2, 'months').month()
+      )
+        max = Math.max(++next2MonthC, max);
+      else if (
+        element.leaveType == 'medical' &&
+        d.getMonth() == moment().add(2, 'months').month()
+      )
+        max = Math.max(++next2MonthM, max);
+      else if (
+        element.leaveType == 'casual' &&
+        d.getMonth() == moment().add(3, 'months').month()
+      )
+        max = Math.max(++next3MonthC, max);
+      else if (
+        element.leaveType == 'medical' &&
+        d.getMonth() == moment().add(3, 'months').month()
+      )
+        max = Math.max(++next3MonthM, max);
+    }
+  });
 
-    const leaveData = [
-      {
-        name: moment().subtract(2, 'months').format('MMMM'),
-        Casual: pass2MonthC,
-        Medical: pass2MonthM,
-      },
-      {
-        name: moment().subtract(1, 'months').format('MMMM'),
-        Casual: pass1MonthC,
-        Medical: pass1MonthM,
-      },
-      {
-        name: moment().format('MMMM'),
-        Casual: currentMonthC,
-        Medical: currentMonthM,
-      },
-      {
-        name: moment().add(1, 'months').format('MMMM'),
-        Casual: next1MonthC,
-        Medical: next1MonthM,
-      },
-      {
-        name: moment().add(2, 'months').format('MMMM'),
-        Casual: next2MonthC,
-        Medical: next2MonthM,
-      },
-      {
-        name: moment().add(3, 'months').format('MMMM'),
-        Casual: next3MonthC,
-        Medical: next3MonthM,
-      },
-    ];
-    return leaveData;
-  };
+  const empLeaveData = [
+    {
+      name: moment().subtract(2, 'months').format('MMMM'),
+      Casual: pass2MonthC,
+      Medical: pass2MonthM,
+    },
+    {
+      name: moment().subtract(1, 'months').format('MMMM'),
+      Casual: pass1MonthC,
+      Medical: pass1MonthM,
+    },
+    {
+      name: moment().format('MMMM'),
+      Casual: currentMonthC,
+      Medical: currentMonthM,
+    },
+    {
+      name: moment().add(1, 'months').format('MMMM'),
+      Casual: next1MonthC,
+      Medical: next1MonthM,
+    },
+    {
+      name: moment().add(2, 'months').format('MMMM'),
+      Casual: next2MonthC,
+      Medical: next2MonthM,
+    },
+    {
+      name: moment().add(3, 'months').format('MMMM'),
+      Casual: next3MonthC,
+      Medical: next3MonthM,
+    },
+  ];
 
   const COLORS1 = ['#0088FE', '#2ce654'];
   const COLORS2 = ['#0088FE', '#de0b0b'];
@@ -223,7 +218,6 @@ const Home = () => {
       </text>
     );
   };
-  console.log(empLeaveData);
   if (loading) return <PageLoading />;
   return (
     <>
@@ -233,6 +227,7 @@ const Home = () => {
         //onOk={handleOk}
         //onCancel={handleCancel}
         footer={[
+          <Button onClick={() => history.goBack()}>Back</Button>,
           <Button form='myForm' key='submit' htmlType='submit'>
             Submit
           </Button>,
@@ -244,7 +239,7 @@ const Home = () => {
             name='department'
             rules={[
               {
-                required: false,
+                required: true,
                 message: 'Please select a department!',
               },
             ]}
@@ -270,14 +265,10 @@ const Home = () => {
               column={{ sm: 3, xs: 1 }}
             >
               <Descriptions.Item label='Name' span={2}>
-                {users.department
-                  ? users.department.name
-                  : user.department.name}
+                {users[0].department.name}
               </Descriptions.Item>
               <Descriptions.Item label='Code' span={1}>
-                {users.department
-                  ? users.department.code
-                  : user.department.code}
+                {users[0].department.code}
               </Descriptions.Item>
               <Descriptions.Item label='Supervisors' span={3}>
                 <List
@@ -293,6 +284,14 @@ const Home = () => {
                 {users.length}
               </Descriptions.Item>
             </Descriptions>
+            {user.roles.name == 'admin' && (
+              <>
+                <br />
+                <Button type='primary' onClick={showModal}>
+                  Change Departments
+                </Button>
+              </>
+            )}
           </Card>
         </Col>
         <Col className='gutter-row' xs={24} sm={12}>
