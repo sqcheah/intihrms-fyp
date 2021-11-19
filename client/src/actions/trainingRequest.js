@@ -17,7 +17,6 @@ export const getUsers = () => async (dispatch) => {
     const { data } = await api.getUsers();
     dispatch({ type: FETCH_ALL_USER, payload: data });
     dispatch({ type: USER_END_LOADING });
-    message.success('Success');
   } catch (error) {
     handleError(error, USER_ERROR);
   }
@@ -28,7 +27,7 @@ export const getUser = (id) => async (dispatch) => {
     const { data } = await api.getUser(id);
     dispatch({ type: FETCH_ONE_USER, payload: data });
     dispatch({ type: USER_END_LOADING });
-    message.success('Success');
+
     return data;
   } catch (error) {
     handleError(error, USER_ERROR);
@@ -40,7 +39,6 @@ export const createUser = (formData) => async (dispatch) => {
     const { data } = await api.createUser(formData);
     dispatch({ type: CREATE_USER, payload: data });
     dispatch({ type: USER_END_LOADING });
-    message.success('Success');
   } catch (error) {
     if (error.response) {
       // Request made and server responded
@@ -73,7 +71,6 @@ export const updateUser = (id, user) => async (dispatch) => {
     const { data } = await api.updateUser(id, user);
     dispatch({ type: UPDATE_USER, payload: data });
     dispatch({ type: USER_END_LOADING });
-    message.success('Success');
   } catch (error) {
     handleError(error, USER_ERROR);
   }

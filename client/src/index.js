@@ -8,7 +8,7 @@ import { ConfigProvider } from 'antd';
 import thunk from 'redux-thunk';
 import { persistStore, persistReducer } from 'redux-persist';
 import { PersistGate } from 'redux-persist/integration/react';
-import App from './App2';
+import App from './App';
 import { reducers } from './reducers';
 import storage from 'redux-persist/lib/storage';
 import hardSet from 'redux-persist/lib/stateReconciler/hardSet';
@@ -16,6 +16,7 @@ import autoMergeLevel1 from 'redux-persist/lib/stateReconciler/autoMergeLevel1';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import reportWebVitals from './reportWebVitals';
 import enUSIntl from 'antd/lib/locale/en_US';
+import { BrowserRouter } from 'react-router-dom';
 
 const persistConfig = {
   key: 'root',
@@ -34,7 +35,9 @@ ReactDOM.render(
   <Provider store={store}>
     <PersistGate loading={null} persistor={persistor}>
       <ConfigProvider locale={enUSIntl}>
-        <App />
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
       </ConfigProvider>
     </PersistGate>
   </Provider>,

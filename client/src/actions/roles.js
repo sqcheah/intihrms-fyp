@@ -17,7 +17,6 @@ export const getRoles = () => async (dispatch) => {
     const { data } = await api.getRoles();
     dispatch({ type: FETCH_ALL_ROLE, payload: data });
     dispatch({ type: ROLE_END_LOADING });
-    message.success('Success');
   } catch (error) {
     handleError(error, ROLE_ERROR);
   }
@@ -28,7 +27,6 @@ export const getRole = (id) => async (dispatch) => {
     const { data } = await api.getRole(id);
     dispatch({ type: FETCH_ONE_ROLE, payload: data });
     dispatch({ type: ROLE_END_LOADING });
-    message.success('Success');
   } catch (error) {
     handleError(error, ROLE_ERROR);
   }
@@ -39,7 +37,6 @@ export const createRole = (role) => async (dispatch) => {
     const { data } = await api.createRole(role);
     dispatch({ type: CREATE_ROLE, payload: data });
     dispatch({ type: ROLE_END_LOADING });
-    message.success('Success');
   } catch (error) {
     handleError(error, ROLE_ERROR);
   }
@@ -50,7 +47,6 @@ export const updateRole = (id, role) => async (dispatch) => {
     const { data } = await api.updateRole(id, role);
     dispatch({ type: UPDATE_ROLE, payload: data });
     dispatch({ type: ROLE_END_LOADING });
-    message.success('Success');
   } catch (error) {
     handleError(error, ROLE_ERROR);
   }

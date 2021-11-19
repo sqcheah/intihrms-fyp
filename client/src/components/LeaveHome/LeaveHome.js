@@ -154,9 +154,15 @@ const LeaveHome = () => {
                   </Table>
                 </>
               ))}
-            <Button type='danger'>
-              <Link to='/leaves/history'>To Leaves</Link>
-            </Button>
+            <br />
+            <Space>
+              <Button type='danger'>
+                <Link to='/leaves/create'>Apply Leave</Link>
+              </Button>
+              <Button type='danger'>
+                <Link to='/leaves/history'>To Leaves</Link>
+              </Button>
+            </Space>
           </Card>
         </Col>
         {user.roles.name != 'staff' && (

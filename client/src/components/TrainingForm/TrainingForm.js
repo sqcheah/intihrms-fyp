@@ -27,7 +27,7 @@ const { TextArea } = Input;
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 const { Text } = Typography;
-
+//const history = useHistory();
 const TrainingForm = () => {
   const { id } = useParams();
 
@@ -228,9 +228,6 @@ const TrainingForm = () => {
           <br />
           <Button type='primary' htmlType='submit'>
             Submit
-          </Button>
-          <Button type='secondary' htmlType='button'>
-            <Link to='/training/list'>Back</Link>
           </Button>
         </Form.Item>
       </Form>

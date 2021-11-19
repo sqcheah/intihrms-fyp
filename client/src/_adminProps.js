@@ -12,6 +12,11 @@ import {
   UnorderedListOutlined,
   HistoryOutlined,
   FormOutlined,
+  BarChartOutlined,
+  ApartmentOutlined,
+  CalendarOutlined,
+  ExclamationCircleOutlined,
+  LaptopOutlined,
 } from '@ant-design/icons';
 import Home from './components/Home/Home';
 import LeaveHome from './components/LeaveHome/LeaveHome';
@@ -22,8 +27,33 @@ export default {
     routes: [
       {
         path: '/',
-        name: 'Personal Dashboard',
-        icon: <UserOutlined />,
+        name: 'Dashboard',
+        icon: <BarChartOutlined />,
+        routes: [
+          {
+            path: '/',
+            name: 'Personal',
+            icon: <UserOutlined />,
+            exact: true,
+          },
+          {
+            path: '/supervisor',
+            name: 'Department',
+            icon: <ApartmentOutlined />,
+            exact: true,
+          },
+          {
+            path: '/admin',
+            name: 'Admin',
+            icon: <LaptopOutlined />,
+            exact: true,
+          },
+        ],
+      },
+      {
+        path: '/calendar',
+        name: 'Calendar',
+        icon: <CalendarOutlined />,
         exact: true,
       },
       {
@@ -59,9 +89,27 @@ export default {
             icon: <HistoryOutlined />,
           },
           {
-            path: '/training/submitExt',
+            path: 'submitExt',
             name: 'Apply External',
             icon: <FormOutlined />,
+          },
+          {
+            path: 'extList',
+            name: 'External Requests',
+            icon: <ExclamationCircleOutlined />,
+          },
+        ],
+      },
+      {
+        path: './',
+        name: 'Employee',
+        icon: <BarChartOutlined />,
+        routes: [
+          {
+            path: '/leaves/list',
+            name: 'Leave Request',
+            icon: <ExclamationCircleOutlined />,
+            exact: true,
           },
         ],
       },

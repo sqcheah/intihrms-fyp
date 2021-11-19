@@ -246,9 +246,6 @@ const ExtTrainingForm = () => {
           <Button type='primary' htmlType='submit'>
             Submit
           </Button>
-          <Button type='secondary' htmlType='button'>
-            <Link to='/training/list'>Back</Link>
-          </Button>
         </Form.Item>
       </Form>
     </>

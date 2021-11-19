@@ -17,10 +17,12 @@ import { getDepts } from '../../actions/depts';
 import { getRoles } from '../../actions/roles';
 import { getLeaveTypes } from '../../actions/leaveTypes';
 import { Link } from 'react-router-dom';
+import { getPolicy } from '../../actions/policy';
+
+import moment from 'moment';
 const { TextArea } = Input;
 const { RangePicker } = DatePicker;
 const { Option } = Select;
-
 const StaffForm = () => {
   const [password, setPassword] = useState('');
   const [staff, setStaff] = useState({
@@ -38,9 +40,11 @@ const StaffForm = () => {
     dispatch(getRoles());
     dispatch(getDepts());
     dispatch(getLeaveTypes());
+    dispatch(getPolicy({ name: 'defaultPolicy' }));
   }, [dispatch]);
   const { depts } = useSelector((state) => state.depts);
   const { roles } = useSelector((state) => state.roles);
+  const { policy } = useSelector((state) => state.policy);
   const { leaveTypes } = useSelector((state) => state.leaveTypes);
   const onFinish = (values) => {
     dispatch(
@@ -60,7 +64,38 @@ const StaffForm = () => {
   const onFinishFailed = (errorInfo) => {
     console.log('Failed:', errorInfo);
   };
+  const onDateChange = (val) => {
+    const stacked = policy.stacked;
+    const policy = policy.list;
+    if (policy) {
+      const today = moment('2025-01-01');
+      const employmentDate = moment(val);
+      const totalYears = today.diff(employmentDate, 'years');
+      console.log(totalYears);
+      let totalIncrease = 0;
+      const policyAfter = policy.filter((p) => p.condition1 == 'after');
+      const policyEvery = policy.filter((p) => p.condition1 == 'every');
+      let highestAfter = 0;
+      policyAfter.forEach((p) => {
+        if (totalYears >= p.year) {
+          if (stacked) {
+            totalIncrease += p.increase;
+          } else {
+            if (p.year > highestAfter) {
+              totalIncrease = p.increase;
+              highestAfter = p.year;
+            }
+          }
+        }
+      });
+      policyEvery.forEach((p) => {
+        const count = totalYears / p.year;
+        totalIncrease += count * p.increase;
+      });
 
+      console.log(totalIncrease);
+    }
+  };
   return (
     <Form
       name='basic'
@@ -151,7 +186,7 @@ const StaffForm = () => {
           },
         ]}
       >
-        <DatePicker placeholder='hi' />
+        <DatePicker placeholder='hi' onChange={onDateChange} />
       </Form.Item>
       <Form.Item
         label='Department'

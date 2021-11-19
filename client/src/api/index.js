@@ -27,6 +27,7 @@ export const fetchLeaveRequests = (role, user, department) =>
 export const fetchUpcomingLeaves = (id) => API.get(`/leaves/upcoming/${id}`);
 export const fetchLeaveHistory = (id) => API.get(`/leaves/history/${id}`);
 export const fetchTodayLeaves = () => API.get('/leaves/date/today');
+export const fetchLeaveCount = () => API.get('/leaves/count/dept');
 
 export const signIn = (formData) => API.post('/users/signIn', formData);
 export const signUp = (formData) => API.post('/users/signUp', formData);
@@ -81,3 +82,10 @@ export const fetchTrainingHistory = (id) => API.get(`/training/history/${id}`);
 export const fetchUpcomingTraining = (id) =>
   API.get(`/training/upcoming/${id}`);
 export const fetchTodayTrainings = () => API.get('/training/date/today');
+export const fetchTrainingCount = () => API.get('/training/count/dept');
+
+export const createPolicy = (formData) => API.post('/policy', formData);
+export const getPolicies = () => API.get('/policy');
+export const getPolicy = (id) => API.get(`/policy/${id}`);
+export const updatePolicy = (id, updatedPolicy) =>
+  API.patch(`/policy/${id}`, updatedPolicy);

@@ -17,9 +17,10 @@ import {
   Modal,
 } from 'antd';
 import { Link } from 'react-router-dom';
-import { fetchAllLeaves, fetchTodayLeaves } from '../../actions/leaves';
-import { fetchTodayTrainings } from '../../actions/training';
-import { fetchDeptUsers } from '../../actions/users';
+import { fetchAllLeaves, fetchLeaveCount } from '../../actions/leaves';
+import { fetchTrainingCount } from '../../actions/training';
+import { getUsers } from '../../actions/users';
+import { getDepts } from '../../actions/depts';
 import moment from 'moment';
 import recharts, {
   BarChart,
@@ -42,11 +43,12 @@ import PageLoading from '../PageLoading/PageLoading';
 
 const Home = () => {
   const user = JSON.parse(localStorage.getItem('profile')).result;
-  const { leaves, isLoading, todayLeaves } = useSelector(
+  const { leaves, isLoading, leaveCount } = useSelector(
     (state) => state.leaves
   );
   const { users } = useSelector((state) => state.users);
-  const { trainings } = useSelector((state) => state.trainings);
+  const { trainingCount } = useSelector((state) => state.trainings);
+  const { depts } = useSelector((state) => state.depts);
   const dispatch = useDispatch();
   const history = useHistory();
 
@@ -66,50 +68,17 @@ const Home = () => {
 
   useEffect(() => {
     dispatch(fetchAllLeaves());
-    dispatch(fetchTodayLeaves());
-    dispatch(fetchTodayTrainings());
-    dispatch(fetchDeptUsers(user.department._id));
-    console.log(users);
+    dispatch(fetchTrainingCount());
+    dispatch(fetchLeaveCount());
+    dispatch(getUsers());
+    dispatch(getDepts());
   }, [dispatch]);
-
-  const filterDept = todayLeaves.filter(
-    (todayLeaves) => todayLeaves.department.name == user.department.name
-  );
 
   const top3Users = users.slice(0, 3);
 
-  var supervisorNames = [];
-  users.map((element) => {
-    if (element.roles.name == 'supervisor')
-      supervisorNames.push(`${element.first_name} ${element.last_name}`);
-  });
-
-  console.log(supervisorNames);
-
-  const leaveData = [
-    { name: 'Casual', value: user.leaveCount.casual },
-    { name: 'Medical', value: user.leaveCount.medical },
-  ];
-
-  //temp training data
-  var totalTraining = 20,
-    completedTraining = 15;
-  var trainingNeeded = totalTraining - completedTraining;
-  var completionPercentage = completedTraining / totalTraining;
-  trainingNeeded = trainingNeeded < 0 ? 0 : trainingNeeded;
-
-  const trainingData = [
-    //test example data
-    { name: 'Hours Completed', value: completedTraining },
-    { name: 'Hours Required', value: trainingNeeded },
-  ];
-
   leaves.map((element) => {
     var d = new Date(element.fromDate);
-    if (
-      element.status == 'approve' &&
-      element.department.name == user.department.name
-    ) {
+    if (element.status == 'approve') {
       if (
         element.leaveType == 'casual' &&
         d.getMonth() == moment().subtract(2, 'months').month()
@@ -216,44 +185,14 @@ const Home = () => {
       </text>
     );
   };
-  if (isLoading) return <PageLoading />;
-
+  if (isLoading || !leaves || !leaveCount) return <PageLoading />;
   return (
     <>
-      <Typography.Title level={2}>Department Dashboard</Typography.Title>
+      <Typography.Title level={2}>Admin Dashboard</Typography.Title>
       <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
-        <Col className='gutter-row' xs={24} sm={12}>
+        <Col className='gutter-row' xs={24} sm={24}>
           <Card bordered>
-            <Descriptions
-              title='Department Details'
-              bordered
-              column={{ sm: 3, xs: 1 }}
-            >
-              <Descriptions.Item label='Name' span={2}>
-                {user.department.name}
-              </Descriptions.Item>
-              <Descriptions.Item label='Code' span={1}>
-                {user.department.code}
-              </Descriptions.Item>
-              <Descriptions.Item label='Supervisors' span={3}>
-                <List
-                  dataSource={supervisorNames}
-                  renderItem={(item) => (
-                    <List.Item>
-                      <Typography.Text mark></Typography.Text> {item}
-                    </List.Item>
-                  )}
-                />
-              </Descriptions.Item>
-              <Descriptions.Item label='No. of Staff' span={3}>
-                {users.length}
-              </Descriptions.Item>
-            </Descriptions>
-          </Card>
-        </Col>
-        <Col className='gutter-row' xs={24} sm={12}>
-          <Card bordered>
-            <h4>Leaves Taken by Month for All Employees</h4>
+            <h3>Leaves Taken by Month for All Employees</h3>
             <ResponsiveContainer minHeight={300}>
               <LineChart
                 width='100%'
@@ -273,82 +212,63 @@ const Home = () => {
                 <Line
                   type='monotone'
                   dataKey='Casual'
-                  stroke='#8884d8'
+                  stroke='#0088FE'
                   activeDot={{ r: 8 }}
                 />
-                <Line type='monotone' dataKey='Medical' stroke='#82ca9d' />
+                <Line type='monotone' dataKey='Medical' stroke='#2ce654' />
               </LineChart>
             </ResponsiveContainer>
-            <Button type='primary'>
-              <Link to='/leaves/list'>To Leaves</Link>
-            </Button>
+            <br />
+            <row>
+              <Button className='right-button' type='primary'>
+                <Link to='/leaves/list'>More Details...</Link>
+              </Button>
+              <Button className='right-button' type='primary'>
+                <Link to='/calendar'>View on Calendar</Link>
+              </Button>
+            </row>
           </Card>
         </Col>
       </Row>
       <br />
-      <Typography.Title level={2}>Department Overview</Typography.Title>
+      <Typography.Title level={2}>Overview</Typography.Title>
       <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
         <Col className='gutter-row' xs={24} sm={12}>
           <Card bordered>
-            <b>Currently on Leave in Department:</b>
-            {filterDept &&
-              (!filterDept.length ? (
-                <Empty></Empty>
-              ) : (
-                <>
-                  <Table dataSource={filterDept} rowKey='_id'>
-                    <Table.Column
-                      title='Name'
-                      dataIndex='name'
-                      render={(text, record) => {
-                        return `${record.user.first_name} ${record.user.last_name}`;
-                      }}
-                    ></Table.Column>
-                    <Table.Column
-                      title='Leave Type'
-                      dataIndex='leaveType'
-                      key='leaveType'
-                      render={(text, record) => <Tag color='red'>{text}</Tag>}
-                    ></Table.Column>
-                    <Table.Column
-                      title='Action'
-                      key='action'
-                      render={(text, record) => (
-                        <Space size='middle' key={record._id}>
-                          <Link to={`leaves/view/${record._id}`}>View</Link>
-                        </Space>
-                      )}
-                    ></Table.Column>
-                  </Table>
-                </>
-              ))}
+            <b>Leaves Taken by Department:</b>
+            <Table dataSource={leaveCount} rowKey='_id'>
+              <Table.Column
+                title='Name'
+                dataIndex={['department', 'name']}
+                dataKey={['department', 'name']}
+              ></Table.Column>
+              <Table.Column
+                title='Leaves Taken'
+                dataIndex='count'
+                dataKey='count'
+                defaultSortOrder='descend'
+                sorter={(a, b) => a.count - b.count}
+              ></Table.Column>
+            </Table>
           </Card>
         </Col>
         <Col className='gutter-row' xs={24} sm={12}>
           <Card bordered>
-            <b>Top Training Hours Completed:</b>
-            {top3Users &&
-              (!top3Users.length ? (
-                <Empty></Empty>
-              ) : (
-                <>
-                  <Table dataSource={top3Users} rowKey='_id'>
-                    <Table.Column
-                      title='Name'
-                      dataIndex='name'
-                      render={(text, record) => {
-                        return `${record.first_name} ${record.last_name}`;
-                      }}
-                    ></Table.Column>
-                    <Table.Column
-                      title='Training Hours'
-                      //dataIndex='leaveType'
-                      //key='leaveType'
-                      //render={(text, record) => <Tag color='red'>{text}</Tag>}
-                    ></Table.Column>
-                  </Table>
-                </>
-              ))}
+            <b>Trainings Conducted by Department:</b>
+            <Table dataSource={trainingCount} rowKey='_id'>
+              <Table.Column
+                title='Name'
+                dataIndex={['department', 'name']}
+                dataKey={['department', 'name']}
+              ></Table.Column>
+              <Table.Column
+                title='Trainings Organized'
+                dataIndex='count'
+                dataKey='count'
+                defaultSortOrder='descend'
+                sorter={(a, b) => a.count - b.count}
+              ></Table.Column>
+            </Table>
           </Card>
         </Col>
       </Row>

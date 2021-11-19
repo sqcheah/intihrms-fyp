@@ -11,6 +11,7 @@ import {
   FETCH_UPCOMING_LEAVE,
   FETCH_LEAVE_HISTORY,
   FETCH_TODAY_LEAVE,
+  FETCH_LEAVE_COUNT,
 } from '../constants/actionTypes';
 
 export default (
@@ -97,6 +98,9 @@ export default (
 
     case FETCH_TODAY_LEAVE:
       return { ...state, todayLeaves: action.payload };
+
+    case FETCH_LEAVE_COUNT:
+      return { ...state, leaveCount: action.payload };
 
     default:
       return state;

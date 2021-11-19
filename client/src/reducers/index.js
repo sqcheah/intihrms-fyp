@@ -8,6 +8,7 @@ import roles from './roles';
 import holidays from './holidays';
 import trainings from './training';
 import trainingRequest from './trainingRequest';
+import policy from './policy';
 import { LOGOUT } from '../constants/actionTypes';
 
 const appReducers = combineReducers({
@@ -20,6 +21,7 @@ const appReducers = combineReducers({
   holidays,
   trainings,
   trainingRequest,
+  policy,
 });
 //https://stackoverflow.com/a/35641992
 export const reducers = (state, action) => {

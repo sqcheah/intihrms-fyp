@@ -73,10 +73,6 @@ const Home = () => {
     setIsModalVisible(false);
   };
 
-  const handleCancel = () => {
-    history.goBack();
-  };
-
   const showModal = () => {
     setIsModalVisible(true);
   };
@@ -224,8 +220,6 @@ const Home = () => {
       <Modal
         title='Select Department to View'
         visible={isModalVisible}
-        //onOk={handleOk}
-        //onCancel={handleCancel}
         footer={[
           <Button onClick={() => history.goBack()}>Back</Button>,
           <Button form='myForm' key='submit' htmlType='submit'>
@@ -296,7 +290,7 @@ const Home = () => {
         </Col>
         <Col className='gutter-row' xs={24} sm={12}>
           <Card bordered>
-            <h4>Leaves Taken by Month for All Employees</h4>
+            <h4>Leaves Taken by Month for Employees in Department</h4>
             <ResponsiveContainer minHeight={300}>
               <LineChart
                 width='100%'
@@ -316,10 +310,10 @@ const Home = () => {
                 <Line
                   type='monotone'
                   dataKey='Casual'
-                  stroke='#8884d8'
+                  stroke='#0088FE'
                   activeDot={{ r: 8 }}
                 />
-                <Line type='monotone' dataKey='Medical' stroke='#82ca9d' />
+                <Line type='monotone' dataKey='Medical' stroke='#2ce654' />
               </LineChart>
             </ResponsiveContainer>
             <Button type='primary'>
@@ -400,27 +394,3 @@ const Home = () => {
 };
 
 export default Home;
-
-/**<Modal
-        title='Basic Modal'
-        visible={isModalVisible}
-        onOk={handleOk}
-        onCancel={handleCancel}
-      ><Form.Item
-          label='Leave Type'
-          name='leaveType'
-          rules={[
-            {
-              required: false,
-              message: 'Please input your leaveType!',
-            },
-          ]}
-        >
-          <Select>
-            {leaveTypes.map((leaveType) => (
-              <Option key={leaveType._id} value={leaveType.code}>
-                {leaveType.name}
-              </Option>
-            ))}
-          </Select>
-        </Form.Item></Modal> */

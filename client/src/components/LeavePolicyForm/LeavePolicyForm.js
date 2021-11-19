@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Form,
   Input,
@@ -16,6 +16,11 @@ import {
   PlusOutlined,
 } from '@ant-design/icons';
 import moment from 'moment';
+import { useHistory, useParams } from 'react-router';
+import { useDispatch, useSelector } from 'react-redux';
+import { createPolicy, getPolicy, updatePolicy } from '../../actions/policy';
+import { useForm } from 'antd/lib/form/Form';
+import { add } from 'lodash';
 const { Option } = Select;
 
 const calcEvery = (every, increase) => {
@@ -36,37 +41,35 @@ const calcAfter = (after, increase) => {
 };
 
 const LeavePolicy = () => {
+  const [form] = useForm();
+  const { id } = useParams();
+  const dispatch = useDispatch();
+  const history = useHistory();
+  const { policy } = useSelector((state) => state.policy);
+  useEffect(() => {
+    if (id) {
+      dispatch(getPolicy(id));
+    }
+  }, [dispatch, id]);
   const onFinish = (values) => {
     console.log('Received values of form:', values);
-    const stacked = values.stacked;
-    const policy = values.policy;
-    if (policy) {
-      const today = moment('2025-01-01');
-      const employmentDate = moment('2010-01-01');
-      const totalYears = today.diff(employmentDate, 'years');
-      console.log(totalYears);
-      let totalIncrease = 0;
-      const policyAfter = policy.filter((p) => p.condition1 == 'after');
-      const policyEvery = policy.filter((p) => p.condition1 == 'every');
-      let highestAfter = 0;
-      policyAfter.forEach((p) => {
-        if (totalYears > p.year) {
-          if (stacked) {
-            totalIncrease += p.increase;
-          } else {
-            if (p.year > highestAfter) {
-              totalIncrease = p.increase;
-              highestAfter = p.year;
-            }
-          }
-        }
-      });
-      policyEvery.forEach((p) => {
-        const count = totalYears / p.year;
-        totalIncrease += count * p.increase;
-      });
 
-      console.log(totalIncrease);
+    if (id) {
+      dispatch(
+        updatePolicy(id, {
+          stacked: values.stacked,
+          name: values.name,
+          list: values.policy,
+        })
+      );
+    } else {
+      dispatch(
+        createPolicy({
+          stacked: values.stacked,
+          name: values.name,
+          list: values.policy,
+        })
+      );
     }
   };
   const onFinishFailed = (errorInfo) => {
@@ -75,6 +78,8 @@ const LeavePolicy = () => {
   const onFieldsChange = () => {};
   return (
     <Form
+      ref={form}
+      initialValues={{ ...policy, policy: policy.list }}
       name='dynamic_form_nest_item'
       onFinish={onFinish}
       onFinishFailed={onFinishFailed}
@@ -98,6 +103,9 @@ const LeavePolicy = () => {
         type='info'
         showIcon
       />
+      <Form.Item label='Name' name='name'>
+        <Input />
+      </Form.Item>
       <Form.List name='policy'>
         {(fields, { add, remove }) => (
           <>
@@ -154,6 +162,13 @@ const LeavePolicy = () => {
       <Form.Item>
         <Button type='primary' htmlType='submit'>
           Submit
+        </Button>
+        <Button
+          type='secondary'
+          htmlType='button'
+          onClick={() => history.goBack()}
+        >
+          Back
         </Button>
       </Form.Item>
     </Form>

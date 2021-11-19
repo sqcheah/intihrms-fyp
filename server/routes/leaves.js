@@ -10,6 +10,7 @@ import {
   fetchUpcomingLeaves,
   fetchLeaveHistory,
   fetchTodayLeaves,
+  fetchLeaveCount,
 } from '../controllers/leaves.js';
 import auth from '../middleware/auth.js';
 import upload from '../middleware/filehelper.js';
@@ -24,5 +25,6 @@ router.get('/:role/:user/:department', auth, fetchLeaveRequests);
 router.get('/upcoming/:id', auth, fetchUpcomingLeaves);
 router.get('/history/:id', auth, fetchLeaveHistory);
 router.get('/date/today', auth, fetchTodayLeaves);
+router.get('/count/dept', auth, fetchLeaveCount);
 
 export default router;

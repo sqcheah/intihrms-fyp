@@ -17,7 +17,6 @@ export const getDepts = () => async (dispatch) => {
     const { data } = await api.getDepts();
     dispatch({ type: FETCH_ALL_DEPT, payload: data });
     dispatch({ type: DEPT_END_LOADING });
-    message.success('Success');
   } catch (error) {
     handleError(error, DEPT_ERROR);
   }
@@ -28,7 +27,6 @@ export const getDept = (id) => async (dispatch) => {
     const { data } = await api.getDept(id);
     dispatch({ type: FETCH_ONE_DEPT, payload: data });
     dispatch({ type: DEPT_END_LOADING });
-    message.success('Success');
   } catch (error) {
     handleError(error, DEPT_ERROR);
   }
@@ -39,7 +37,6 @@ export const createDept = (dept) => async (dispatch) => {
     const { data } = await api.createDept(dept);
     dispatch({ type: CREATE_DEPT, payload: data });
     dispatch({ type: DEPT_END_LOADING });
-    message.success('Success');
   } catch (error) {
     handleError(error, DEPT_ERROR);
   }
@@ -50,7 +47,6 @@ export const deleteDept = (id) => async (dispatch) => {
     const { data } = await api.deleteDept(id);
     dispatch({ type: DELETE_DEPT, payload: data });
     dispatch({ type: DEPT_END_LOADING });
-    message.success('Success');
   } catch (error) {
     handleError(error, DEPT_ERROR);
   }

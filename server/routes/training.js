@@ -11,6 +11,7 @@ import {
   fetchTrainingHistory,
   fetchUpcomingTraining,
   fetchTodayTrainings,
+  fetchTrainingCount,
 } from '../controllers/training.js';
 import auth from '../middleware/auth.js';
 import upload from '../middleware/filehelper.js';
@@ -27,5 +28,6 @@ router.get('/history/ext/:id', auth, fetchExtTrainingHistory);
 router.get('/history/:id', auth, fetchTrainingHistory);
 router.get('/upcoming/:id', auth, fetchUpcomingTraining);
 router.get('/date/today', auth, fetchTodayTrainings);
+router.get('/count/dept', auth, fetchTrainingCount);
 
 export default router;

@@ -251,6 +251,42 @@ export const fetchTodayTrainings = async (req, res) => {
     res.status(404).json({ message: error });
   }
 };
+export const fetchTrainingCount = async (req, res) => {
+  try {
+    const trainings = await trainingModel.aggregate([
+      {
+        $group: {
+          _id: '$department',
+          trainings: { $addToSet: '$_id' },
+        },
+      },
+      {
+        $unwind: '$trainings',
+      },
+      {
+        $group: { _id: '$_id', count: { $sum: 1 } },
+      },
+      {
+        $project: {
+          _id: 0,
+          department: '$_id',
+          count: 1,
+        },
+      },
+    ]);
+    trainingModel.populate(
+      trainings,
+      {
+        path: 'department',
+      },
+      (err, result) => {
+        res.status(200).json(result);
+      }
+    );
+  } catch (error) {
+    res.status(404).json({ message: error });
+  }
+};
 //https://github.com/Musawirkhann/Nodejs_Mongodb_Express_Multer/blob/main/serverproject/controllers/fileuploaderController.js
 const fileSizeFormatter = (bytes, decimal) => {
   if (bytes === 0) {

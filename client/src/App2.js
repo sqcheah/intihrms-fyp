@@ -65,7 +65,7 @@ import ExtTrainingList from './components/ExtTrainingList/ExtTrainingList';
 import TrainingHistory from './components/TrainingHistory/TrainingHistory';
 import AdminHome from './components/AdminHome/AdminHome';
 import SupervisorHome from './components/SupervisorHome/SupervisorHome';
-import LeavePolicy from './components/LeavePolicy/LeavePolicy';
+import LeavePolicy from './components/LeavePolicyForm/LeavePolicyForm';
 import Error404 from './components/Error/Error404';
 
 import { useSelector } from 'react-redux';
@@ -87,8 +87,8 @@ const App = () => {
           <Menu.Item key='1' icon={<FcBusinessman />}>
             <Link to='/'>Personal Dashboard</Link>
           </Menu.Item>
-          <Menu.Item key='2' icon={<FcCalendar />}>
-            <Link to='/calendar/'>Calendar</Link>
+          <Menu.Item key='2' icon={<FcLeave />}>
+            <Link to='/leaves'>Leave</Link>
           </Menu.Item>
           <SubMenu key='sub1' icon={<FcPodiumWithAudience />} title='Training'>
             <Menu.Item key='3' icon={<FcHome />}>
@@ -101,16 +101,13 @@ const App = () => {
               <Link to='/training/list'>Workshop List</Link>
             </Menu.Item>
             <Menu.Item key='6' icon={<FcList />}>
-              <Link to='/training/history'>Attending Workshop</Link>
+              <Link to='/training/history'>History</Link>
             </Menu.Item>
             <Menu.Item key='7' icon={<FcAutomotive />}>
-              <Link to='/training/submitExt'>External Workshop</Link>
+              <Link to='/training/submitExt'>Apply External</Link>
             </Menu.Item>
           </SubMenu>
-          <Menu.Item key='8' icon={<FcLeave />}>
-            <Link to='/leaves'>Leave</Link>
-          </Menu.Item>
-          <Menu.Item key='9' icon={<FcSettings />}>
+          <Menu.Item key='8' icon={<FcSettings />}>
             Setting
           </Menu.Item>
         </>
@@ -129,37 +126,37 @@ const App = () => {
           <Menu.Item key='3' icon={<FcCalendar />}>
             <Link to='/calendar/'>Calendar</Link>
           </Menu.Item>
+          <Menu.Item key='4' icon={<FcLeave />}>
+            <Link to='/leaves'>Leave</Link>
+          </Menu.Item>
           <SubMenu key='sub2' icon={<FcPodiumWithAudience />} title='Training'>
-            <Menu.Item key='4' icon={<FcHome />}>
+            <Menu.Item key='5' icon={<FcHome />}>
               <Link to='/training/'>Training Home</Link>
             </Menu.Item>
-            <Menu.Item key='5' icon={<FcCollaboration />}>
+            <Menu.Item key='6' icon={<FcCollaboration />}>
               <Link to='/training/create'>Organize Workshop</Link>
             </Menu.Item>
-            <Menu.Item key='6' icon={<FcLeave />}>
+            <Menu.Item key='7' icon={<FcLeave />}>
               <Link to='/training/list'>Workshop List</Link>
             </Menu.Item>
-            <Menu.Item key='7' icon={<FcList />}>
-              <Link to='/training/history'>Attending Workshop</Link>
+            <Menu.Item key='8' icon={<FcList />}>
+              <Link to='/training/history'>History</Link>
             </Menu.Item>
-            <Menu.Item key='8' icon={<FcAutomotive />}>
-              <Link to='/training/submitExt'>External Workshop</Link>
+            <Menu.Item key='9' icon={<FcAutomotive />}>
+              <Link to='/training/submitExt'>Apply External</Link>
             </Menu.Item>
-            <Menu.Item key='9' icon={<FcQuestions />}>
-              <Link to='/training/extList'>External Request</Link>
+            <Menu.Item key='10' icon={<FcQuestions />}>
+              <Link to='/training/extList'>External Requests</Link>
             </Menu.Item>
           </SubMenu>
           <SubMenu key='sub3' icon={<FcConferenceCall />} title='Employee'>
-            <Menu.Item key='10' icon={<FcReadingEbook />}>
+            <Menu.Item key='11' icon={<FcReadingEbook />}>
               Employee List
             </Menu.Item>
-            <Menu.Item key='11' icon={<FcQuestions />}>
+            <Menu.Item key='12' icon={<FcQuestions />}>
               <Link to='/leaves/list'>Leave Request</Link>
             </Menu.Item>
           </SubMenu>
-          <Menu.Item key='12' icon={<FcLeave />}>
-            <Link to='/leaves'>Leave</Link>
-          </Menu.Item>
           <Menu.Item key='13' icon={<FcSettings />}>
             Setting
           </Menu.Item>
@@ -182,40 +179,40 @@ const App = () => {
           <Menu.Item key='4' icon={<FcCalendar />}>
             <Link to='/calendar/'>Calendar</Link>
           </Menu.Item>
+          <Menu.Item key='5' icon={<FcLeave />}>
+            <Link to='/leaves'>Leave</Link>
+          </Menu.Item>
           <SubMenu key='sub2' icon={<FcPodiumWithAudience />} title='Training'>
-            <Menu.Item key='5' icon={<FcHome />}>
+            <Menu.Item key='6' icon={<FcHome />}>
               <Link to='/training/'>Training Home</Link>
             </Menu.Item>
-            <Menu.Item key='6' icon={<FcCollaboration />}>
+            <Menu.Item key='7' icon={<FcCollaboration />}>
               <Link to='/training/create'>Organize Workshop</Link>
             </Menu.Item>
-            <Menu.Item key='7' icon={<FcLeave />}>
+            <Menu.Item key='8' icon={<FcLeave />}>
               <Link to='/training/list'>Workshop List</Link>
             </Menu.Item>
-            <Menu.Item key='8' icon={<FcList />}>
-              <Link to='/training/history'>Attending Workshop</Link>
+            <Menu.Item key='9' icon={<FcList />}>
+              <Link to='/training/history'>History</Link>
             </Menu.Item>
-            <Menu.Item key='9' icon={<FcAutomotive />}>
-              <Link to='/training/submitExt'>External Workshop</Link>
+            <Menu.Item key='10' icon={<FcAutomotive />}>
+              <Link to='/training/submitExt'>Apply External</Link>
             </Menu.Item>
-            <Menu.Item key='10' icon={<FcQuestions />}>
-              <Link to='/training/extList'>External Request</Link>
+            <Menu.Item key='11' icon={<FcQuestions />}>
+              <Link to='/training/extList'>External Requests</Link>
             </Menu.Item>
           </SubMenu>
           <SubMenu key='sub3' icon={<FcConferenceCall />} title='Employee'>
-            <Menu.Item key='11' icon={<FcReadingEbook />}>
+            <Menu.Item key='12' icon={<FcReadingEbook />}>
               Employee List
             </Menu.Item>
-            <Menu.Item key='12' icon={<FcQuestions />}>
+            <Menu.Item key='13' icon={<FcQuestions />}>
               <Link to='/leaves/list'>Leave Request</Link>
             </Menu.Item>
-            <Menu.Item key='13' icon={<FcExpired />}>
+            <Menu.Item key='14' icon={<FcExpired />}>
               Policy
             </Menu.Item>
           </SubMenu>
-          <Menu.Item key='14' icon={<FcLeave />}>
-            <Link to='/leaves'>Leave</Link>
-          </Menu.Item>
           <Menu.Item key='15' icon={<FcSettings />}>
             Setting
           </Menu.Item>
@@ -231,9 +228,8 @@ const App = () => {
     <BrowserRouter>
       <Layout style={{ minHeight: '100vh', overflow: 'auto' }}>
         <Header className='site-layout-red'>
-          <div className='logo'>
-            <Image src='/INTI_Logo.png' preview={false} />
-          </div>
+          <img className='logo' src='/INTI_Logo_smol.png' />
+
           <Navbar />
         </Header>
         <Layout>
@@ -347,7 +343,7 @@ const App = () => {
                   exact
                   component={HolidayForm}
                 />
-                {/** 
+
                 <PrivateRoute path='/training' exact component={TrainingHome} />
                 <PrivateRoute
                   path='/training/create'
@@ -379,7 +375,7 @@ const App = () => {
                   exact
                   component={TrainingHistory}
                 />
-                */}
+
                 <PublicRoute path='/auth' exact component={Auth} />
                 <Route
                   path='/resetPassword'

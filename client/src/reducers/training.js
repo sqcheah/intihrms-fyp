@@ -13,6 +13,7 @@ import {
   FETCH_TRAINING_HISTORY,
   FETCH_UPCOMING_TRAINING,
   FETCH_TODAY_TRAINING,
+  FETCH_TRAINING_COUNT,
 } from '../constants/actionTypes';
 
 export default (
@@ -70,6 +71,9 @@ export default (
 
     case FETCH_TODAY_TRAINING:
       return { ...state, trainings: action.payload };
+
+    case FETCH_TRAINING_COUNT:
+      return { ...state, trainingCount: action.payload };
 
     default:
       return state;

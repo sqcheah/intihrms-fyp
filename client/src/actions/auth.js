@@ -11,11 +11,10 @@ import { handleError } from './error.js';
 export const signIn = (formData, history) => async (dispatch) => {
   try {
     dispatch({ type: AUTH_START_LOADING });
-    message.success('Success');
+
     const { data } = await api.signIn(formData);
     dispatch({ type: AUTH, data });
     dispatch({ type: AUTH_END_LOADING });
-    message.success('Success');
 
     history.push('/');
   } catch (error) {
@@ -26,11 +25,10 @@ export const signIn = (formData, history) => async (dispatch) => {
 export const signUp = (formData, history) => async (dispatch) => {
   try {
     dispatch({ type: AUTH_START_LOADING });
-    message.success('Success');
+
     const { data } = await api.signUp(formData);
     dispatch({ type: AUTH, data });
     dispatch({ type: AUTH_END_LOADING });
-    message.success('Success');
 
     history.push('/');
   } catch (error) {
@@ -41,11 +39,10 @@ export const signUp = (formData, history) => async (dispatch) => {
 export const resetPassword = (email) => async (dispatch) => {
   try {
     dispatch({ type: AUTH_START_LOADING });
-    message.success('Success');
+
     const { data } = await api.resetPassword(email);
     dispatch({ type: AUTH, data });
     dispatch({ type: AUTH_END_LOADING });
-    message.success('Success');
   } catch (error) {
     handleError(error, AUTH_ERROR);
   }

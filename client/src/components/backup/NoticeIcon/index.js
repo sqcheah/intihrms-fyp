@@ -207,7 +207,7 @@ const NoticeIconView = () => {
         return notice;
       })
     );
-    message.success(`${'清空了'} ${title}`);
+    message.success(`${'Clear'} ${title}`);
   };
 
   return (
@@ -220,8 +220,8 @@ const NoticeIconView = () => {
       }}
       onClear={(title, key) => clearReadState(title, key)}
       loading={false}
-      clearText='清空'
-      viewMoreText='查看更多'
+      clearText='Clear'
+      viewMoreText='View More'
       onViewMore={() => message.info('Click on view more')}
       clearClose
     >
@@ -229,10 +229,11 @@ const NoticeIconView = () => {
         tabKey='notification'
         count={unreadMsg.notification}
         list={noticeData.notification}
-        title='通知'
-        emptyText='你已查看所有通知'
+        title='Notification'
+        emptyText='You have no new notifiications'
         showViewMore
       />
+      {/**
       <NoticeIcon.Tab
         tabKey='message'
         count={unreadMsg.message}
@@ -248,7 +249,7 @@ const NoticeIconView = () => {
         count={unreadMsg.event}
         list={noticeData.event}
         showViewMore
-      />
+      /> */}
     </NoticeIcon>
   );
 };

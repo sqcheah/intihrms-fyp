@@ -9,7 +9,7 @@ import {
   leaveTraining,
   updateTrainingStatus,
 } from '../../actions/training';
-import { Descriptions, Badge, Button, Space, Upload, Spin } from 'antd';
+import { Descriptions, Badge, Button, Space, Upload, Spin, List } from 'antd';
 import { UploadOutlined, InboxOutlined, StarOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 import moment from 'moment';
@@ -53,6 +53,7 @@ const TrainingDetails = () => {
     );
   };
 
+  console.log(training);
   if (!training) return null;
   if (isLoading) return <PageLoading />;
   return (
@@ -74,6 +75,9 @@ const TrainingDetails = () => {
         <Descriptions.Item label='Description' span={3}>
           {training.description}
         </Descriptions.Item>
+        <Descriptions.Item label='Training Type' span={3}>
+          {training.trainingType}
+        </Descriptions.Item>
         <Descriptions.Item label='Organizer' span={3}>
           {training.trainingType == 'internal' ? (
             <>{`${training.user.first_name} ${training.user.last_name}`}</>
@@ -91,11 +95,19 @@ const TrainingDetails = () => {
           <Descriptions.Item label='Attendants' span={3}>
             {training.attendants.length != 0 ? (
               <>
-                {training.attendants.map((item) => (
+                <List
+                  size='small'
+                  split='true'
+                  dataSource={training.attendants}
+                  renderItem={(item) => (
+                    <List.Item>{`${item.first_name} ${item.last_name}`}</List.Item>
+                  )}
+                />
+                {/*training.attendants.map((item) => (
                   <div key={item._id}>
                     {`${item.first_name} ${item.last_name}`}
                   </div>
-                ))}
+                ))*/}
               </>
             ) : (
               <div>No data</div>

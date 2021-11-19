@@ -13,6 +13,7 @@ import {
   FETCH_UPCOMING_LEAVE,
   FETCH_LEAVE_HISTORY,
   FETCH_TODAY_LEAVE,
+  FETCH_LEAVE_COUNT,
 } from '../constants/actionTypes';
 import { handleError } from './error.js';
 
@@ -22,7 +23,6 @@ export const fetchAllLeaves = () => async (dispatch) => {
     const { data } = await api.fetchAllLeaves();
     dispatch({ type: FETCH_ALL_LEAVE, payload: data });
     dispatch({ type: LEAVE_END_LOADING });
-    message.success('Success');
   } catch (error) {
     handleError(error, LEAVE_ERROR);
   }
@@ -34,7 +34,7 @@ export const fetchLeaveById = (id) => async (dispatch) => {
     const { data } = await api.fetchLeaveById(id);
     dispatch({ type: FETCH_ONE_LEAVE, payload: data });
     dispatch({ type: LEAVE_END_LOADING });
-    message.success('Success');
+
     return data;
   } catch (error) {
     handleError(error, LEAVE_ERROR);
@@ -47,7 +47,6 @@ export const createLeave = (leave) => async (dispatch) => {
     const { data } = await api.createLeave(leave);
     dispatch({ type: CREATE_LEAVE, payload: data });
     dispatch({ type: LEAVE_END_LOADING });
-    message.success('Success');
   } catch (error) {
     handleError(error, LEAVE_ERROR);
   }
@@ -58,7 +57,6 @@ export const updateLeave = (id, leave) => async (dispatch) => {
     const { data } = await api.updateLeave(id, leave);
     dispatch({ type: UPDATE_LEAVE, payload: data });
     dispatch({ type: LEAVE_END_LOADING });
-    message.success('Success');
   } catch (error) {
     handleError(error, LEAVE_ERROR);
   }
@@ -70,7 +68,6 @@ export const fetchLeaveByDateRange = (dateRange) => async (dispatch) => {
     console.log(data);
     dispatch({ type: FETCH_LEAVE_BY_DATERANGE, payload: data });
     dispatch({ type: LEAVE_END_LOADING });
-    message.success('Success');
   } catch (error) {
     handleError(error, LEAVE_ERROR);
   }
@@ -82,7 +79,6 @@ export const fetchLeaveRequests =
       const { data } = await api.fetchLeaveRequests(role, user, department);
       dispatch({ type: FETCH_LEAVE_REQUESTS, payload: data });
       dispatch({ type: LEAVE_END_LOADING });
-      message.success('Success');
     } catch (error) {
       handleError(error, LEAVE_ERROR);
     }
@@ -93,7 +89,6 @@ export const fetchUpcomingLeaves = (id) => async (dispatch) => {
     const { data } = await api.fetchUpcomingLeaves(id);
     dispatch({ type: FETCH_UPCOMING_LEAVE, payload: data });
     dispatch({ type: LEAVE_END_LOADING });
-    message.success('Success');
   } catch (error) {
     handleError(error, LEAVE_ERROR);
   }
@@ -104,7 +99,6 @@ export const fetchLeaveHistory = (id) => async (dispatch) => {
     const { data } = await api.fetchLeaveHistory(id);
     dispatch({ type: FETCH_LEAVE_HISTORY, payload: data });
     dispatch({ type: LEAVE_END_LOADING });
-    message.success('Success');
   } catch (error) {
     handleError(error, LEAVE_ERROR);
   }
@@ -115,7 +109,16 @@ export const fetchTodayLeaves = () => async (dispatch) => {
     const { data } = await api.fetchTodayLeaves();
     dispatch({ type: FETCH_TODAY_LEAVE, payload: data });
     dispatch({ type: LEAVE_END_LOADING });
-    message.success('Success');
+  } catch (error) {
+    handleError(error, LEAVE_ERROR);
+  }
+};
+export const fetchLeaveCount = () => async (dispatch) => {
+  try {
+    dispatch({ type: LEAVE_START_LOADING });
+    const { data } = await api.fetchLeaveCount();
+    dispatch({ type: FETCH_LEAVE_COUNT, payload: data });
+    dispatch({ type: LEAVE_END_LOADING });
   } catch (error) {
     handleError(error, LEAVE_ERROR);
   }

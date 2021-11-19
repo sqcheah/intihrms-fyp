@@ -203,7 +203,8 @@ const Home = () => {
       </text>
     );
   };
-  if (isLoading) return <PageLoading />;
+  if (isLoading || !leaves || !todayLeaves || !trainings)
+    return <PageLoading />;
 
   return (
     <>
@@ -386,7 +387,7 @@ const Home = () => {
                       key='action'
                       render={(text, record) => (
                         <Space size='middle' key={record._id}>
-                          <Link to={`leaves/view/${record._id}`}>View</Link>
+                          <Link to={`training/view/${record._id}`}>View</Link>
                         </Space>
                       )}
                     ></Table.Column>

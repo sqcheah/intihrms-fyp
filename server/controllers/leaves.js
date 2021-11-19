@@ -33,8 +33,28 @@ export const createLeave = async (req, res) => {
   const leave = req.body;
   console.log(req.body);
   console.log('files', req.files);
-
   let filesArray = [];
+  /**
+   * {
+    fieldname: 'files',
+    originalname: 'Capture1.PNG',
+    encoding: '7bit',
+    mimetype: 'image/png',
+    size: 155376,
+    bucket: 'intihrmsbucket',
+    key: '2021-11-18T15-30-11.754Z-Capture1.PNG',
+    acl: 'private',
+    contentType: 'image/png',
+    contentDisposition: null,
+    contentEncoding: null,
+    storageClass: 'STANDARD',
+    serverSideEncryption: null,
+    metadata: { fieldName: 'files' },
+    location: 'https://intihrmsbucket.s3.amazonaws.com/2021-11-18T15-30-11.754Z-Capture1.PNG',
+    etag: '"1783936d33c5cc2001c400a9a9c6f3e5"',
+    versionId: undefined
+  }
+   */
   req.files.forEach((element) => {
     const file = {
       fileId: mongoose.Types.ObjectId(),
@@ -46,6 +66,7 @@ export const createLeave = async (req, res) => {
     console.log('1', element);
     filesArray.push(file);
   });
+
   const newLeave = new leaveModel({
     ...leave,
     attachments: [...filesArray],
@@ -244,6 +265,40 @@ export const fetchLeaveHistory = async (req, res) => {
   const { id } = req.params;
 
   try {
+    /*
+    const leaves = await leaveModel
+      .aggregate([
+        {
+          $match: { user: mongoose.Types.ObjectId(id) },
+        },
+        {
+          $lookup: {
+            from: 'leavetypes',
+            localField: 'code',
+            foreignField: 'leaveType',
+            as: 'leaveTypes',
+          },
+        },
+        {
+          $set: {
+            leaveTypes: '$leaveTypes',
+          },
+        },
+      ])
+      .exec();
+    leaveModel.populate(
+      leaves,
+      [
+        { path: 'user', select: 'first_name last_name roles' },
+        { path: 'department', select: 'name' },
+      ],
+      (err, result) => {
+        console.log(result);
+        res.status(200).json(result);
+      }
+    );
+    console.log(leaves);
+  */
     const leaves = await leaveModel.find({ user: id }).populate([
       { path: 'user', select: 'first_name last_name roles' },
       { path: 'department', select: 'name' },
@@ -285,6 +340,43 @@ export const fetchTodayLeaves = async (req, res) => {
         { path: 'department', select: 'name' },
       ]);
     res.status(200).json(leaves);
+  } catch (error) {
+    res.status(404).json({ message: error });
+  }
+};
+export const fetchLeaveCount = async (req, res) => {
+  try {
+    const leaves = await leaveModel.aggregate([
+      {
+        $group: {
+          _id: '$department',
+          leaves: { $addToSet: '$_id' },
+        },
+      },
+      {
+        $unwind: '$leaves',
+      },
+      {
+        $group: { _id: '$_id', count: { $sum: 1 } },
+      },
+      {
+        $project: {
+          _id: 0,
+          department: '$_id',
+          count: 1,
+        },
+      },
+    ]);
+    leaveModel.populate(
+      leaves,
+      {
+        path: 'department',
+      },
+      (err, result) => {
+        console.log(result);
+        res.status(200).json(result);
+      }
+    );
   } catch (error) {
     res.status(404).json({ message: error });
   }

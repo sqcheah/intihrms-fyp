@@ -4,17 +4,26 @@ import {
   UserOutlined,
 } from '@ant-design/icons';
 import { Avatar, Menu, Spin } from 'antd';
-import React from 'react';
-import { useHistory } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Link, useHistory, useLocation } from 'react-router-dom';
+import { LOGOUT } from '../../constants/actionTypes';
 import HeaderDropdown from '../HeaderDropdown';
 import styles from './index.less';
 
-const AvatarDropdown = () => {
+const AvatarDropdown = ({ user }) => {
+  const dispatch = useDispatch();
   const history = useHistory();
+  const location = useLocation();
+  const logout = () => {
+    dispatch({ type: LOGOUT });
 
-  const onMenuClick = (event) => {
-    history.push('/supervisor');
+    history.push('/auth');
   };
+  const login = () => {
+    history.push('/auth');
+  };
+
   const menu = true;
   const currentUser = {
     avatar:
@@ -22,49 +31,32 @@ const AvatarDropdown = () => {
     name: 'Cheah',
   };
   const menuHeaderDropdown = (
-    <Menu className={styles.menu} selectedKeys={[]} onClick={onMenuClick}>
-      {menu && (
-        <Menu.Item key='center'>
-          <UserOutlined />
-          个人中心
-        </Menu.Item>
-      )}
-      {menu && (
-        <Menu.Item key='settings'>
-          <SettingOutlined />
-          个人设置
-        </Menu.Item>
-      )}
-      {menu && <Menu.Divider />}
-
-      <Menu.Item key='logout'>
+    <Menu className={styles.menu}>
+      <Menu.Item key='profile'>
+        <Link to='/profile'>Profile</Link>
+      </Menu.Item>
+      <Menu.Item key='logout' onClick={logout}>
         <LogoutOutlined />
-        退出登录
+        Logout
       </Menu.Item>
     </Menu>
   );
-  return currentUser && currentUser.name ? (
+  return user ? (
     <HeaderDropdown overlay={menuHeaderDropdown}>
       <span className={`${styles.action} ${styles.account}`}>
         <Avatar
           size='small'
           className={styles.avatar}
-          src={currentUser.avatar}
+          src='https://gw.alipayobjects.com/zos/rmsportal/BiazfanxmamNRoxxVxka.png'
           alt='avatar'
         />
-        <span className={`${styles.name} anticon`}>{currentUser.name}</span>
+        <span
+          className={`${styles.name} anticon`}
+        >{`${user.first_name} ${user.last_name}`}</span>
       </span>
     </HeaderDropdown>
   ) : (
-    <span className={`${styles.action} ${styles.account}`}>
-      <Spin
-        size='small'
-        style={{
-          marginLeft: 8,
-          marginRight: 8,
-        }}
-      />
-    </span>
+    <Link to='/auth'>Login</Link>
   );
 };
 
