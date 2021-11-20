@@ -1,6 +1,6 @@
 import axios from 'axios';
-const trueURl = 'https://competent-dijkstra-2b3714.netlify.app';
-const API = axios.create({ baseURL: 'http://localhost:5000' });
+const trueURl = 'https://intihrms.herokuapp.com/';
+const API = axios.create({ baseURL: 'https://intihrms.herokuapp.com' });
 API.interceptors.request.use((req) => {
   if (localStorage.getItem('profile')) {
     req.headers.authorization = `Bearer ${

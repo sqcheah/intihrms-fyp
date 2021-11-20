@@ -20,6 +20,9 @@ app.use(express.json({ extended: true }));
 app.use(cors());
 //https://stackoverflow.com/questions/25260818/rest-with-express-js-nested-router
 app.use('/', routes);
+app.get('/', (req, res) => {
+  res.send('APP IS RUNNING');
+});
 //https://stackoverflow.com/a/39819473
 //https://stackoverflow.com/a/28279609
 const __dirname = path.resolve();
@@ -38,9 +41,7 @@ mongoose
 //https://socket.io/docs/v3/server-initialization/#with-express
 //https://stackoverflow.com/a/41741696
 const httpServer = createServer(app);
-const io = new Server(httpServer, {
-  cors: { origin: 'http://localhost:3000' },
-});
+const io = new Server(httpServer);
 
 let onlineUsers = [];
 

@@ -8,7 +8,7 @@ import {
 } from '../constants/actionTypes';
 import { handleError } from './error.js';
 
-export const signIn = (formData, history) => async (dispatch) => {
+export const signIn = (formData, navigate) => async (dispatch) => {
   try {
     dispatch({ type: AUTH_START_LOADING });
 
@@ -22,7 +22,7 @@ export const signIn = (formData, history) => async (dispatch) => {
   }
 };
 
-export const signUp = (formData, history) => async (dispatch) => {
+export const signUp = (formData, navigate) => async (dispatch) => {
   try {
     dispatch({ type: AUTH_START_LOADING });
 

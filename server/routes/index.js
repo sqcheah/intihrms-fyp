@@ -8,6 +8,7 @@ import holidayRoutes from './holiday.js';
 import trainingRoutes from './training.js';
 import trainingRequestRoutes from './training.js';
 import policyRoutes from './policy.js';
+import notificationRoutes from './notification.js';
 const router = express.Router();
 
 router.use('/leaves', leavesRoutes);
@@ -19,5 +20,6 @@ router.use('/holidays', holidayRoutes);
 router.use('/training', trainingRoutes);
 router.use('/trainingRequest', trainingRequestRoutes);
 router.use('/policy', policyRoutes);
+router.use('/notification', notificationRoutes);
 
 export default router;
