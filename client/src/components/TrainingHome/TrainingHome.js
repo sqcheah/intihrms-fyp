@@ -35,12 +35,11 @@ import './TrainingHome.css';
 import { set } from 'lodash';
 import PageLoading from '../PageLoading/PageLoading';
 
-const TrainingHome = () => {
+const TrainingHome = ({ socket, user }) => {
   const [loading, setLoading] = useState(true);
   const { trainings, upcomingTraining, isLoading } = useSelector(
     (state) => state.trainings
   );
-  const user = JSON.parse(localStorage.getItem('profile')).result;
   const navigate = useNavigate();
   const dispatch = useDispatch();
   var count = 0;
@@ -70,7 +69,7 @@ const TrainingHome = () => {
   }, [dispatch]);
 
   for (var element of trainings) {
-    if (element.status == 'pending') count++;
+    if (element.status == 'Pending') count++;
   }
 
   console.log('trainings', trainings);
@@ -134,11 +133,23 @@ const TrainingHome = () => {
       </Row>
       <br />
       <Typography.Title level={2}>Quick Overview</Typography.Title>
+      {user.roles.name != 'staff' && (
+        <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
+          <Col className='gutter-row' xs={24} sm={12}>
+            <Card bordered>
+              <b>Pending External Training Requests:{` ${count}`}</b>
+              <Button className='right-button' type='danger'>
+                <Link to='/training/extList'>To Requests</Link>
+              </Button>
+            </Card>
+          </Col>
+        </Row>
+      )}
       <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
-        <Col className='gutter-row' xs={24} sm={12}>
+        <Col className='gutter-row' xs={24} sm={24}>
           <Card bordered>
             <b>Upcoming Trainings:</b>
-            {upcomingTraining && // uh just do the ?.ya better
+            {upcomingTraining &&
               (!upcomingTraining.length ? (
                 <Empty></Empty>
               ) : (
@@ -146,25 +157,37 @@ const TrainingHome = () => {
                   <Table dataSource={upcomingTraining} rowKey='_id'>
                     <Table.Column
                       title='Organizer'
-                      render={(text, record) => {
-                        return record.trainingType == 'internal'
-                          ? `${record.user.first_name} ${record.user.last_name}`
-                          : `${record.organization}`;
-                      }}
+                      dataIndex='organizer'
+                      key='organizer'
                     ></Table.Column>
-
                     <Table.Column
                       title='Title'
                       dataIndex='title'
                       key='title'
                     ></Table.Column>
                     <Table.Column
+                      title='Type'
+                      dataIndex='trainingType'
+                      key='trainingType'
+                    ></Table.Column>
+                    <Table.Column
                       title='Date'
                       dataIndex='date'
                       key='date'
                       render={(text, record) =>
-                        moment(text).format('YYYY-MM-DD')
+                        `${moment(record.fromDate).format(
+                          'YYYY-MM-DD'
+                        )} - ${moment(record.toDate).format('YYYY-MM-DD')}`
                       }
+                    ></Table.Column>
+                    <Table.Column
+                      title='Action'
+                      key='action'
+                      render={(text, record) => (
+                        <Space size='middle' key={record._id}>
+                          <Link to={`view/${record._id}`}>View</Link>
+                        </Space>
+                      )}
                     ></Table.Column>
                   </Table>
                 </>
@@ -174,16 +197,6 @@ const TrainingHome = () => {
             </Button>
           </Card>
         </Col>
-        {user.roles.name != 'staff' && (
-          <Col className='gutter-row' xs={24} sm={12}>
-            <Card bordered>
-              Pending External Training Requests:{` ${count}`}
-              <Button className='right-button' type='danger'>
-                <Link to='/training/extList'>To Requests</Link>
-              </Button>
-            </Card>
-          </Col>
-        )}
       </Row>
     </>
   );

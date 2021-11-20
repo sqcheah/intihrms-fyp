@@ -9,7 +9,7 @@ import moment from 'moment';
 import { updateUser, getUser } from '../../actions/users';
 import PageLoading from '../PageLoading/PageLoading';
 import _ from 'lodash';
-const LeaveDetail = () => {
+const LeaveDetail = ({ user }) => {
   const { leave, isLoading: leaveIsloading } = useSelector(
     (state) => state.leaves
   );
@@ -84,9 +84,15 @@ const LeaveDetail = () => {
           />
         </Descriptions.Item>
       </Descriptions>
-      <Space>
+      <Space size='middle'>
         <Button onClick={() => navigate(-1)}>Back</Button>
-        {leave.status == 'pending' && (
+        {leave.status == 'pending' && user.roles.name == 'staff' ? (
+          <>
+            <Button className='btn-success' onClick={() => setStatus('cancel')}>
+              Cancel
+            </Button>
+          </>
+        ) : (
           <>
             <Button
               className='btn-success'

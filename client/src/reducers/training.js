@@ -64,7 +64,7 @@ export default (
       return { ...state, extTrainings: action.payload };
 
     case FETCH_TRAINING_HISTORY:
-      return { ...state, trainings: action.payload };
+      return { ...state, trainingHistory: action.payload };
 
     case FETCH_UPCOMING_TRAINING:
       return { ...state, upcomingTraining: action.payload };

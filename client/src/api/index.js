@@ -1,6 +1,7 @@
 import axios from 'axios';
 const trueURl = 'https://intihrms.herokuapp.com/';
-const API = axios.create({ baseURL: 'https://intihrms.herokuapp.com' });
+
+const API = axios.create({ baseURL: 'http://localhost:5000' });
 API.interceptors.request.use((req) => {
   if (localStorage.getItem('profile')) {
     req.headers.authorization = `Bearer ${

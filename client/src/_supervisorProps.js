@@ -68,22 +68,22 @@ export default {
           },
           {
             path: 'list',
-            name: 'Workshop List',
+            name: 'Internal Training List',
             icon: <UnorderedListOutlined />,
           },
           {
             path: 'history',
-            name: 'History',
+            name: 'Training History',
             icon: <HistoryOutlined />,
           },
           {
             path: 'submitExt',
-            name: 'Apply External',
+            name: 'External Training Request',
             icon: <FormOutlined />,
           },
           {
             path: 'extList',
-            name: 'External Requests',
+            name: 'Pending External Requests',
             icon: <ExclamationCircleOutlined />,
           },
         ],

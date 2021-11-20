@@ -45,17 +45,17 @@ export default {
           },
           {
             path: 'list',
-            name: 'Workshop List',
+            name: 'Internal Training List',
             icon: <UnorderedListOutlined />,
           },
           {
             path: 'history',
-            name: 'History',
+            name: 'Training History',
             icon: <HistoryOutlined />,
           },
           {
             path: '/training/submitExt',
-            name: 'Apply External',
+            name: 'External Training Request',
             icon: <FormOutlined />,
           },
         ],

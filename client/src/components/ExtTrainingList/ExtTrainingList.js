@@ -40,14 +40,28 @@ const ExtTrainingList = () => {
   }, [dispatch]);
   var deptFilters = [];
   const statusFilter = [
-    { text: 'Pending', value: 'pending' },
-    { text: 'Approved', value: 'approve' },
-    { text: 'Rejected', value: 'reject' },
+    { text: 'Pending', value: 'Pending' },
+    { text: 'Approved', value: 'Approved' },
+    { text: 'Rejected', value: 'Rejected' },
   ];
 
   depts.forEach((element) => {
     deptFilters.push({ text: element.name, value: element.name });
   });
+
+  const formatDuration = (data) => {
+    if (moment.duration(data, 'hours').asDays() >= 1)
+      return (
+        Math.floor(data) +
+        moment
+          .utc(moment.duration(data, 'hours').asMilliseconds())
+          .format(' [hours] mm [minutes]')
+      );
+    else
+      return moment
+        .utc(moment.duration(data, 'hours').asMilliseconds())
+        .format('H [hours] mm [minutes]');
+  };
 
   const columns = [
     {
@@ -65,26 +79,41 @@ const ExtTrainingList = () => {
       filters: deptFilters,
       onFilter: (value, record) => record.department.name.indexOf(value) === 0,
     },
-    { title: 'Organizer', dataIndex: 'organization', key: 'organization' },
+    {
+      title: 'Organizer',
+      dataIndex: 'organizer',
+      key: 'organizer',
+      valueType: 'text',
+    },
     { title: 'Title', dataIndex: 'title', key: 'title' },
     {
-      title: 'Date',
-      dataIndex: 'date',
-      key: 'date',
+      title: 'Start Date',
+      dataIndex: 'fromDate',
+      key: 'fromDate',
       valueType: 'date',
-      sorter: (a, b) => moment(a.date) - moment(b.date),
-      render: (text, record) => moment(record.date).format('YYYY-MM-DD'),
+      sorter: (a, b) => moment(a.fromDate) - moment(b.fromDate),
+      render: (text, record) => moment(record.fromDate).format('YYYY-MM-DD'),
+    },
+    {
+      title: 'End Date',
+      dataIndex: 'toDate',
+      key: 'toDate',
+      valueType: 'date',
+      sorter: (a, b) => moment(a.toDate) - moment(b.toDate),
+      render: (text, record) => moment(record.toDate).format('YYYY-MM-DD'),
     },
     {
       title: 'Time',
       dataIndex: 'time',
       key: 'time',
       hideInSearch: true,
+      render: (text, record) => `${record.fromTime} - ${record.toTime}`,
     },
     {
-      title: 'Duration(hours)',
+      title: 'Total Duration',
       dataIndex: 'duration',
       key: 'duration',
+      render: (text, record) => formatDuration(record.duration),
       hideInSearch: true,
     },
     {
@@ -96,9 +125,9 @@ const ExtTrainingList = () => {
       render: (text, record) => (
         <Badge
           status={
-            record.status == 'pending'
+            record.status == 'Pending'
               ? 'processing'
-              : record.status == 'approve'
+              : record.status == 'Approved'
               ? 'success'
               : 'error'
           }
@@ -112,7 +141,7 @@ const ExtTrainingList = () => {
       valueType: 'option',
       render: (text, record) => (
         <Space size='middle' key={record._id}>
-          <Link to={`view/${record._id}`}>View</Link>
+          <Link to={`/training/view/${record._id}`}>View</Link>
         </Space>
       ),
     },
@@ -123,7 +152,7 @@ const ExtTrainingList = () => {
 
   return (
     <>
-      <h2>External Training Requests</h2>
+      <h2>Received External Training Requests</h2>
       {!trainings.length ? (
         <Empty></Empty>
       ) : (

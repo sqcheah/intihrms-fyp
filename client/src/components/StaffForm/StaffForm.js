@@ -152,7 +152,7 @@ const StaffForm = () => {
         <Form.Item
           key={leaveType._id}
           label={leaveType.name}
-          name={leaveType.name}
+          name={leaveType._id}
           initialValue={leaveType.count}
           rules={[
             {

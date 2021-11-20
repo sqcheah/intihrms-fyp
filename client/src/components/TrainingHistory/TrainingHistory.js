@@ -31,12 +31,11 @@ import PageLoading from '../PageLoading/PageLoading';
 import ProTable, { TableDropdown } from '@ant-design/pro-table';
 import enUSIntl from 'antd/lib/locale/en_US';
 
-const TrainingHistory = () => {
-  const { trainings, extTrainings, isLoading } = useSelector(
+const TrainingHistory = ({ socket, user }) => {
+  const { trainingHistory, extTrainings, isLoading } = useSelector(
     (state) => state.trainings
   );
   const { depts } = useSelector((state) => state.depts);
-  const user = JSON.parse(localStorage.getItem('profile')).result;
   const navigate = useNavigate();
   const dispatch = useDispatch();
   useEffect(() => {
@@ -47,36 +46,70 @@ const TrainingHistory = () => {
 
   var deptFilters = [];
   const statusFilter = [
-    { text: 'Pending', value: 'pending' },
-    { text: 'Approved', value: 'approve' },
-    { text: 'Rejected', value: 'reject' },
+    { text: 'Pending', value: 'Pending' },
+    { text: 'Approved', value: 'Approved' },
+    { text: 'Rejected', value: 'Rejected' },
   ];
+  const calcAttendance = (data) => {
+    var temp = data.filter(function (item) {
+      return item.status == 'Approved';
+    }).length;
+    return temp;
+  };
+  const formatDuration = (data) => {
+    if (moment.duration(data, 'hours').asDays() >= 1)
+      return (
+        Math.floor(data) +
+        moment
+          .utc(moment.duration(data, 'hours').asMilliseconds())
+          .format(' [hours] mm [minutes]')
+      );
+    else
+      return moment
+        .utc(moment.duration(data, 'hours').asMilliseconds())
+        .format('H [hours] mm [minutes]');
+  };
 
   depts.forEach((element) => {
     deptFilters.push({ text: element.name, value: element.name });
   });
 
   const columns1 = [
-    { title: 'Organizer', dataIndex: 'organization', key: 'organization' },
+    {
+      title: 'Organizer',
+      dataIndex: 'organizer',
+      key: 'organizer',
+      valueType: 'text',
+    },
     { title: 'Title', dataIndex: 'title', key: 'title' },
     {
-      title: 'Date',
-      dataIndex: 'date',
-      key: 'date',
+      title: 'Start Date',
+      dataIndex: 'fromDate',
+      key: 'fromDate',
       valueType: 'date',
-      sorter: (a, b) => moment(a.date) - moment(b.date),
-      render: (text, record) => moment(record.date).format('YYYY-MM-DD'),
+      sorter: (a, b) => moment(a.fromDate) - moment(b.fromDate),
+      render: (text, record) => moment(record.fromDate).format('YYYY-MM-DD'),
+    },
+    {
+      title: 'End Date',
+      dataIndex: 'toDate',
+      key: 'toDate',
+      valueType: 'date',
+      sorter: (a, b) => moment(a.toDate) - moment(b.toDate),
+      render: (text, record) => moment(record.toDate).format('YYYY-MM-DD'),
     },
     {
       title: 'Time',
       dataIndex: 'time',
       key: 'time',
       hideInSearch: true,
+      render: (text, record) => `${record.fromTime} - ${record.toTime}`,
     },
     {
-      title: 'Duration(hours)',
+      title: 'Total Duration',
       dataIndex: 'duration',
       key: 'duration',
+      render: (text, record) => formatDuration(record.duration),
       hideInSearch: true,
     },
     {
@@ -88,9 +121,9 @@ const TrainingHistory = () => {
       render: (text, record) => (
         <Badge
           status={
-            record.status == 'pending'
+            record.status == 'Pending'
               ? 'processing'
-              : record.status == 'approve'
+              : record.status == 'Approved'
               ? 'success'
               : 'error'
           }
@@ -104,7 +137,7 @@ const TrainingHistory = () => {
       valueType: 'option',
       render: (text, record) => (
         <Space size='middle' key={record._id}>
-          <Link to={`view/${record._id}`}>View</Link>
+          <Link to={`/training/view/${record._id}`}>View</Link>
         </Space>
       ),
     },
@@ -113,38 +146,39 @@ const TrainingHistory = () => {
   const columns2 = [
     {
       title: 'Organizer',
-      dataIndex: 'user',
-      key: 'user',
+      dataIndex: 'organizer',
+      key: 'organizer',
       valueType: 'text',
-      render: (text, record) => `${text.first_name} ${text.last_name}`,
-    },
-    {
-      title: 'Department',
-      dataIndex: ['department', 'name'],
-      key: 'department',
-
-      filters: deptFilters,
-      onFilter: (value, record) => record.department.name.indexOf(value) === 0,
     },
     { title: 'Title', dataIndex: 'title', key: 'title' },
     {
-      title: 'Date',
-      dataIndex: 'date',
-      key: 'date',
+      title: 'Start Date',
+      dataIndex: 'fromDate',
+      key: 'fromDate',
       valueType: 'date',
-      sorter: (a, b) => moment(a.date) - moment(b.date),
-      render: (text, record) => moment(record.date).format('YYYY-MM-DD'),
+      sorter: (a, b) => moment(a.fromDate) - moment(b.fromDate),
+      render: (text, record) => moment(record.fromDate).format('YYYY-MM-DD'),
+    },
+    {
+      title: 'End Date',
+      dataIndex: 'toDate',
+      key: 'toDate',
+      valueType: 'date',
+      sorter: (a, b) => moment(a.toDate) - moment(b.toDate),
+      render: (text, record) => moment(record.toDate).format('YYYY-MM-DD'),
     },
     {
       title: 'Time',
       dataIndex: 'time',
       key: 'time',
       hideInSearch: true,
+      render: (text, record) => `${record.fromTime} - ${record.toTime}`,
     },
     {
-      title: 'Duration(hours)',
+      title: 'Total Duration',
       dataIndex: 'duration',
       key: 'duration',
+      render: (text, record) => formatDuration(record.duration),
       hideInSearch: true,
     },
     {
@@ -153,8 +187,8 @@ const TrainingHistory = () => {
       key: 'attendants',
       hideInSearch: true,
       sorter: (a, b) =>
-        moment(a.attendants.length) - moment(b.attendants.length),
-      render: (text, record) => record.attendants.length,
+        calcAttendance(a.attendants) - calcAttendance(b.attendants),
+      render: (text, record) => calcAttendance(record.attendants),
     },
     {
       title: 'Action',
@@ -162,14 +196,14 @@ const TrainingHistory = () => {
       valueType: 'option',
       render: (text, record) => (
         <Space size='middle' key={record._id}>
-          <Link to={`view/${record._id}`}>View</Link>
+          <Link to={`/training/view/${record._id}`}>View</Link>
         </Space>
       ),
     },
   ];
   const actionRef = useRef();
 
-  if (isLoading) return <PageLoading />;
+  if (isLoading || !trainingHistory || !extTrainings) return <PageLoading />;
 
   return (
     <>
@@ -189,7 +223,7 @@ const TrainingHistory = () => {
                     if (Object.keys(params).length > 0) {
                       dataSource = dataSource.filter((item) => {
                         return Object.keys(params).every((key) => {
-                          console.log(Object.keys(params));
+                          //console.log(Object.keys(params));
                           if (!params[key]) {
                             return true;
                           }
@@ -259,7 +293,7 @@ const TrainingHistory = () => {
         ))}
 
       <h3>Attending/Hosting Internal Training</h3>
-      {!trainings.length ? (
+      {!trainingHistory.length ? (
         <Empty></Empty>
       ) : (
         <>
@@ -268,12 +302,12 @@ const TrainingHistory = () => {
               columns={columns2}
               actionRef={actionRef}
               request={(params, sorter, filter) => {
-                let dataSource = trainings.reverse();
+                let dataSource = trainingHistory.reverse();
                 if (params) {
                   if (Object.keys(params).length > 0) {
                     dataSource = dataSource.filter((item) => {
                       return Object.keys(params).every((key) => {
-                        console.log(Object.keys(params));
+                        //console.log(Object.keys(params));
                         if (!params[key]) {
                           return true;
                         }
@@ -327,13 +361,6 @@ const TrainingHistory = () => {
                 tooltip:
                   'Use the search bar above or filter icons on the columns for easy record finding',
               }}
-              toolBarRender={() => [
-                <Space>
-                  <Button type='primary'>
-                    <Link to='/training/create'>Organize Training</Link>
-                  </Button>
-                </Space>,
-              ]}
             />
           </ConfigProvider>
         </>

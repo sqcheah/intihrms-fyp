@@ -7,10 +7,7 @@ const UserSchema = mongoose.Schema({
   email: { type: String, required: true },
   employment_date: { type: Date, required: true },
   password: { type: String, required: true },
-  leaveCount: {
-    casual: { type: Number, default: 19 },
-    medical: { type: Number, default: 10 },
-  },
+  leaveCount: {},
   trainingHours: { type: Number, default: 60 },
   department: {
     type: mongoose.Schema.Types.ObjectId,

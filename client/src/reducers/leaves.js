@@ -19,7 +19,7 @@ export default (
     error: null,
     isLoading: true,
     leaves: [],
-    calendar: [],
+    calendar: null,
     leave: null,
   },
   action
@@ -49,9 +49,10 @@ export default (
       const calLeaves =
         action.payload.data.leaves.map((leave) => {
           const leaveType = leave.leaveType;
+          console.log(leaveType);
           return {
             id: leave._id,
-            title: `${leave.user.first_name} ${leave.user.last_name} (${leave.leaveType})`,
+            title: `${leave.user.first_name} ${leave.user.last_name} (${leaveType.code})`,
             start: leave.fromDate,
             url: `/leaves/view/${leave._id}`,
             end: leave.toDate,
@@ -59,12 +60,7 @@ export default (
               emp_id: leave.emp_id,
             },
             allDay: true,
-            color:
-              leaveType == 'casual'
-                ? 'blue'
-                : leaveType == 'medical'
-                ? 'green'
-                : 'red',
+            color: leaveType.color,
           };
         }) || [];
       const calHolidays =
@@ -80,7 +76,7 @@ export default (
         }) || [];
       return {
         ...state,
-        leaves: [...calHolidays, ...calLeaves],
+        calendar: [...calHolidays, ...calLeaves],
       };
     case FETCH_ALL_LEAVE:
       return { ...state, leaves: action.payload };

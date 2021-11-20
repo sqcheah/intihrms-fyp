@@ -372,10 +372,8 @@ const Home = () => {
                   <Table dataSource={trainings} rowKey='_id'>
                     <Table.Column
                       title='Organizer'
-                      dataIndex='name'
-                      render={(text, record) => {
-                        return `${record.user.first_name} ${record.user.last_name}`;
-                      }}
+                      dataIndex='organizer'
+                      key='organizer'
                     ></Table.Column>
                     <Table.Column
                       title='Tite'
@@ -387,7 +385,7 @@ const Home = () => {
                       key='action'
                       render={(text, record) => (
                         <Space size='middle' key={record._id}>
-                          <Link to={`training/view/${record._id}`}>View</Link>
+                          <Link to={`/training/view/${record._id}`}>View</Link>
                         </Space>
                       )}
                     ></Table.Column>

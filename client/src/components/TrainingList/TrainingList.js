@@ -63,7 +63,6 @@ const TrainingList = () => {
       dataIndex: 'organizer',
       key: 'organizer',
       valueType: 'text',
-      //render: (text, record) => `${text.first_name} ${text.last_name}`,
     },
     { title: 'Title', dataIndex: 'title', key: 'title' },
     {
@@ -96,7 +95,7 @@ const TrainingList = () => {
       render: (text, record) =>
         moment
           .utc(moment.duration(record.duration, 'hours').asMilliseconds())
-          .format('HH [hours] mm [minutes]'),
+          .format('H [hours] mm [minutes]'),
       hideInSearch: true,
     },
     {
@@ -104,7 +103,8 @@ const TrainingList = () => {
       dataIndex: 'attendants',
       key: 'attendants',
       hideInSearch: true,
-      sorter: (a, b) => calcAttendance(a.attendants) - calcAttendance(b.attendants),
+      sorter: (a, b) =>
+        calcAttendance(a.attendants) - calcAttendance(b.attendants),
       render: (text, record) => calcAttendance(record.attendants),
     },
     {

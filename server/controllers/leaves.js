@@ -3,6 +3,7 @@ import leaveModel from '../models/leaveModel.js';
 import mailer from 'nodemailer';
 import holidayModel from '../models/holidayModel.js';
 import moment from 'moment';
+import userModel from '../models/userModel.js';
 export const fetchAllLeaves = async (req, res) => {
   try {
     const leaves = await leaveModel.find().populate([
@@ -71,6 +72,7 @@ export const createLeave = async (req, res) => {
     ...leave,
     attachments: [...filesArray],
   });
+  /** 
   newLeave
     .save()
     .then((result) => {
@@ -79,6 +81,37 @@ export const createLeave = async (req, res) => {
     .catch((error) => {
       return res.status(409).json({ message: error });
     });
+*/
+  //  const users=userModel.find({})
+  /*
+      {
+      $lookup: { $from: 'department' },
+      localField: 'dept',
+      foreignField: '_id',
+      as: 'department',
+    },
+  */
+  const users = userModel.aggregate([
+    {
+      $lookup: { $from: 'roles' },
+      localField: 'roles',
+      foreignField: '_id',
+      as: 'roles',
+    },
+    {
+      $match: {
+        $or: [
+          { [roles.name]: 'admin' },
+          {
+            $and: [
+              { [roles.name]: 'supervisor' },
+              { department: leave.department },
+            ],
+          },
+        ],
+      },
+    },
+  ]);
 };
 export const updateLeave = async (req, res) => {
   const { id: _id } = req.params;
@@ -161,9 +194,9 @@ export const fetchLeaveByDateRange = async (req, res) => {
       .populate([
         { path: 'user', select: 'first_name last_name roles' },
         { path: 'department', select: 'name' },
+        { path: 'leaveType' },
       ])
       .exec();
-
     //https://stackoverflow.com/questions/62970611/return-match-item-only-from-array-of-object-mongoose
     const holidays = await holidayModel
       .aggregate([

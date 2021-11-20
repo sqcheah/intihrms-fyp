@@ -27,10 +27,9 @@ const { RangePicker } = DatePicker;
 const { Option } = Select;
 const { Text } = Typography;
 //const history = useHistory();
-const TrainingForm = () => {
+const TrainingForm = ({ socket, user }) => {
   const { id } = useParams();
 
-  const user = JSON.parse(localStorage.getItem('profile')).result;
   const { isLoading, training } = useSelector((state) => state.trainings);
   const [form] = Form.useForm();
   const [error, setError] = useState(null);
@@ -56,6 +55,7 @@ const TrainingForm = () => {
 
     const trainingData = {
       user: user._id,
+      department: user.department._id,
       organizer: values.organizer,
       title: values.title,
       description: values.description,
@@ -63,15 +63,22 @@ const TrainingForm = () => {
       toDate: endDate.format('YYYY-MM-DD'),
       fromTime: startTime.format('HH:mm'),
       toTime: endTime.format('HH:mm'),
-      duration:
+      duration: (
         moment.duration(endTime.diff(startTime)).as('hours') *
-        (moment.duration(endDate.diff(startDate)).as('days') + 1),
-      trainingType: 'internal',
+        (moment.duration(endDate.diff(startDate)).as('days') + 1)
+      ).toFixed(2),
+      trainingType: 'Internal',
     };
     Object.entries(trainingData).forEach(([key, value]) => {
       formData.append(key, value);
     });
     dispatch(createTraining(formData));
+    Modal.success({
+      content: 'Training successfully created.',
+      onOk() {
+        window.location = '/training';
+      },
+    });
   };
   const defaultFile = () => {
     if (!!!id) return null;
@@ -197,7 +204,11 @@ const TrainingForm = () => {
             },
           ]}
         >
-          <TimePicker.RangePicker format='HH:mm' minuteStep={15} />
+          <TimePicker.RangePicker
+            format='HH:mm'
+            minuteStep={15}
+            defaultValue={moment('00:00:00', 'HH:mm:ss')}
+          />
         </Form.Item>
         {/**https://github.com/ant-design/ant-design/tree/master/components/upload/UploadList */}
         <Form.Item
@@ -239,18 +250,7 @@ const TrainingForm = () => {
           <br />
           <br />
           <br />
-          <Button
-            type='primary'
-            htmlType='submit'
-            onClick={() => {
-              Modal.success({
-                content: 'Training successfully created.',
-                onOk() {
-                  window.location = '/training';
-                },
-              });
-            }}
-          >
+          <Button type='primary' htmlType='submit'>
             Submit
           </Button>
         </Form.Item>

@@ -41,7 +41,11 @@ mongoose
 //https://socket.io/docs/v3/server-initialization/#with-express
 //https://stackoverflow.com/a/41741696
 const httpServer = createServer(app);
-const io = new Server(httpServer);
+//https://competent-dijkstra-2b3714.netlify.app/
+//http://localhost:3000
+const io = new Server(httpServer, {
+  cors: { origin: '*' },
+});
 
 let onlineUsers = [];
 

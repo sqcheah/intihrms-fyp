@@ -8,7 +8,7 @@ import moment from 'moment';
 export const fetchAllTrainings = async (req, res) => {
   try {
     const trainings = await trainingModel
-      .find({ trainingType: 'internal' })
+      .find({ trainingType: 'Internal' })
       .populate([{ path: 'user', select: 'first_name last_name' }]);
     res.status(200).json(trainings);
   } catch (error) {
@@ -22,6 +22,7 @@ export const fetchTrainingById = async (req, res) => {
     const training = await trainingModel.findById(id).populate([
       { path: 'user', select: 'first_name last_name' },
       { path: 'attendants.user', select: 'first_name last_name' },
+      { path: 'department', select: 'name' },
     ]);
 
     res.status(200).json(training);
@@ -113,7 +114,7 @@ export const fetchExtTraining = async (req, res) => {
     let trainings = [{}];
     if (role == 'admin') {
       trainings = await trainingModel
-        .find({ trainingType: 'external' })
+        .find({ trainingType: 'External' })
         .populate([
           { path: 'user', select: 'first_name last_name roles' },
           { path: 'department', select: 'name' },
@@ -125,7 +126,7 @@ export const fetchExtTraining = async (req, res) => {
     } else if (role == 'supervisor') {
       trainings = await trainingModel
         .find({
-          $and: [{ trainingType: 'external' }],
+          $and: [{ trainingType: 'External' }],
         })
         .populate([
           {
@@ -174,7 +175,7 @@ export const fetchExtTrainingHistory = async (req, res) => {
 
   try {
     const trainings = await trainingModel
-      .find({ $and: [{ trainingType: 'external' }, { user: id }] })
+      .find({ $and: [{ trainingType: 'External' }, { user: id }] })
       .populate([
         { path: 'user', select: 'first_name last_name roles' },
         { path: 'department', select: 'name' },
@@ -191,8 +192,8 @@ export const fetchTrainingHistory = async (req, res) => {
     const trainings = await trainingModel
       .find({
         $and: [
-          { trainingType: 'internal' },
-          { $or: [{ attendants: id }, { user: id }] },
+          { trainingType: 'Internal' },
+          { attendants: { $elemMatch: { user: id } } },
         ],
       })
       .populate([
@@ -213,9 +214,14 @@ export const fetchUpcomingTraining = async (req, res) => {
     const trainings = await trainingModel
       .find({
         $and: [
-          { $or: [{ attendants: id }, { user: id }] },
-          { date: { $gte: currentDate } },
-          { date: { $lte: date7Days } },
+          {
+            $or: [
+              { attendants: { $elemMatch: { user: id, status: 'Approved' } } },
+              { $and: [{ user: id }, { status: 'Approved' }] },
+            ],
+          },
+          { fromDate: { $gte: currentDate } },
+          { fromDate: { $lte: date7Days } },
         ],
       })
       .populate([
@@ -236,9 +242,9 @@ export const fetchTodayTrainings = async (req, res) => {
     const trainings = await trainingModel
       .find({
         $and: [
-          { trainingType: 'internal' },
-          { date: { $gte: currentDate } },
-          { date: { $lt: next1Day } },
+          { trainingType: 'Internal' },
+          { fromDate: { $lte: currentDate } },
+          { toDate: { $gte: currentDate } },
         ],
       })
       .populate([

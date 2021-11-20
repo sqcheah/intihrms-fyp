@@ -59,8 +59,10 @@ const LeaveForm = () => {
     const rangeValue = values['range-picker'];
     const startDate = rangeValue[0];
     const endDate = rangeValue[1];
-    let remainLeave = user.leaveCount[values.leaveType];
+    const type = leaveTypes.find((rec) => rec._id === values['leaveType']);
+    let remainLeave = user.leaveCount[type['code']];
     const dateDiff = calcWorkingDays(startDate, endDate);
+
     const leaveData = {
       reason: values.reason,
       leaveType: values.leaveType,
@@ -73,7 +75,7 @@ const LeaveForm = () => {
       formData.append(key, value);
     });
     //  console.log(...formData);
-
+    console.log(remainLeave);
     if (remainLeave >= dateDiff) {
       if (id) {
         dispatch(updateLeave(id, formData));
@@ -164,7 +166,7 @@ const LeaveForm = () => {
         >
           <Select>
             {leaveTypes.map((leaveType) => (
-              <Option key={leaveType._id} value={leaveType.code}>
+              <Option key={leaveType._id} value={leaveType._id}>
                 {leaveType.name}
               </Option>
             ))}
@@ -198,7 +200,7 @@ const LeaveForm = () => {
         </Form.Item>
         <Form.Item
           name='upload'
-          label='Upload'
+          label='Supporting Documents'
           valuePropName='fileList'
           getValueFromEvent={normFile}
         >

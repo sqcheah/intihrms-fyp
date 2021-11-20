@@ -9,6 +9,7 @@ import {
   InputNumber,
   Typography,
   Upload,
+  Modal,
 } from 'antd';
 import 'antd/dist/antd.css';
 
@@ -47,22 +48,42 @@ const ExtTrainingForm = () => {
       }
     }
 
+    const dateRange = values['date'];
+    const startDate = dateRange[0];
+    const endDate = dateRange[1];
+    const timeRange = values['time'];
+    const startTime = timeRange[0];
+    const endTime = timeRange[1];
+
     const trainingData = {
       user: user._id,
       department: user.department._id,
+      organizer: values.organizer,
       title: values.title,
       description: values.description,
-      date: values.date.format('YYYY-MM-DD'),
-      time: values.time.format('HH:mm'),
-      duration: values.duration,
-      trainingType: 'external',
-      organization: values.organization,
-      status: 'pending',
+      fromDate: startDate.format('YYYY-MM-DD'),
+      toDate: endDate.format('YYYY-MM-DD'),
+      fromTime: startTime.format('HH:mm'),
+      toTime: endTime.format('HH:mm'),
+      duration: (
+        moment.duration(endTime.diff(startTime)).as('hours') *
+        (moment.duration(endDate.diff(startDate)).as('days') + 1)
+      ).toFixed(2),
+      trainingType: 'External',
+      status: 'Pending',
+      fee: values.fee,
     };
     Object.entries(trainingData).forEach(([key, value]) => {
       formData.append(key, value);
     });
     dispatch(createTraining(formData));
+    Modal.success({
+      content:
+        'Request successfully submitted. You can check request status at Training History.',
+      onOk() {
+        window.location = '/training';
+      },
+    });
   };
   const defaultFile = () => {
     if (!!!id) return null;
@@ -104,7 +125,7 @@ const ExtTrainingForm = () => {
 
   return (
     <>
-      <h2 className='form-header'>Request External Training</h2>
+      <h2 className='form-header'>External Training Request</h2>
       <Form
         form={form}
         name='basic'
@@ -122,24 +143,24 @@ const ExtTrainingForm = () => {
         autoComplete='off'
       >
         <Form.Item
-          label='Workshop Name'
+          label='Course Name'
           name='title'
           rules={[
             {
               required: true,
-              message: 'Please insert a name!',
+              message: 'Please enter a name!',
             },
           ]}
         >
           <Input />
         </Form.Item>
         <Form.Item
-          label='Workshop Organization'
-          name='organization'
+          label='Organizer'
+          name='organizer'
           rules={[
             {
               required: true,
-              message: 'Please insert a organization!',
+              message: 'Please enter an organizer!',
             },
           ]}
         >
@@ -169,7 +190,11 @@ const ExtTrainingForm = () => {
             },
           ]}
         >
-          <DatePicker />
+          <DatePicker.RangePicker
+            disabledDate={(current) => {
+              return current && current < moment().endOf('day');
+            }}
+          />
         </Form.Item>
 
         <Form.Item
@@ -182,20 +207,24 @@ const ExtTrainingForm = () => {
             },
           ]}
         >
-          <TimePicker />
+          <TimePicker.RangePicker
+            format='HH:mm'
+            minuteStep={15}
+            defaultValue={moment('00:00:00', 'HH:mm:ss')}
+          />
         </Form.Item>
 
         <Form.Item
-          label='Duration(hours)'
-          name='duration'
+          label='Course Fee(RM)'
+          name='fee'
           rules={[
             {
               required: true,
-              message: 'Please input the duration!',
+              message: 'Please enter the course fee!',
             },
           ]}
         >
-          <InputNumber min={1} />
+          <InputNumber min={0} />
         </Form.Item>
         {/**https://github.com/ant-design/ant-design/tree/master/components/upload/UploadList */}
         <Form.Item

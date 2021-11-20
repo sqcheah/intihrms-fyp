@@ -42,7 +42,7 @@ const AvatarDropdown = ({ user }) => {
     </Menu>
   );
   return user ? (
-    <HeaderDropdown overlay={menuHeaderDropdown}>
+    <HeaderDropdown overlay={menuHeaderDropdown} trigger={['click']}>
       <span className={`${styles.action} ${styles.account}`}>
         <Avatar
           size='small'

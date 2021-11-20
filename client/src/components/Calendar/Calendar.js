@@ -27,7 +27,7 @@ const Calendar = () => {
     toDate: moment(),
   });
   const [cal, setCal] = useState({});
-  const { leaves, isLoading, error } = useSelector((state) => state.leaves);
+  const { calendar, isLoading, error } = useSelector((state) => state.leaves);
   //https://stackoverflow.com/questions/61528054/react-full-calendar-change-view-api
   useEffect(() => {
     if (!isLoading) {
@@ -63,7 +63,7 @@ const Calendar = () => {
       );
     }
 
-    success(leaves);
+    success(calendar);
     console.log('here');
   };
 

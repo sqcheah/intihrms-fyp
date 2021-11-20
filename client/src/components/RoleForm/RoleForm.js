@@ -82,7 +82,7 @@ const RoleForm = () => {
         <Input onChange={onChange} />
       </Form.Item>
       <Form.Item
-        label='Code'
+        label='ShortName'
         name='code'
         rules={[
           {

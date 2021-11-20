@@ -33,8 +33,21 @@ const TrainingDetails = ({ socket, user }) => {
   };
 
   const setStatus = (status) => {
-    //used for approve/reject ext training
     dispatch(updateTrainingStatus(id, { ...training, status }));
+  };
+
+  const formatDuration = (data) => {
+    if (moment.duration(data, 'hours').asDays() >= 1)
+      return (
+        Math.floor(data) +
+        moment
+          .utc(moment.duration(data, 'hours').asMilliseconds())
+          .format(' [hours] mm [minutes]')
+      );
+    else
+      return moment
+        .utc(moment.duration(data, 'hours').asMilliseconds())
+        .format('H [hours] mm [minutes]');
   };
 
   const setAttendanceStatus = (attendant_id, newStatus) => {
@@ -65,8 +78,6 @@ const TrainingDetails = ({ socket, user }) => {
     );
   };
 
-  console.log(training);
-
   if (!training) return null;
   if (isLoading) return <PageLoading />;
   return (
@@ -77,23 +88,42 @@ const TrainingDetails = ({ socket, user }) => {
         bordered
         column={{ xxl: 4, xl: 3, lg: 3, md: 3, sm: 2, xs: 1 }}
       >
-        {training.trainingType == 'external' && (
-          <Descriptions.Item label='Requester' span={3}>
-            {`${training.user.first_name} ${training.user.last_name}`}
-          </Descriptions.Item>
-        )}
-        <Descriptions.Item label='Title' span={3}>
-          {training.title}
-        </Descriptions.Item>
-        <Descriptions.Item label='Description' span={3}>
-          {training.description}
-        </Descriptions.Item>
         <Descriptions.Item label='Training Type' span={3}>
           {training.trainingType}
         </Descriptions.Item>
-        <Descriptions.Item label='Organizer' span={3}>
-          {training.organizer}
-        </Descriptions.Item>
+
+        {training.trainingType == 'External' ? (
+          <>
+            <Descriptions.Item label='Requester Name' span={3}>
+              {`${training.user.first_name} ${training.user.last_name}`}
+            </Descriptions.Item>
+            <Descriptions.Item label='Requester Department' span={3}>
+              {`${training.department.name}`}
+            </Descriptions.Item>
+            <Descriptions.Item label='Organizer' span={3}>
+              {training.organizer}
+            </Descriptions.Item>
+            <Descriptions.Item label='Course Name' span={3}>
+              {training.title}
+            </Descriptions.Item>
+            <Descriptions.Item label='Reason for Attending' span={3}>
+              {training.description}
+            </Descriptions.Item>
+          </>
+        ) : (
+          <>
+            <Descriptions.Item label='Organizer' span={3}>
+              {training.organizer}
+            </Descriptions.Item>
+            <Descriptions.Item label='Title' span={3}>
+              {training.title}
+            </Descriptions.Item>
+            <Descriptions.Item label='Description' span={3}>
+              {training.description}
+            </Descriptions.Item>
+          </>
+        )}
+
         <Descriptions.Item label='Start Date' span={2}>
           {moment(training.fromDate).format('YYYY-MM-DD')}
         </Descriptions.Item>
@@ -103,7 +133,10 @@ const TrainingDetails = ({ socket, user }) => {
         <Descriptions.Item label='Time' span={3}>
           {`${training.fromTime} - ${training.toTime}`}
         </Descriptions.Item>
-        {training.trainingType == 'internal' && (
+        <Descriptions.Item label='Total Duration' span={3}>
+          {formatDuration(training.duration)}
+        </Descriptions.Item>
+        {training.trainingType == 'Internal' ? (
           <Descriptions.Item label='Attendants' span={3}>
             {training.attendants.length != 0 ? (
               <>
@@ -155,6 +188,10 @@ const TrainingDetails = ({ socket, user }) => {
               <div>No data</div>
             )}
           </Descriptions.Item>
+        ) : (
+          <Descriptions.Item label='Course Fee' span={3}>
+            {`RM ${training.fee}`}
+          </Descriptions.Item>
         )}
         <Descriptions.Item label='Supporting Documents' span={3}>
           {training.attachments.length != 0 ? (
@@ -177,13 +214,13 @@ const TrainingDetails = ({ socket, user }) => {
             <div>None</div>
           )}
         </Descriptions.Item>
-        {training.trainingType == 'external' && (
+        {training.trainingType == 'External' && (
           <Descriptions.Item label='Status' span={3}>
             <Badge
               status={
-                training.status == 'pending'
+                training.status == 'Pending'
                   ? 'processing'
-                  : training.status == 'approve'
+                  : training.status == 'Approved'
                   ? 'success'
                   : 'error'
               }
@@ -195,7 +232,7 @@ const TrainingDetails = ({ socket, user }) => {
       <Space>
         <Button onClick={() => navigate(-1)}>Back</Button>
         {!training.attendants.some((e) => e.user._id === user._id) &&
-        training.trainingType == 'internal' ? (
+        training.trainingType == 'Internal' ? (
           <>
             <Button
               className='btn-success'
@@ -204,7 +241,7 @@ const TrainingDetails = ({ socket, user }) => {
               Join Training
             </Button>
           </>
-        ) : training.trainingType == 'internal' ? (
+        ) : training.trainingType == 'Internal' ? (
           <>
             <Button danger onClick={() => cancelAttendance(user._id)}>
               Cancel Attendance
@@ -212,16 +249,16 @@ const TrainingDetails = ({ socket, user }) => {
           </>
         ) : (
           training.user._id != user._id &&
-          training.trainingType == 'external' &&
-          training.status == 'pending' && (
+          training.trainingType == 'External' &&
+          training.status == 'Pending' && (
             <>
               <Button
                 className='btn-success'
-                onClick={() => setStatus('approve')}
+                onClick={() => setStatus('Approved')}
               >
                 Approve
               </Button>
-              <Button danger onClick={() => setStatus('reject')}>
+              <Button danger onClick={() => setStatus('Rejected')}>
                 Reject
               </Button>
             </>
