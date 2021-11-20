@@ -1,4 +1,4 @@
-import { Route, Redirect } from 'react-router-dom';
+import { Route, Navigate } from 'react-router-dom';
 import {
   LEAVE_APPROVE,
   LEAVE_VIEW_ALL,
@@ -6,11 +6,11 @@ import {
 } from './constants/permissions';
 
 //https://medium.com/@thanhbinh.tran93/private-route-public-route-and-restricted-route-with-react-router-d50b27c15f5e
+//https://stackoverflow.com/questions/69864165/error-privateroute-is-not-a-route-component-all-component-children-of-rou
 function PrivateRoute({
-  component: Component,
+  children,
   requiredPermissions = null,
   matchAllPermissions = false,
-  ...rest
 }) {
   const user = JSON.parse(localStorage.getItem('profile'));
   let hasAccess = true;
@@ -27,14 +27,7 @@ function PrivateRoute({
       );
     }
   }
-  return (
-    <Route
-      {...rest}
-      render={(props) =>
-        user && hasAccess ? <Component {...props} /> : <Redirect to='/auth' />
-      }
-    />
-  );
+  return user && hasAccess ? children : <Navigate to='/auth' replace />;
 }
 
 export default PrivateRoute;

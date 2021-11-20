@@ -1,28 +1,27 @@
-import React, { createRef, useState, useEffect } from 'react';
-import {
-  Form,
-  Input,
-  Button,
-  Select,
-  DatePicker,
-  TimePicker,
-  InputNumber,
-  Typography,
-  Upload,
-} from 'antd';
-import 'antd/dist/antd.css';
-
-import { useDispatch, useSelector } from 'react-redux';
-import { createTraining } from '../../actions/training';
-import { Link, useParams } from 'react-router-dom';
 import {
   DeleteOutlined,
   DownloadOutlined,
   UploadOutlined,
 } from '@ant-design/icons';
+import {
+  Button,
+  DatePicker,
+  Form,
+  Input,
+  Modal,
+  Select,
+  TimePicker,
+  Typography,
+  Upload,
+} from 'antd';
+import 'antd/dist/antd.css';
 import moment from 'moment';
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
+import { createTraining } from '../../actions/training';
 import './TrainingForm.css';
-import PageLoading from '../PageLoading/PageLoading';
+
 const { TextArea } = Input;
 const { RangePicker } = DatePicker;
 const { Option } = Select;
@@ -48,14 +47,25 @@ const TrainingForm = () => {
       }
     }
 
+    const dateRange = values['date'];
+    const startDate = dateRange[0];
+    const endDate = dateRange[1];
+    const timeRange = values['time'];
+    const startTime = timeRange[0];
+    const endTime = timeRange[1];
+
     const trainingData = {
       user: user._id,
-      department: user.department._id,
+      organizer: values.organizer,
       title: values.title,
       description: values.description,
-      date: values.date.format('YYYY-MM-DD'),
-      time: values.time.format('HH:mm'),
-      duration: values.duration,
+      fromDate: startDate.format('YYYY-MM-DD'),
+      toDate: endDate.format('YYYY-MM-DD'),
+      fromTime: startTime.format('HH:mm'),
+      toTime: endTime.format('HH:mm'),
+      duration:
+        moment.duration(endTime.diff(startTime)).as('hours') *
+        (moment.duration(endDate.diff(startDate)).as('days') + 1),
       trainingType: 'internal',
     };
     Object.entries(trainingData).forEach(([key, value]) => {
@@ -105,7 +115,7 @@ const TrainingForm = () => {
 
   return (
     <>
-      <h2 className='form-header'>Organize Internal Training</h2>
+      <h2 className='form-header'>Create Internal Training</h2>
       <Form
         form={form}
         name='basic'
@@ -122,6 +132,18 @@ const TrainingForm = () => {
         onFinishFailed={onFinishFailed}
         autoComplete='off'
       >
+        <Form.Item
+          label='Organizer'
+          name='organizer'
+          rules={[
+            {
+              required: true,
+              message: 'Please enter an organizer!',
+            },
+          ]}
+        >
+          <Input />
+        </Form.Item>
         <Form.Item
           label='Title'
           name='title'
@@ -158,7 +180,11 @@ const TrainingForm = () => {
             },
           ]}
         >
-          <DatePicker />
+          <DatePicker.RangePicker
+            disabledDate={(current) => {
+              return current && current < moment().endOf('day');
+            }}
+          />
         </Form.Item>
 
         <Form.Item
@@ -171,20 +197,7 @@ const TrainingForm = () => {
             },
           ]}
         >
-          <TimePicker />
-        </Form.Item>
-
-        <Form.Item
-          label='Duration(hours)'
-          name='duration'
-          rules={[
-            {
-              required: true,
-              message: 'Please input the duration!',
-            },
-          ]}
-        >
-          <InputNumber min={1} />
+          <TimePicker.RangePicker format='HH:mm' minuteStep={15} />
         </Form.Item>
         {/**https://github.com/ant-design/ant-design/tree/master/components/upload/UploadList */}
         <Form.Item
@@ -226,7 +239,18 @@ const TrainingForm = () => {
           <br />
           <br />
           <br />
-          <Button type='primary' htmlType='submit'>
+          <Button
+            type='primary'
+            htmlType='submit'
+            onClick={() => {
+              Modal.success({
+                content: 'Training successfully created.',
+                onOk() {
+                  window.location = '/training';
+                },
+              });
+            }}
+          >
             Submit
           </Button>
         </Form.Item>

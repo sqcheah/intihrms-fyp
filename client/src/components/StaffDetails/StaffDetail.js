@@ -2,15 +2,15 @@ import React, { useEffect } from 'react';
 import 'antd/dist/antd.css';
 import './StaffDetail.css';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory, useParams } from 'react-router';
+
 import { Descriptions, Badge, Button } from 'antd';
 import { getUser } from '../../actions/users';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import moment from 'moment';
 const StaffDetail = () => {
   const { user } = useSelector((state) => state.users);
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useNavigate();
   const { id } = useParams();
   useEffect(() => {
     dispatch(getUser(id));

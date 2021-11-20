@@ -3,8 +3,8 @@ import React, { useEffect, useState } from 'react';
 import moment from 'moment';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchHolidaysByYear } from '../../actions/holidays';
-import { Link, useHistory } from 'react-router-dom';
-const HolidayHome = () => {
+import { Link } from 'react-router-dom';
+const HolidayHome = ({ socket, user }) => {
   const { holidays } = useSelector((state) => state.holidays);
   const today = moment();
   const dispatch = useDispatch();
@@ -15,6 +15,15 @@ const HolidayHome = () => {
   useEffect(() => {
     dispatch(fetchHolidaysByYear(year));
   }, [dispatch, year]);
+
+  const testNoti = () => {
+    console.log(user);
+    socket?.emit('sendNoti', {
+      senderName: user.email,
+      receiverName: 'ShamsuzlynnMahat244@gmail.com',
+      content: 'test',
+    });
+  };
 
   return (
     <>
@@ -55,6 +64,7 @@ const HolidayHome = () => {
       <Button>
         <Link to='/'>Back</Link>
       </Button>
+      <Button onClick={testNoti}>Test</Button>
     </>
   );
 };

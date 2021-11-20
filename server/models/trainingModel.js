@@ -2,20 +2,27 @@ import mongoose from 'mongoose';
 
 const trainingSchema = mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  department: { type: mongoose.Schema.Types.ObjectId, ref: 'department' },
+  department: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'department',
+  },
   title: { type: String },
   description: { type: String },
-  date: { type: Date },
-  time: { type: String },
+  fromDate: { type: Date },
+  toDate: { type: Date },
+  fromTime: { type: String },
+  toTime: { type: String },
   duration: { type: Number },
-  attendants: {
-    type: [mongoose.Schema.Types.ObjectId],
-    default: [],
-    ref: 'User',
-  },
+  attendants: [
+    {
+      user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+      status: { type: String, default: 'Pending' },
+    },
+  ],
   trainingType: { type: String },
   status: { type: String },
-  organization: { type: String },
+  organizer: { type: String },
+  fee: { type: Number },
   attachments: [],
 });
 

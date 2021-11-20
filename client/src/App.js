@@ -8,8 +8,13 @@ import {
   Layout,
   Image,
   message,
+  notification,
 } from 'antd';
-import { LikeOutlined, UserOutlined } from '@ant-design/icons';
+import {
+  CheckCircleOutlined,
+  LikeOutlined,
+  UserOutlined,
+} from '@ant-design/icons';
 import RightContent from './components/GlobalHeader/RightContent';
 import ProLayout, {
   PageContainer,
@@ -22,7 +27,6 @@ import NoticeIcon from './components/backup/NoticeIcon/';
 import Avatar from './components/GlobalHeader/AvatarDropdown';
 import './App.less';
 
-import { BrowserRouter, Switch, Route, Link } from 'react-router-dom';
 import LeaveHome from './components/LeaveHome/LeaveHome';
 import Navbar from './components/Navbar/Navbar';
 import Auth from './components/Auth/Auth';
@@ -61,10 +65,20 @@ import SupervisorHome from './components/SupervisorHome/SupervisorHome';
 import LeavePolicyForm from './components/LeavePolicyForm/LeavePolicyForm';
 import LeavePolicyHome from './components/LeavePolicyHome/LeavePolicyHome';
 import Error404 from './components/Error/Error404';
+
 import { useDispatch, useSelector } from 'react-redux';
-import { useLocation, useHistory } from 'react-router';
+import {
+  Routes,
+  Route,
+  Link,
+  useLocation,
+  useNavigate,
+} from 'react-router-dom';
 import { LOGOUT } from './constants/actionTypes';
 import jwtDecode from 'jwt-decode';
+
+import { io } from 'socket.io-client';
+
 const { Header, Footer, Sider, Content } = Layout;
 const App = () => {
   const dispatch = useDispatch();
@@ -77,14 +91,15 @@ const App = () => {
     splitMenus: false,
   });
   const [pathname, setPathname] = useState('/');
+  const [socket, setSocket] = useState(null);
   const { authData } = useSelector((state) => state.auth);
   const user = authData?.result;
   const location = useLocation();
   var temp = defaultProps;
-  const history = useHistory();
+  const navigate = useNavigate();
   const logout = () => {
     dispatch({ type: LOGOUT });
-    history.push('/auth');
+    navigate('/auth');
   };
   useEffect(() => {
     setPathname(location.pathname);
@@ -97,6 +112,25 @@ const App = () => {
       }
     }
   }, [location]);
+
+  useEffect(() => {
+    setSocket(io('http://localhost:5000'));
+  }, []);
+  useEffect(() => {
+    if (socket && user) {
+      socket?.emit('newUser', user);
+      socket.emit('listUser');
+
+      socket.on('getNotif', (data) => {
+        notification.open({
+          message: 'title',
+          description: 'body',
+          icon: <CheckCircleOutlined />,
+          placement: 'bottomRight',
+        });
+      });
+    }
+  }, [socket, user]);
 
   if (user?.roles?.name == 'supervisor') temp = supervisorProps;
   else if (user?.roles?.name == 'admin') temp = adminProps;
@@ -168,108 +202,314 @@ const App = () => {
         {...settings}
       >
         <Content className='site-layout-background'>
-          <Switch>
-            <PrivateRoute path='/' exact component={Home} />
-            <PrivateRoute path='/supervisor' exact component={SupervisorHome} />
-            <PrivateRoute path='/admin' exact component={AdminHome} />
-            <PrivateRoute path='/leaves' exact component={LeaveHome} />
-            <PrivateRoute path='/leaves/create' exact component={LeaveForm} />
-            <PrivateRoute
+          <Routes>
+            <Route
+              path='/'
+              element={
+                <PrivateRoute>
+                  <Home socket={socket} user={user} />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path='/supervisor'
+              element={
+                <PrivateRoute>
+                  <SupervisorHome socket={socket} user={user} />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path='/admin'
+              element={
+                <PrivateRoute>
+                  <AdminHome socket={socket} user={user} />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path='/leaves'
+              element={
+                <PrivateRoute>
+                  <LeaveHome socket={socket} user={user} />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path='/leaves/create'
+              element={
+                <PrivateRoute>
+                  <LeaveForm socket={socket} user={user} />
+                </PrivateRoute>
+              }
+            />
+            <Route
               path='/leaves/view/:id'
-              exact
-              component={LeaveDetail}
+              element={
+                <PrivateRoute>
+                  <LeaveDetail socket={socket} user={user} />
+                </PrivateRoute>
+              }
             />
-            <PrivateRoute path='/leaves/edit/:id' exact component={LeaveForm} />
-            <PrivateRoute path='/leaves/list' exact component={LeaveList} />
-            <PrivateRoute
+            <Route
+              path='/leaves/edit/:id'
+              element={
+                <PrivateRoute>
+                  <LeaveForm socket={socket} user={user} />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path='/leaves/list'
+              element={
+                <PrivateRoute>
+                  <LeaveList socket={socket} user={user} />
+                </PrivateRoute>
+              }
+            />
+            <Route
               path='/leaves/history'
-              exact
-              component={LeaveHistory}
+              element={
+                <PrivateRoute>
+                  <LeaveHistory socket={socket} user={user} />
+                </PrivateRoute>
+              }
             />
 
-            <PrivateRoute path='/depts' exact component={DeptHome} />
-            <PrivateRoute path='/depts/create' exact component={DeptForm} />
-            <PrivateRoute path='/users' exact component={StaffHome} />
-            <PrivateRoute path='/profile' exact component={Profile} />
-            <PrivateRoute path='/users/create' exact component={StaffForm} />
-            <PrivateRoute
+            <Route
+              path='/depts'
+              element={
+                <PrivateRoute>
+                  <DeptHome socket={socket} user={user} />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path='/depts/create'
+              element={
+                <PrivateRoute>
+                  <DeptForm socket={socket} user={user} />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path='/users'
+              element={
+                <PrivateRoute>
+                  <StaffHome socket={socket} user={user} />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path='/profile'
+              element={
+                <PrivateRoute>
+                  <Profile socket={socket} user={user} />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path='/users/create'
+              element={
+                <PrivateRoute>
+                  <StaffForm socket={socket} user={user} />
+                </PrivateRoute>
+              }
+            />
+            <Route
               path='/users/view/:id'
-              exact
-              component={StaffDetail}
+              element={
+                <PrivateRoute>
+                  <StaffDetail socket={socket} user={user} />
+                </PrivateRoute>
+              }
             />
-            <PrivateRoute path='/leaveTypes' exact component={LeaveTypeHome} />
-            <PrivateRoute path='/test' exact component={Test} />
-            <PrivateRoute path='/test2' exact component={Test2} />
-            <PrivateRoute
+            <Route
+              path='/leaveTypes'
+              element={
+                <PrivateRoute>
+                  <LeaveTypeHome socket={socket} user={user} />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path='/test'
+              element={
+                <PrivateRoute>
+                  <Test socket={socket} user={user} />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path='/test2'
+              element={
+                <PrivateRoute>
+                  <Test2 socket={socket} user={user} />
+                </PrivateRoute>
+              }
+            />
+            <Route
               path='/leaveTypes/create'
-              exact
-              component={LeaveTypeForm}
+              element={
+                <PrivateRoute>
+                  <LeaveTypeForm socket={socket} user={user} />
+                </PrivateRoute>
+              }
             />
-            <PrivateRoute
+            <Route
               path='/leaveTypes/edit/:id'
-              exact
-              component={LeaveTypeForm}
+              element={
+                <PrivateRoute>
+                  <LeaveTypeForm socket={socket} user={user} />
+                </PrivateRoute>
+              }
             />
-            <PrivateRoute path='/roles' exact component={RoleHome} />
-            <PrivateRoute path='/roles/create' exact component={RoleForm} />
-            <PrivateRoute path='/roles/edit/:id' exact component={RoleForm} />
-            <PrivateRoute path='/calendar' exact component={Calendar} />
+            <Route
+              path='/roles'
+              element={
+                <PrivateRoute>
+                  <RoleHome socket={socket} user={user} />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path='/roles/create'
+              element={
+                <PrivateRoute>
+                  <RoleForm socket={socket} user={user} />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path='/roles/edit/:id'
+              element={
+                <PrivateRoute>
+                  <RoleForm socket={socket} user={user} />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path='/calendar'
+              element={
+                <PrivateRoute>
+                  <Calendar socket={socket} user={user} />
+                </PrivateRoute>
+              }
+            />
 
-            <PrivateRoute path='/holidays' exact component={HolidayHome} />
-            <PrivateRoute
+            <Route
+              path='/holidays'
+              element={
+                <PrivateRoute>
+                  <HolidayHome socket={socket} user={user} />
+                </PrivateRoute>
+              }
+            />
+            <Route
               path='/holidays/create/:id'
-              exact
-              component={HolidayForm}
+              element={
+                <PrivateRoute>
+                  <HolidayForm socket={socket} user={user} />
+                </PrivateRoute>
+              }
             />
 
-            <PrivateRoute path='/training' exact component={TrainingHome} />
-            <PrivateRoute
+            <Route
+              path='/training/*'
+              element={
+                <PrivateRoute>
+                  <TrainingHome socket={socket} user={user} />
+                </PrivateRoute>
+              }
+            />
+            <Route
               path='/training/create'
-              exact
-              component={TrainingForm}
+              element={
+                <PrivateRoute>
+                  <TrainingForm socket={socket} user={user} />
+                </PrivateRoute>
+              }
             />
-            <PrivateRoute
+            <Route
               path='/training/list'
-              exact
-              component={TrainingList}
+              element={
+                <PrivateRoute>
+                  <TrainingList socket={socket} user={user} />
+                </PrivateRoute>
+              }
             />
-            <PrivateRoute
+            <Route
               path='/training/view/:id'
-              exact
-              component={TrainingDetails}
+              element={
+                <PrivateRoute>
+                  <TrainingDetails socket={socket} user={user} />
+                </PrivateRoute>
+              }
             />
-            <PrivateRoute
+            <Route
               path='/training/submitExt'
-              exact
-              component={ExtTrainingForm}
+              element={
+                <PrivateRoute>
+                  <ExtTrainingForm socket={socket} user={user} />
+                </PrivateRoute>
+              }
             />
-            <PrivateRoute
+            <Route
               path='/training/extList'
-              exact
-              component={ExtTrainingList}
+              element={
+                <PrivateRoute>
+                  <ExtTrainingList socket={socket} user={user} />
+                </PrivateRoute>
+              }
             />
-            <PrivateRoute
+            <Route
               path='/training/history'
-              exact
-              component={TrainingHistory}
+              element={
+                <PrivateRoute>
+                  <TrainingHistory socket={socket} user={user} />
+                </PrivateRoute>
+              }
             />
 
-            <PublicRoute path='/auth' exact component={Auth} />
-            <Route path='/resetPassword' exact component={ResetPasswordForm} />
-
-            <PrivateRoute path='/policy' exact component={LeavePolicyHome} />
-            <PrivateRoute
+            <Route
+              path='/policy'
+              element={
+                <PrivateRoute>
+                  <LeavePolicyHome socket={socket} user={user} />
+                </PrivateRoute>
+              }
+            />
+            <Route
               path='/policy/create'
-              exact
-              component={LeavePolicyForm}
+              element={
+                <PrivateRoute>
+                  <LeavePolicyForm socket={socket} user={user} />
+                </PrivateRoute>
+              }
             />
-            <PrivateRoute
+            <Route
               path='/policy/edit/:id'
-              exact
-              component={LeavePolicyForm}
+              element={
+                <PrivateRoute>
+                  <LeavePolicyForm socket={socket} user={user} />
+                </PrivateRoute>
+              }
             />
-            <Route component={Error404} />
-          </Switch>
+
+            <Route
+              path='/auth'
+              element={
+                <PublicRoute>
+                  <Auth socket={socket} user={user} />
+                </PublicRoute>
+              }
+            />
+            <Route
+              path='/resetPassword'
+              element={<ResetPasswordForm socket={socket} user={user} />}
+            />
+            <Route element={<Error404 />} />
+          </Routes>
         </Content>
         {/**   <div
             style={{

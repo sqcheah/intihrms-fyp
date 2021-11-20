@@ -16,8 +16,7 @@ import {
   Descriptions,
 } from 'antd';
 
-import { Link, useHistory } from 'react-router-dom';
-import { useParams } from 'react-router';
+import { Link, useNavigate } from 'react-router-dom';
 import moment from 'moment';
 import recharts, {
   BarChart,
@@ -34,6 +33,7 @@ import 'antd/dist/antd.css';
 import './LeaveHome.css';
 import { set } from 'lodash';
 import PageLoading from '../PageLoading/PageLoading';
+const { Text } = Typography;
 
 const LeaveHome = () => {
   const [loading, setLoading] = useState(true);
@@ -41,7 +41,7 @@ const LeaveHome = () => {
     (state) => state.leaves
   );
   const user = JSON.parse(localStorage.getItem('profile')).result;
-  const history = useHistory();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   var count = 0;
 
@@ -133,9 +133,18 @@ const LeaveHome = () => {
                 <>
                   <Table dataSource={upcomingLeave} rowKey='_id'>
                     <Table.Column
-                      title='Title'
-                      dataIndex='title'
-                      key='title'
+                      title='Leave Type'
+                      dataIndex='leaveType'
+                      key='leaveType'
+                      render={(text, record) => (
+                        <Tag color={text.color}>{text.name}</Tag>
+                      )}
+                    ></Table.Column>
+                    <Table.Column
+                      title='Reason'
+                      dataIndex='reason'
+                      key='reason'
+                      render={(text, record) => <Text ellipsis>{text}</Text>}
                     ></Table.Column>
                     <Table.Column
                       title='Date'
@@ -144,12 +153,6 @@ const LeaveHome = () => {
                       render={(text, record) =>
                         moment(text).format('YYYY-MM-DD')
                       }
-                    ></Table.Column>
-                    <Table.Column
-                      title='Leave Type'
-                      dataIndex='leaveType'
-                      key='leaveType'
-                      render={(text, record) => <Tag color='red'>{text}</Tag>}
                     ></Table.Column>
                   </Table>
                 </>
@@ -160,7 +163,7 @@ const LeaveHome = () => {
                 <Link to='/leaves/create'>Apply Leave</Link>
               </Button>
               <Button type='danger'>
-                <Link to='/leaves/history'>To Leaves</Link>
+                <Link to='/leaves/history'>Leave History</Link>
               </Button>
             </Space>
           </Card>

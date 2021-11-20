@@ -15,8 +15,7 @@ import {
   Menu,
 } from 'antd';
 
-import { Link, useHistory } from 'react-router-dom';
-import { useParams } from 'react-router';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import moment from 'moment';
 import 'antd/dist/antd.css';
 import PageLoading from '../PageLoading/PageLoading';
@@ -33,7 +32,7 @@ const LeaveHistory = () => {
   const { leaves, isLoading } = useSelector((state) => state.leaves);
   const { leaveTypes } = useSelector((state) => state.leaveTypes);
   const user = JSON.parse(localStorage.getItem('profile')).result;
-  const history = useHistory();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const statusFilter = [
     { text: 'Pending', value: 'pending' },
@@ -52,7 +51,7 @@ const LeaveHistory = () => {
   });
 
   const applyLeave = () => {
-    history.push('/leaves/create');
+    navigate('/leaves/create');
   };
 
   const actionRef = useRef();

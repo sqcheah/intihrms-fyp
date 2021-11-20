@@ -1,26 +1,24 @@
-import React, { useEffect } from 'react';
+import { StarOutlined } from '@ant-design/icons';
+import { Badge, Button, Descriptions, List, Space, Upload } from 'antd';
 import 'antd/dist/antd.css';
-import './TrainingDetails.css';
+import moment from 'moment';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory, useParams } from 'react-router';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   fetchTrainingById,
-  updateTraining,
   leaveTraining,
+  updateTraining,
   updateTrainingStatus,
 } from '../../actions/training';
-import { Descriptions, Badge, Button, Space, Upload, Spin, List } from 'antd';
-import { UploadOutlined, InboxOutlined, StarOutlined } from '@ant-design/icons';
-import { Link } from 'react-router-dom';
-import moment from 'moment';
-import { updateUser } from '../../actions/users';
 import PageLoading from '../PageLoading/PageLoading';
-const TrainingDetails = () => {
+import './TrainingDetails.css';
+const TrainingDetails = ({ socket, user }) => {
   const { isLoading, training } = useSelector((state) => state.trainings);
-  const user = JSON.parse(localStorage.getItem('profile')).result;
+  //const user = JSON.parse(localStorage.getItem('profile')).result;
 
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useNavigate();
   const { id } = useParams();
   useEffect(() => {
     dispatch(fetchTrainingById(id));
@@ -35,7 +33,21 @@ const TrainingDetails = () => {
   };
 
   const setStatus = (status) => {
+    //used for approve/reject ext training
     dispatch(updateTrainingStatus(id, { ...training, status }));
+  };
+
+  const setAttendanceStatus = (attendant_id, newStatus) => {
+    console.log(attendant_id, newStatus);
+    const updatedAttendant = training.attendants.map((attendant) => {
+      if (attendant.user._id === attendant_id)
+        return { user: attendant_id, status: newStatus };
+      return attendant;
+    });
+
+    dispatch(
+      updateTrainingStatus(id, { ...training, attendants: updatedAttendant })
+    );
   };
 
   const defaultFile = () => {
@@ -54,6 +66,7 @@ const TrainingDetails = () => {
   };
 
   console.log(training);
+
   if (!training) return null;
   if (isLoading) return <PageLoading />;
   return (
@@ -79,17 +92,16 @@ const TrainingDetails = () => {
           {training.trainingType}
         </Descriptions.Item>
         <Descriptions.Item label='Organizer' span={3}>
-          {training.trainingType == 'internal' ? (
-            <>{`${training.user.first_name} ${training.user.last_name}`}</>
-          ) : (
-            <>{`${training.organization}`}</>
-          )}
+          {training.organizer}
         </Descriptions.Item>
-        <Descriptions.Item label='Date' span={1}>
-          {moment(training.date).format('YYYY-MM-DD')}
+        <Descriptions.Item label='Start Date' span={2}>
+          {moment(training.fromDate).format('YYYY-MM-DD')}
         </Descriptions.Item>
-        <Descriptions.Item label='Time' span={2}>
-          {training.time}
+        <Descriptions.Item label='End Date' span={2}>
+          {moment(training.toDate).format('YYYY-MM-DD')}
+        </Descriptions.Item>
+        <Descriptions.Item label='Time' span={3}>
+          {`${training.fromTime} - ${training.toTime}`}
         </Descriptions.Item>
         {training.trainingType == 'internal' && (
           <Descriptions.Item label='Attendants' span={3}>
@@ -100,14 +112,44 @@ const TrainingDetails = () => {
                   split='true'
                   dataSource={training.attendants}
                   renderItem={(item) => (
-                    <List.Item>{`${item.first_name} ${item.last_name}`}</List.Item>
+                    <List.Item>
+                      <Space size='large'>
+                        {`${item.user.first_name} ${item.user.last_name}`}
+                        <Badge
+                          status={
+                            item.status == 'Pending'
+                              ? 'processing'
+                              : item.status == 'Approved'
+                              ? 'success'
+                              : 'error'
+                          }
+                          text={item.status}
+                        />
+                        {user.roles.name == 'admin' &&
+                          item.status == 'Pending' && (
+                            <>
+                              <Button
+                                className='btn-success'
+                                onClick={() =>
+                                  setAttendanceStatus(item.user._id, 'Approved')
+                                }
+                              >
+                                Approve
+                              </Button>
+                              <Button
+                                danger
+                                onClick={() =>
+                                  setAttendanceStatus(item.user._id, 'Rejected')
+                                }
+                              >
+                                Reject
+                              </Button>
+                            </>
+                          )}
+                      </Space>
+                    </List.Item>
                   )}
                 />
-                {/*training.attendants.map((item) => (
-                  <div key={item._id}>
-                    {`${item.first_name} ${item.last_name}`}
-                  </div>
-                ))*/}
               </>
             ) : (
               <div>No data</div>
@@ -151,9 +193,8 @@ const TrainingDetails = () => {
         )}
       </Descriptions>
       <Space>
-        <Button onClick={() => history.goBack()}>Back</Button>
-        {training.user._id != user._id &&
-        !training.attendants.some((e) => e._id === user._id) &&
+        <Button onClick={() => navigate(-1)}>Back</Button>
+        {!training.attendants.some((e) => e.user._id === user._id) &&
         training.trainingType == 'internal' ? (
           <>
             <Button
@@ -163,13 +204,9 @@ const TrainingDetails = () => {
               Join Training
             </Button>
           </>
-        ) : training.user._id != user._id &&
-          training.trainingType == 'internal' ? (
+        ) : training.trainingType == 'internal' ? (
           <>
-            <Button
-              className='btn-success'
-              onClick={() => cancelAttendance(user._id)}
-            >
+            <Button danger onClick={() => cancelAttendance(user._id)}>
               Cancel Attendance
             </Button>
           </>

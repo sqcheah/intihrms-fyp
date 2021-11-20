@@ -16,7 +16,7 @@ import {
   PlusOutlined,
 } from '@ant-design/icons';
 import moment from 'moment';
-import { useHistory, useParams } from 'react-router';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { createPolicy, getPolicy, updatePolicy } from '../../actions/policy';
 import { useForm } from 'antd/lib/form/Form';
@@ -44,7 +44,7 @@ const LeavePolicy = () => {
   const [form] = useForm();
   const { id } = useParams();
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useNavigate();
   const { policy } = useSelector((state) => state.policy);
   useEffect(() => {
     if (id) {
@@ -163,11 +163,7 @@ const LeavePolicy = () => {
         <Button type='primary' htmlType='submit'>
           Submit
         </Button>
-        <Button
-          type='secondary'
-          htmlType='button'
-          onClick={() => history.goBack()}
-        >
+        <Button type='secondary' htmlType='button' onClick={() => navigate(-1)}>
           Back
         </Button>
       </Form.Item>

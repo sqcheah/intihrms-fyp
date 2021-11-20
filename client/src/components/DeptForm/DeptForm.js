@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Form, Input, Button, Select, Typography } from 'antd';
 import { useDispatch } from 'react-redux';
 
@@ -9,7 +9,7 @@ import { createDept } from '../../actions/depts';
 const { Title } = Typography;
 const DeptForm = () => {
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useNavigate();
   const onFinish = (values) => {
     console.log('Success:', values);
 

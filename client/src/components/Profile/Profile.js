@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import 'antd/dist/antd.css';
 import './Profile.css';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory, useParams } from 'react-router';
 import {
   Descriptions,
   Badge,
@@ -23,36 +22,12 @@ import 'antd/es/modal/style';
 import 'antd/es/slider/style';
 const { Text } = Typography;
 
-const Profile = () => {
+const Profile = ({ user }) => {
   const [imageState, setImageState] = useState({
     imageUrl:
       'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
     loading: false,
   });
-
-  const [fileList, setFileList] = useState([]);
-
-  const onChange = ({ fileList: newFileList }) => {
-    console.log(newFileList);
-    setFileList(newFileList);
-  };
-
-  const onPreview = async (file) => {
-    let src = file.url;
-    if (!src) {
-      src = await new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file.originFileObj);
-        reader.onload = () => resolve(reader.result);
-      });
-    }
-    const image = new Image();
-    image.src = src;
-    const imgWindow = window.open(src);
-    imgWindow.document.write(image.outerHTML);
-  };
-  const user = JSON.parse(localStorage.getItem('profile')).result;
-  console.log('user', user);
 
   const getBase64 = (img, callback) => {
     const reader = new FileReader();
@@ -83,6 +58,49 @@ const Profile = () => {
       );
     }
   };
+
+  const [fileList, setFileList] = useState([
+    {
+      uid: '-1',
+      name: 'image.png',
+      status: 'done',
+      url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
+    },
+  ]);
+
+  const onChange = async ({ file }) => {
+    console.log(file);
+    const src = await new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file.originFileObj);
+      reader.onload = () => resolve(reader.result);
+    });
+
+    setFileList([
+      {
+        uid: '-1',
+        name: file.name,
+        status: 'done',
+        url: src,
+      },
+    ]);
+  };
+
+  const onPreview = async (file) => {
+    let src = file.url;
+    if (!src) {
+      src = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file.originFileObj);
+        reader.onload = () => resolve(reader.result);
+      });
+    }
+    const image = new Image();
+    image.src = src;
+    const imgWindow = window.open(src);
+    imgWindow.document.write(image.outerHTML);
+  };
+
   function ZoomIn() {
     return (
       <Image
@@ -105,9 +123,8 @@ const Profile = () => {
         fileList={fileList}
         onChange={onChange}
         onPreview={onPreview}
-        customRequest={dummyRequest}
       >
-        {fileList.length < 5 && '+ Upload'}
+        {fileList.length <= 2 && '+ Upload'}
       </Upload>
     </ImgCrop>
   );
@@ -117,9 +134,9 @@ const Profile = () => {
         name='avatar'
         listType='picture-card'
         className='avatar-uploader'
-        showUploadList={false}
+        //showUploadList={false}
         action='https://www.mocky.io/v2/5cc8019d300000980a055e76'
-        beforeUpload={preventUpload}
+        //beforeUpload={preventUpload}
         // customRequest={dummyRequest}
         onChange={handleChange}
         accept='image/*'
@@ -165,7 +182,7 @@ const Profile = () => {
       </Divider>
       <center>
         <div>
-          <UploadProfile />
+          <ImageCrop />
         </div>
       </center>
 

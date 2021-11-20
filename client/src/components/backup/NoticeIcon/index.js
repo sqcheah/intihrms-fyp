@@ -56,7 +56,7 @@ const getNotices = () => {
         title: '曲丽丽 评论了你',
         description: '描述信息描述信息描述信息',
         datetime: '2017-08-07',
-        type: 'message',
+        type: 'notification',
         clickClose: true,
       },
       {
@@ -66,7 +66,7 @@ const getNotices = () => {
         title: '朱偏右 回复了你',
         description: '这种模板用于提醒谁与你发生了互动，左侧放『谁』的头像',
         datetime: '2017-08-07',
-        type: 'message',
+        type: 'notification',
         clickClose: true,
       },
       {
@@ -76,7 +76,7 @@ const getNotices = () => {
         title: '标题',
         description: '这种模板用于提醒谁与你发生了互动，左侧放『谁』的头像',
         datetime: '2017-08-07',
-        type: 'message',
+        type: 'notification',
         clickClose: true,
       },
       {
@@ -85,7 +85,7 @@ const getNotices = () => {
         description: '任务需要在 2017-01-12 20:00 前启动',
         extra: '未开始',
         status: 'todo',
-        type: 'event',
+        type: 'notification',
       },
       {
         id: '000000010',
@@ -94,7 +94,7 @@ const getNotices = () => {
           '冠霖提交于 2017-01-06，需在 2017-01-07 前完成代码变更任务',
         extra: '马上到期',
         status: 'urgent',
-        type: 'event',
+        type: 'notification',
       },
       {
         id: '000000011',
@@ -102,7 +102,7 @@ const getNotices = () => {
         description: '指派竹尔于 2017-01-09 前完成更新并发布',
         extra: '已耗时 8 天',
         status: 'doing',
-        type: 'event',
+        type: 'notification',
       },
       {
         id: '000000012',
@@ -111,7 +111,7 @@ const getNotices = () => {
           '冠霖提交于 2017-01-06，需在 2017-01-07 前完成代码变更任务',
         extra: '进行中',
         status: 'processing',
-        type: 'event',
+        type: 'notification',
       },
     ],
   };
@@ -231,7 +231,6 @@ const NoticeIconView = () => {
         list={noticeData.notification}
         title='Notification'
         emptyText='You have no new notifiications'
-        showViewMore
       />
       {/**
       <NoticeIcon.Tab

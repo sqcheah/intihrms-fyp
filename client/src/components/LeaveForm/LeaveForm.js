@@ -12,7 +12,7 @@ import 'antd/dist/antd.css';
 import './LeaveForm.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { createLeave, fetchLeaveById, updateLeave } from '../../actions/leaves';
-import { Link, useParams, useHistory } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { getLeaveTypes } from '../../actions/leaveTypes';
 import {
   DeleteOutlined,
@@ -26,7 +26,7 @@ const { Option } = Select;
 const { Text } = Typography;
 
 const LeaveForm = () => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { id } = useParams();
   const user = JSON.parse(localStorage.getItem('profile')).result;
   const { leave } = useSelector((state) => state.leaves);
@@ -62,7 +62,6 @@ const LeaveForm = () => {
     let remainLeave = user.leaveCount[values.leaveType];
     const dateDiff = calcWorkingDays(startDate, endDate);
     const leaveData = {
-      title: values.title,
       reason: values.reason,
       leaveType: values.leaveType,
       user: user._id,
@@ -154,31 +153,6 @@ const LeaveForm = () => {
         autoComplete='off'
       >
         <Form.Item
-          label='Title'
-          name='title'
-          rules={[
-            {
-              required: true,
-              message: 'Please insert a title!',
-            },
-          ]}
-        >
-          <Input />
-        </Form.Item>
-
-        <Form.Item
-          label='Reason'
-          name='reason'
-          rules={[
-            {
-              required: true,
-              message: 'Please input your reason!',
-            },
-          ]}
-        >
-          <TextArea rows={4} />
-        </Form.Item>
-        <Form.Item
           label='Leave Type'
           name='leaveType'
           rules={[
@@ -196,6 +170,20 @@ const LeaveForm = () => {
             ))}
           </Select>
         </Form.Item>
+
+        <Form.Item
+          label='Reason'
+          name='reason'
+          rules={[
+            {
+              required: true,
+              message: 'Please input your reason!',
+            },
+          ]}
+        >
+          <TextArea rows={4} />
+        </Form.Item>
+
         <Form.Item
           label='Date'
           name='range-picker'
@@ -252,7 +240,7 @@ const LeaveForm = () => {
           <Button
             type='secondary'
             htmlType='button'
-            onClick={() => history.goBack()}
+            onClick={() => navigate(-1)}
           >
             Back
           </Button>

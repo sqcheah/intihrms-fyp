@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Form, Input, Button, Select, Typography } from 'antd';
 import { useDispatch } from 'react-redux';
 
@@ -9,9 +9,9 @@ import { signIn } from '../../actions/auth';
 const { Title } = Typography;
 const Auth = () => {
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useNavigate();
   const onFinish = (values) => {
-    dispatch(signIn(values, history));
+    dispatch(signIn(values, navigate));
   };
 
   const onFinishFailed = (errorInfo) => {

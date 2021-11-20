@@ -14,7 +14,7 @@ import {
   Col,
   Image,
 } from 'antd';
-import { Link, useHistory, useLocation } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { BellOutlined, UserOutlined } from '@ant-design/icons';
 import jwtDecode from 'jwt-decode';
 import 'antd/dist/antd.css';
@@ -25,16 +25,16 @@ const { TabPane } = Tabs;
 const Navbar = () => {
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('profile')));
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
   const logout = () => {
     dispatch({ type: LOGOUT });
 
-    history.push('/auth');
+    navigate('/auth');
     setUser(null);
   };
   const login = () => {
-    history.push('/auth');
+    navigate('/auth');
   };
   const menu = (
     <Menu>

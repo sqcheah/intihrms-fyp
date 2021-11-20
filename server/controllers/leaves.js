@@ -199,6 +199,7 @@ export const fetchLeaveRequests = async (req, res) => {
         .populate([
           { path: 'user', select: 'first_name last_name roles' },
           { path: 'department', select: 'name' },
+          { path: 'leaveType' },
         ])
         .exec((err, items) => {
           const filterItems = items.filter((item) => item.user._id != id);
@@ -266,11 +267,8 @@ export const fetchLeaveHistory = async (req, res) => {
 
   try {
     /*
-    const leaves = await leaveModel
+        const leaves = await leaveModel
       .aggregate([
-        {
-          $match: { user: mongoose.Types.ObjectId(id) },
-        },
         {
           $lookup: {
             from: 'leavetypes',
@@ -279,13 +277,9 @@ export const fetchLeaveHistory = async (req, res) => {
             as: 'leaveTypes',
           },
         },
-        {
-          $set: {
-            leaveTypes: '$leaveTypes',
-          },
-        },
       ])
       .exec();
+    console.log(leaves[0].leaveTypes);
     leaveModel.populate(
       leaves,
       [
@@ -298,12 +292,21 @@ export const fetchLeaveHistory = async (req, res) => {
       }
     );
     console.log(leaves);
-  */
-    const leaves = await leaveModel.find({ user: id }).populate([
-      { path: 'user', select: 'first_name last_name roles' },
-      { path: 'department', select: 'name' },
-    ]);
-    res.status(200).json(leaves);
+
+
+    */
+    const leaves = await leaveModel
+      .find({ user: id })
+      .populate([
+        { path: 'user', select: 'first_name last_name roles' },
+        { path: 'department', select: 'name' },
+        { path: 'leaveType' },
+      ])
+      .exec((err, result) => {
+        console.log(err, result);
+      });
+    //console.log(leaves);
+    //res.status(200).json(leaves);
   } catch (error) {
     res.status(404).json({ message: error });
   }

@@ -16,7 +16,7 @@ export const signIn = (formData, history) => async (dispatch) => {
     dispatch({ type: AUTH, data });
     dispatch({ type: AUTH_END_LOADING });
 
-    history.push('/');
+    navigate('/');
   } catch (error) {
     handleError(error, AUTH_ERROR);
   }
@@ -30,7 +30,7 @@ export const signUp = (formData, history) => async (dispatch) => {
     dispatch({ type: AUTH, data });
     dispatch({ type: AUTH_END_LOADING });
 
-    history.push('/');
+    navigate('/');
   } catch (error) {
     handleError(error, AUTH_ERROR);
   }

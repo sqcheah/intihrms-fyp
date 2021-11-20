@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import trainingModel from '../models/trainingModel.js';
+import userModel from '../models/userModel.js';
 import leaveModel from '../models/leaveModel.js';
 import mailer from 'nodemailer';
 import holidayModel from '../models/holidayModel.js';
@@ -8,11 +9,7 @@ export const fetchAllTrainings = async (req, res) => {
   try {
     const trainings = await trainingModel
       .find({ trainingType: 'internal' })
-      .populate([
-        { path: 'user', select: 'first_name last_name' },
-        { path: 'department', select: 'name' },
-      ]);
-
+      .populate([{ path: 'user', select: 'first_name last_name' }]);
     res.status(200).json(trainings);
   } catch (error) {
     res.status(404).json({ message: error });
@@ -24,12 +21,12 @@ export const fetchTrainingById = async (req, res) => {
   try {
     const training = await trainingModel.findById(id).populate([
       { path: 'user', select: 'first_name last_name' },
-      { path: 'department', select: 'name' },
-      { path: 'attendants', select: 'first_name last_name' },
+      { path: 'attendants.user', select: 'first_name last_name' },
     ]);
 
     res.status(200).json(training);
   } catch (error) {
+    console.log(error);
     res.status(404).json({ message: error });
   }
 };
@@ -67,22 +64,25 @@ export const createTraining = async (req, res) => {
 export const updateTraining = async (req, res) => {
   const { id: _id } = req.params;
   const user_id = req.body.user_id;
+  var status;
   if (!mongoose.Types.ObjectId.isValid(_id))
     return res.status(404).send('No training with that id');
-
+  const user = await userModel.findById(user_id).populate('department roles');
+  if (user.roles.name == 'admin') status = 'Approved';
+  else status = 'Pending';
   const updatedTraining = await trainingModel
     .findByIdAndUpdate(
       _id,
       //https://www.codegrepper.com/code-examples/whatever/mongoose+push+to+subarray+if+not+exists
-      { $addToSet: { attendants: user_id } },
+      { $addToSet: { attendants: { user: user_id, status: status } } },
       // { $push: { attendants: user_id } },
       { new: true, upsert: true }
     )
     .populate([
       { path: 'user', select: 'first_name last_name' },
-      { path: 'department', select: 'name' },
-      { path: 'attendants', select: 'first_name last_name' },
+      { path: 'attendants.user', select: 'first_name last_name' },
     ]);
+
   res.json(updatedTraining);
 };
 export const leaveTraining = async (req, res) => {
@@ -95,16 +95,14 @@ export const leaveTraining = async (req, res) => {
     .findByIdAndUpdate(
       _id,
       //https://www.codegrepper.com/code-examples/whatever/mongoose+push+to+subarray+if+not+exists
-      { $pull: { attendants: user_id } },
+      { $pull: { attendants: { user: user_id } } },
       // { $push: { attendants: user_id } },
       { new: true, upsert: true }
     )
     .populate([
       { path: 'user', select: 'first_name last_name' },
-      { path: 'department', select: 'name' },
-      { path: 'attendants', select: 'first_name last_name' },
+      { path: 'attendants.user', select: 'first_name last_name' },
     ]);
-  console.log(updateTraining);
   res.json(updatedTraining);
 };
 export const fetchExtTraining = async (req, res) => {
@@ -166,6 +164,7 @@ export const updateTrainingStatus = async (req, res) => {
     .findByIdAndUpdate(_id, { ...training, _id }, { new: true })
     .populate([
       { path: 'user', select: 'first_name last_name' },
+      { path: 'attendants.user', select: 'first_name last_name' },
       { path: 'department', select: 'name' },
     ]);
   res.json(updatedTraining);

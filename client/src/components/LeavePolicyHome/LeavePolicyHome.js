@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Spin, Table, Space, Button } from 'antd';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import { getPolicies } from '../../actions/policy';
 const { Column } = Table;
@@ -11,9 +11,9 @@ const RoleHome = () => {
   useEffect(() => {
     dispatch(getPolicies());
   }, [dispatch]);
-  const history = useHistory();
+  const navigate = useNavigate();
   const createPolicy = () => {
-    history.push('/policy/create');
+    navigate('/policy/create');
   };
   return (
     <>

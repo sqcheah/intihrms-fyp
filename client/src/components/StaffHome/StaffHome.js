@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Spin, Table, Space, Button, List, Grid } from 'antd';
 import 'antd/dist/antd.css';
 import './StaffHome.css';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { getUsers } from '../../actions/users';
 const { Column } = Table;
 const { useBreakpoint } = Grid;
@@ -13,9 +13,9 @@ const StaffHome = () => {
   useEffect(() => {
     dispatch(getUsers());
   }, [dispatch]);
-  const history = useHistory();
+  const navigate = useNavigate();
   const createUser = () => {
-    history.push('/users/create');
+    navigate('/users/create');
   };
   const screens = useBreakpoint();
   if (isLoading) return <Spin size='large' />;

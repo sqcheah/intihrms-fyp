@@ -11,6 +11,6 @@ const trainingSchema = mongoose.Schema({
   attachments: [],
 });
 
-const trainingModel = mongoose.model('training', trainingSchema);
+const trainingModel = mongoose.model('trainingRequest', trainingSchema);
 
 export default trainingModel;

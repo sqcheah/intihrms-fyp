@@ -67,11 +67,6 @@ export default {
             exact: true,
           },
           {
-            path: 'create',
-            name: 'Organize Workshop',
-            icon: <UsergroupAddOutlined />,
-          },
-          {
             path: 'list',
             name: 'Workshop List',
             icon: <UnorderedListOutlined />,

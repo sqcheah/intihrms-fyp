@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router';
 import {
   Row,
   Col,
@@ -15,8 +14,9 @@ import {
   Alert,
   List,
   Modal,
+  Statistic,
 } from 'antd';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { fetchAllLeaves, fetchLeaveCount } from '../../actions/leaves';
 import { fetchTrainingCount } from '../../actions/training';
 import { getUsers } from '../../actions/users';
@@ -40,7 +40,9 @@ import recharts, {
 } from 'recharts';
 import 'antd/dist/antd.css';
 import PageLoading from '../PageLoading/PageLoading';
-
+import { UserOutlined } from '@ant-design/icons';
+import RcResizeObserver from 'rc-resize-observer';
+import { StatisticCard } from '@ant-design/pro-card';
 const Home = () => {
   const user = JSON.parse(localStorage.getItem('profile')).result;
   const { leaves, isLoading, leaveCount } = useSelector(
@@ -50,7 +52,8 @@ const Home = () => {
   const { trainingCount } = useSelector((state) => state.trainings);
   const { depts } = useSelector((state) => state.depts);
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useNavigate();
+  const [responsive, setResponsive] = useState(false);
 
   var pass2MonthC = 0,
     pass2MonthM = 0,
@@ -73,7 +76,7 @@ const Home = () => {
     dispatch(getUsers());
     dispatch(getDepts());
   }, [dispatch]);
-
+  const { Divider } = StatisticCard;
   const top3Users = users.slice(0, 3);
 
   leaves.map((element) => {
@@ -189,6 +192,60 @@ const Home = () => {
   return (
     <>
       <Typography.Title level={2}>Admin Dashboard</Typography.Title>
+
+      <RcResizeObserver
+        key='resize-observer'
+        onResize={(offset) => {
+          setResponsive(offset.width < 596);
+        }}
+      >
+        <StatisticCard.Group direction={responsive ? 'column' : 'row'}>
+          <StatisticCard
+            statistic={{
+              title: '冻结金额',
+              value: 20190102,
+              precision: 2,
+              suffix: '元',
+            }}
+            chart={
+              <img
+                src='https://gw.alipayobjects.com/zos/alicdn/RLeBTRNWv/bianzu%25252043x.png'
+                alt='直方图'
+                width='100%'
+              />
+            }
+          />
+          <Divider type={responsive ? 'horizontal' : 'vertical'} />
+          <StatisticCard
+            statistic={{
+              title: '设计资源数',
+              value: 234,
+            }}
+            chart={
+              <img
+                src='https://gw.alipayobjects.com/zos/alicdn/RLeBTRNWv/bianzu%25252043x.png'
+                alt='直方图'
+                width='100%'
+              />
+            }
+          />
+          <Divider type={responsive ? 'horizontal' : 'vertical'} />
+          <StatisticCard
+            statistic={{
+              title: '信息完成度',
+              value: 5,
+              suffix: '/ 100',
+            }}
+            chart={
+              <img
+                src='https://gw.alipayobjects.com/zos/alicdn/RLeBTRNWv/bianzu%25252043x.png'
+                alt='直方图'
+                width='100%'
+              />
+            }
+          />
+        </StatisticCard.Group>
+      </RcResizeObserver>
       <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
         <Col className='gutter-row' xs={24} sm={24}>
           <Card bordered>

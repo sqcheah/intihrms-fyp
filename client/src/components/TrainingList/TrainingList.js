@@ -21,7 +21,7 @@ import {
   SearchOutlined,
 } from '@ant-design/icons';
 
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import moment from 'moment';
 import 'antd/dist/antd.css';
 import PageLoading from '../PageLoading/PageLoading';
@@ -31,14 +31,20 @@ import enUSIntl from 'antd/lib/locale/en_US';
 const TrainingList = () => {
   const { trainings, isLoading } = useSelector((state) => state.trainings);
   const { depts } = useSelector((state) => state.depts);
-  const history = useHistory();
+  const navigate = useNavigate();
   var deptFilters = [];
 
   const createTraining = () => {
-    history.push('/training/create');
+    navigate('/training/create');
   };
   const createExtTraining = () => {
-    history.push('/training/submitExt');
+    navigate('/training/submitExt');
+  };
+  const calcAttendance = (data) => {
+    var temp = data.filter(function (item) {
+      return item.status == 'Approved';
+    }).length;
+    return temp;
   };
   const dispatch = useDispatch();
   useEffect(() => {
@@ -54,38 +60,43 @@ const TrainingList = () => {
   const columns = [
     {
       title: 'Organizer',
-      dataIndex: 'user',
-      key: 'user',
+      dataIndex: 'organizer',
+      key: 'organizer',
       valueType: 'text',
-      render: (text, record) => `${text.first_name} ${text.last_name}`,
-    },
-    {
-      title: 'Department',
-      dataIndex: ['department', 'name'],
-      key: 'department',
-
-      filters: deptFilters,
-      onFilter: (value, record) => record.department.name.indexOf(value) === 0,
+      //render: (text, record) => `${text.first_name} ${text.last_name}`,
     },
     { title: 'Title', dataIndex: 'title', key: 'title' },
     {
-      title: 'Date',
-      dataIndex: 'date',
-      key: 'date',
+      title: 'Start Date',
+      dataIndex: 'fromDate',
+      key: 'fromDate',
       valueType: 'date',
-      sorter: (a, b) => moment(a.date) - moment(b.date),
-      render: (text, record) => moment(record.date).format('YYYY-MM-DD'),
+      sorter: (a, b) => moment(a.fromDate) - moment(b.fromDate),
+      render: (text, record) => moment(record.fromDate).format('YYYY-MM-DD'),
+    },
+    {
+      title: 'End Date',
+      dataIndex: 'toDate',
+      key: 'toDate',
+      valueType: 'date',
+      sorter: (a, b) => moment(a.toDate) - moment(b.toDate),
+      render: (text, record) => moment(record.toDate).format('YYYY-MM-DD'),
     },
     {
       title: 'Time',
       dataIndex: 'time',
       key: 'time',
       hideInSearch: true,
+      render: (text, record) => `${record.fromTime} - ${record.toTime}`,
     },
     {
-      title: 'Duration(hours)',
+      title: 'Total Duration(hours)',
       dataIndex: 'duration',
       key: 'duration',
+      render: (text, record) =>
+        moment
+          .utc(moment.duration(record.duration, 'hours').asMilliseconds())
+          .format('HH [hours] mm [minutes]'),
       hideInSearch: true,
     },
     {
@@ -93,9 +104,8 @@ const TrainingList = () => {
       dataIndex: 'attendants',
       key: 'attendants',
       hideInSearch: true,
-      sorter: (a, b) =>
-        moment(a.attendants.length) - moment(b.attendants.length),
-      render: (text, record) => record.attendants.length,
+      sorter: (a, b) => calcAttendance(a.attendants) - calcAttendance(b.attendants),
+      render: (text, record) => calcAttendance(record.attendants),
     },
     {
       title: 'Action',
@@ -103,7 +113,7 @@ const TrainingList = () => {
       valueType: 'option',
       render: (text, record) => (
         <Space size='middle' key={record._id}>
-          <Link to={`view/${record._id}`}>View</Link>
+          <Link to={`/training/view/${record._id}`}>View</Link>
         </Space>
       ),
     },
@@ -181,18 +191,6 @@ const TrainingList = () => {
                 tooltip:
                   'Use the search bar above or filter icons on the columns for easy record finding',
               }}
-              toolBarRender={() => [
-                <Space>
-                  <Button type='primary'>
-                    <Link to='/training/create'>Organize Training</Link>
-                  </Button>
-                  <Button type='primary'>
-                    <Link to='/training/submitExt'>
-                      Submit External Training Request
-                    </Link>
-                  </Button>
-                </Space>,
-              ]}
             />
           </ConfigProvider>
         </>

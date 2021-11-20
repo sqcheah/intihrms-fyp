@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Spin, Table, Space, Button } from 'antd';
 import 'antd/dist/antd.css';
 import './DeptHome.css';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { deleteDept, getDepts } from '../../actions/depts';
 const { Column } = Table;
 const DeptHome = () => {
@@ -16,9 +16,9 @@ const DeptHome = () => {
   useEffect(() => {
     dispatch(getDepts());
   }, [dispatch]);
-  const history = useHistory();
+  const navigate = useNavigate();
   const createDept = () => {
-    history.push('/depts/create');
+    navigate('/depts/create');
   };
   return (
     <>

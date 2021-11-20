@@ -19,8 +19,7 @@ import {
   Descriptions,
 } from 'antd';
 
-import { Link, useHistory } from 'react-router-dom';
-import { useParams } from 'react-router';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import moment from 'moment';
 import recharts, {
   PieChart,
@@ -42,7 +41,7 @@ const TrainingHome = () => {
     (state) => state.trainings
   );
   const user = JSON.parse(localStorage.getItem('profile')).result;
-  const history = useHistory();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   var count = 0;
 

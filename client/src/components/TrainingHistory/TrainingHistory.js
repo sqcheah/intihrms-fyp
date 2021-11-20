@@ -24,8 +24,7 @@ import {
   SearchOutlined,
 } from '@ant-design/icons';
 
-import { Link, useHistory } from 'react-router-dom';
-import { useParams } from 'react-router';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import moment from 'moment';
 import 'antd/dist/antd.css';
 import PageLoading from '../PageLoading/PageLoading';
@@ -38,7 +37,7 @@ const TrainingHistory = () => {
   );
   const { depts } = useSelector((state) => state.depts);
   const user = JSON.parse(localStorage.getItem('profile')).result;
-  const history = useHistory();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   useEffect(() => {
     dispatch(fetchExtTrainingHistory(user._id));

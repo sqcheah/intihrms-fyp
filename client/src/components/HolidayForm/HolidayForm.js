@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useHistory, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Form, Input, Button, Select, Typography, DatePicker } from 'antd';
 import { useDispatch } from 'react-redux';
 import { createHoliday } from '../../actions/holidays';
@@ -8,7 +8,7 @@ import './HolidayForm.css';
 const { Title } = Typography;
 const DeptForm = () => {
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useNavigate();
   const { id } = useParams();
   const onFinish = (values) => {
     console.log('Success:', values);

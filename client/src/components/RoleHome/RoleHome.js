@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Spin, Table, Space, Button } from 'antd';
 import 'antd/dist/antd.css';
 import './RoleHome.css';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import { getRoles } from '../../actions/roles';
 const { Column } = Table;
@@ -13,9 +13,9 @@ const RoleHome = () => {
   useEffect(() => {
     dispatch(getRoles());
   }, [dispatch]);
-  const history = useHistory();
+  const navigate = useNavigate();
   const createRole = () => {
-    history.push('/roles/create');
+    navigate('/roles/create');
   };
   return (
     <>

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router';
 import {
   Row,
   Col,
@@ -18,7 +17,7 @@ import {
   Form,
   Select,
 } from 'antd';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { fetchAllLeaves, fetchTodayLeaves } from '../../actions/leaves';
 import { fetchDeptUsers } from '../../actions/users';
 import { getDepts } from '../../actions/depts';
@@ -51,7 +50,7 @@ const Home = () => {
   const { depts } = useSelector((state) => state.depts);
   const { Option } = Select;
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useNavigate();
   const [loading, setIsloading] = useState(true);
   const [isModalVisible, setIsModalVisible] = useState(false);
   var deptId;
@@ -221,7 +220,7 @@ const Home = () => {
         title='Select Department to View'
         visible={isModalVisible}
         footer={[
-          <Button onClick={() => history.goBack()}>Back</Button>,
+          <Button onClick={() => navigate(-1)}>Back</Button>,
           <Button form='myForm' key='submit' htmlType='submit'>
             Submit
           </Button>,

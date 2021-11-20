@@ -7,15 +7,17 @@ const leaveSchema = mongoose.Schema({
     ref: 'department',
     required: true,
   },
-  title: { type: String, required: true },
-  reason: { type: String, required: true },
-  leaveType: { type: String, required: true },
+  reason: { type: String },
+  leaveType: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'leaveType',
+    required: true,
+  },
   fromDate: { type: Date, required: true },
   toDate: { type: Date, required: true },
   status: { type: String, default: 'pending' },
   attachments: [],
 });
-
 const leaveModel = mongoose.model('leave', leaveSchema);
 
 export default leaveModel;

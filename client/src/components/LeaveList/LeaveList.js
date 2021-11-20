@@ -14,6 +14,8 @@ import {
   ConfigProvider,
   Dropdown,
   Menu,
+  Input,
+  Typography,
 } from 'antd';
 import {
   PlusOutlined,
@@ -22,20 +24,22 @@ import {
   SearchOutlined,
 } from '@ant-design/icons';
 import _ from 'lodash';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import moment from 'moment';
 import ProTable, { TableDropdown } from '@ant-design/pro-table';
 import enUSIntl from 'antd/lib/locale/en_US';
 
 import 'antd/dist/antd.css';
 import PageLoading from '../PageLoading/PageLoading';
+import { ProFormDateRangePicker } from '@ant-design/pro-form';
+const { Text } = Typography;
 
 const LeaveList = () => {
   const { leaves, isLoading } = useSelector((state) => state.leaves);
   const { depts } = useSelector((state) => state.depts);
   const { leaveTypes } = useSelector((state) => state.leaveTypes);
   const user = JSON.parse(localStorage.getItem('profile')).result;
-  const history = useHistory();
+  const navigate = useNavigate();
   var deptFilters = [];
   const statusFilter = [
     { text: 'Pending', value: 'pending' },
@@ -77,14 +81,20 @@ const LeaveList = () => {
       onFilter: (value, record) => record.department.name.indexOf(value) === 0,
       //  render: (text, record) => `${record.department.name}`,
     },
-    { title: 'Title', dataIndex: 'title', key: 'title' },
+    {
+      title: 'Reason',
+      dataIndex: 'reason',
+      key: 'reason',
+      hideInSearch: true,
+      render: (text, record) => <Text ellipsis>{text}</Text>,
+    },
     {
       title: 'Leave Type',
       dataIndex: 'leaveType',
       key: 'leaveType',
       filters: typeFilter,
-      onFilter: (value, record) => record.leaveType.indexOf(value) === 0,
-      render: (text, record) => <Tag color='red'>{text}</Tag>,
+      onFilter: (value, record) => record.leaveType.code.indexOf(value) === 0,
+      render: (text, record) => <Tag color={text.color}>{text.code}</Tag>,
     },
     {
       title: 'Start Date',
@@ -93,6 +103,21 @@ const LeaveList = () => {
       valueType: 'date',
       sorter: (a, b) => moment(a.fromDate) - moment(b.fromDate),
       render: (text, record) => moment(record.fromDate).format('YYYY-MM-DD'),
+    },
+    {
+      title: 'Start Date to End Date',
+      dataIndex: 'fromDate',
+      valueType: 'dateRange',
+      key: 'somehtin',
+      hideInTable: true,
+      search: {
+        transform: (value) => {
+          return {
+            startTime: value[0],
+            endTime: value[1],
+          };
+        },
+      },
     },
     {
       title: 'End Date',
@@ -167,6 +192,27 @@ const LeaveList = () => {
                           val = `${item.user.first_name} ${item.user.last_name}`;
                         } else if (key == 'department') {
                           val = `${item.department.name}`;
+                        } else if (key == 'startTime') {
+                          console.log(
+                            item['fromDate'],
+                            params[key],
+                            moment(item['fromDate']).diff(
+                              moment(params[key]),
+                              'days'
+                            )
+                          );
+                          return (
+                            moment(item['fromDate']).diff(
+                              moment(params[key])
+                            ) >= 0
+                          );
+                        } else if (key == 'endTime') {
+                          return (
+                            moment(item['toDate']).diff(
+                              moment(params[key]),
+                              'days'
+                            ) <= 0
+                          );
                         }
                         if (!val) {
                           return true;

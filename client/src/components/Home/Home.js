@@ -357,7 +357,7 @@ const Home = () => {
                 </>
               ))}
             <Button type='danger'>
-              <Link to='/leaves'>To Leaves</Link>
+              <Link to='/leaves'>Leaves Dashboard</Link>
             </Button>
           </Card>
         </Col>
@@ -395,7 +395,7 @@ const Home = () => {
                 </>
               ))}
             <Button type='danger'>
-              <Link to='/training'>To Trainings</Link>
+              <Link to='/training'>Training Dashboard</Link>
             </Button>
           </Card>
         </Col>

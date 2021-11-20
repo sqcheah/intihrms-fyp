@@ -2,10 +2,9 @@ import React, { useEffect, useState } from 'react';
 import 'antd/dist/antd.css';
 import './LeaveDetail.css';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory, useParams } from 'react-router';
 import { fetchLeaveById, updateLeave } from '../../actions/leaves';
 import { Descriptions, Badge, Button, Space, Spin } from 'antd';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import moment from 'moment';
 import { updateUser, getUser } from '../../actions/users';
 import PageLoading from '../PageLoading/PageLoading';
@@ -16,7 +15,7 @@ const LeaveDetail = () => {
   );
   const dispatch = useDispatch();
   const [loading, setIsloading] = useState(true);
-  const history = useHistory();
+  const navigate = useNavigate();
   const { id } = useParams();
   useEffect(() => {
     dispatch(fetchLeaveById(id)).then(() => setIsloading(false));
@@ -86,7 +85,7 @@ const LeaveDetail = () => {
         </Descriptions.Item>
       </Descriptions>
       <Space>
-        <Button onClick={() => history.goBack()}>Back</Button>
+        <Button onClick={() => navigate(-1)}>Back</Button>
         {leave.status == 'pending' && (
           <>
             <Button

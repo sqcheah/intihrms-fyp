@@ -1,11 +1,11 @@
 import React from 'react';
 import { Result, Button } from 'antd';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const Error404 = () => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const toHome = () => {
-    history.push('/');
+    navigate('/');
   };
   return (
     <Result

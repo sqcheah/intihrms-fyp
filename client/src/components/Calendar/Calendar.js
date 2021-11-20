@@ -9,7 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Grid, Spin } from 'antd';
 import 'antd/dist/antd.css';
 import './Calendar.css';
-import { useHistory } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 import { fetchLeaveByDateRange } from '../../actions/leaves';
 import moment from 'moment';
 const { useBreakpoint } = Grid;
@@ -19,7 +19,7 @@ const { useBreakpoint } = Grid;
 const Calendar = () => {
   const dispatch = useDispatch();
   const screens = useBreakpoint();
-  const history = useHistory();
+  const navigate = useNavigate();
   const c = createRef();
   let newLeave;
   const [dateRange, setDateRange] = useState({
@@ -68,8 +68,7 @@ const Calendar = () => {
   };
 
   const handleEventClick = (clickInfo) => {
-    if (clickInfo.event.display != 'background')
-      history.push(clickInfo.event.url);
+    if (clickInfo.event.display != 'background') navigate(clickInfo.event.url);
   };
 
   const renderEventContent = (eventInfo) => {

@@ -8,11 +8,12 @@ const notificationSchema = mongoose.Schema({
     type: { type: String, required: true }, //training/ leave
   },
   sender: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  recipient: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-  },
+  recipient: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
+  ],
   date: { type: Date, default: new Date() },
   status: { type: String, default: 'unread' }, //notification status
 });
