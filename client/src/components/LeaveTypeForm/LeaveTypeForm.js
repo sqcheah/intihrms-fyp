@@ -11,8 +11,9 @@ import {
   Space,
   Row,
   Col,
+  Modal,
 } from 'antd';
-import 'antd/dist/antd.css';
+
 import ProForm, {
   ProFormText,
   ProFormDigit,
@@ -32,11 +33,16 @@ import { ChromePicker, SketchPicker } from 'react-color';
 import { PageLoading } from '@ant-design/pro-layout';
 const { TextArea } = Input;
 const { RangePicker } = DatePicker;
-
+//https://stackoverflow.com/a/68880332
+const isBlank = (str) => {
+  return !!!str || /^\s*$/.test(str);
+};
 const LeaveTypeForm = () => {
   const { id } = useParams();
   const [color, setColor] = useState('#39f983');
-  const { leaveType, isLoading } = useSelector((state) => state.leaveTypes);
+  const { leaveType, isLoading, success, error } = useSelector(
+    (state) => state.leaveTypes
+  );
   const [loading, setLoading] = useState(false);
   const [colorState, setColorState] = useState({
     code: 'sample',
@@ -44,14 +50,18 @@ const LeaveTypeForm = () => {
   });
   const [form] = Form.useForm();
   const dispatch = useDispatch();
-  const onFinish = (values) => {
+  const onFinish = async (values) => {
     if (id) {
       dispatch(updateLeaveType(id, values));
     } else {
       dispatch(createLeaveType(values));
     }
   };
-
+  useEffect(() => {
+    console.log(isLoading);
+    if (success) Modal.success({ content: success });
+    else if (error) Modal.error({ content: error });
+  }, [isLoading]);
   useEffect(() => {
     if (id) {
       setLoading(true);
@@ -59,6 +69,7 @@ const LeaveTypeForm = () => {
       dispatch(getLeaveType(id)).then((data) => {
         form.setFieldsValue(data);
         setLoading(false);
+        setColorState({ code: data.code, color: data.color });
       });
     }
   }, [dispatch, id]);
@@ -66,10 +77,25 @@ const LeaveTypeForm = () => {
     console.log('Failed:', errorInfo);
   };
   const onValuesChange = (changedFields, allFields) => {
-    console.log(changedFields, allFields);
-    if (allFields.code != '' && allFields.color != '') setColorState(allFields);
+    if (changedFields.color || changedFields.code) {
+      setColorState({
+        code: changedFields.code
+          ? changedFields.code
+          : isBlank(colorState.code)
+          ? 'sample'
+          : colorState.code,
+        color: changedFields.color ? changedFields.color : colorState.color,
+      });
+    }
   };
-  if (isLoading) return <PageLoading />;
+  const onNameChange = (event) => {
+    const value = event.target.value;
+    const autoCode = value.toLowerCase().split(' ')[0];
+    form.setFieldsValue({ code: autoCode });
+    setColorState({ ...colorState, code: autoCode });
+  };
+
+  if (loading) return <PageLoading />;
   return (
     <>
       <ConfigProvider locale={enUSIntl}>
@@ -101,9 +127,11 @@ const LeaveTypeForm = () => {
           }}
         >
           <ProFormText
-            name='code'
-            label='Code'
-            placeholder='Enter code'
+            name='name'
+            label='Name'
+            placeholder='Enter Name'
+            tooltip='Press enter to autofill short name'
+            fieldProps={{ onPressEnter: onNameChange }}
             width='md'
             rules={[
               {
@@ -112,28 +140,31 @@ const LeaveTypeForm = () => {
               },
             ]}
           />
-
           <ProFormText
-            name='name'
-            label='Name'
-            placeholder='Enter Name'
+            name='code'
+            label='Short Name'
+            placeholder='Enter Short Name'
+            tooltip='This field is meant for display purpose'
             width='md'
             rules={[
               {
                 required: true,
-                message: 'Please input your reason!',
               },
             ]}
           />
 
           <ProFormDigit
             name='count'
-            label='Count'
+            label='Default Count'
+            placeholder='Enter Default count'
             width='md'
             rules={[
               {
                 required: true,
-                message: 'Please input your reason!',
+              },
+              {
+                type: 'number',
+                min: 0,
               },
             ]}
           />

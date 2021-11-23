@@ -14,11 +14,11 @@ import {
   Typography,
   Upload,
 } from 'antd';
-import 'antd/dist/antd.css';
+
 import moment from 'moment';
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { createTraining } from '../../actions/training';
 import './TrainingForm.css';
 
@@ -29,6 +29,7 @@ const { Text } = Typography;
 //const history = useHistory();
 const TrainingForm = ({ socket, user }) => {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const { isLoading, training } = useSelector((state) => state.trainings);
   const [form] = Form.useForm();
@@ -76,10 +77,11 @@ const TrainingForm = ({ socket, user }) => {
     Modal.success({
       content: 'Training successfully created.',
       onOk() {
-        window.location = '/training';
+        navigate('/training/home');
       },
     });
   };
+
   const defaultFile = () => {
     if (!!!id) return null;
     return (

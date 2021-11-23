@@ -6,19 +6,23 @@ import {
   DEPT_END_LOADING,
   DEPT_ERROR,
   DEPT_START_LOADING,
+  DEPT_SUCCESS,
 } from '../constants/actionTypes';
-
+import { handleError } from './error.js';
 export default (
-  state = { error: null, isLoading: true, depts: [] },
+  state = { error: null, isLoading: true, depts: [], success: null },
   action
 ) => {
   switch (action.type) {
     case DEPT_START_LOADING:
-      return { ...state, isLoading: true, error: null };
+      return { ...state, isLoading: true, error: null, success: null };
     case DEPT_END_LOADING:
       return { ...state, isLoading: false };
     case DEPT_ERROR: {
-      return { ...state, error: action.error, isLoading: false };
+      return { ...state, error: handleError(action.error), isLoading: false };
+    }
+    case DEPT_SUCCESS: {
+      return { ...state, success: action.payload.success };
     }
 
     case UPDATE_DEPT:

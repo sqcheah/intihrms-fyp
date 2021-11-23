@@ -7,8 +7,9 @@ import leaveTypes from './leaveTypes';
 import roles from './roles';
 import holidays from './holidays';
 import trainings from './training';
-import trainingRequest from './trainingRequest';
+import trainingProgress from './trainingProgress';
 import policy from './policy';
+import notifications from './notification';
 import { LOGOUT } from '../constants/actionTypes';
 
 const appReducers = combineReducers({
@@ -20,8 +21,9 @@ const appReducers = combineReducers({
   roles,
   holidays,
   trainings,
-  trainingRequest,
+  trainingProgress,
   policy,
+  notifications,
 });
 //https://stackoverflow.com/a/35641992
 export const reducers = (state, action) => {

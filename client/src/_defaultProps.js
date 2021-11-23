@@ -12,6 +12,7 @@ import {
   UnorderedListOutlined,
   HistoryOutlined,
   FormOutlined,
+  CalendarOutlined,
 } from '@ant-design/icons';
 import Home from './components/Home/Home';
 import LeaveHome from './components/LeaveHome/LeaveHome';
@@ -21,7 +22,7 @@ export default {
     path: '/',
     routes: [
       {
-        path: '/',
+        path: '/home',
         name: 'Personal Dashboard',
         icon: <UserOutlined />,
         exact: true,
@@ -31,6 +32,29 @@ export default {
         name: 'Leaves',
         icon: <ScheduleOutlined />,
         exact: true,
+        routes: [
+          {
+            path: 'home',
+            name: 'Leaves Dashboard',
+            icon: <HomeOutlined />,
+            exact: true,
+          },
+          {
+            path: 'create',
+            name: 'Apply Leave',
+            icon: <UsergroupAddOutlined />,
+          },
+          {
+            path: 'history',
+            name: 'Leave History',
+            icon: <HistoryOutlined />,
+          },
+          {
+            path: '/calendar/personal',
+            name: 'Calendar View',
+            icon: <CalendarOutlined />,
+          },
+        ],
       },
       {
         path: '/training',
@@ -38,8 +62,8 @@ export default {
         icon: <SolutionOutlined />,
         routes: [
           {
-            path: './',
-            name: 'Training Home',
+            path: 'home',
+            name: 'Training Dashboard',
             icon: <HomeOutlined />,
             exact: true,
           },

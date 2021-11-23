@@ -5,6 +5,9 @@ import moment from 'moment';
 
 import NoticeIcon from './NoticeIcon';
 import './index.less';
+import { useDispatch, useSelector } from 'react-redux';
+import { getNotificationsById } from '../../../actions/notification';
+import { useLocation } from 'react-router-dom';
 const getNotices = () => {
   return {
     data: [
@@ -124,21 +127,21 @@ const getNoticeData = (notices) => {
   const newNotices = notices.map((notice) => {
     const newNotice = { ...notice };
 
-    if (newNotice.datetime) {
-      newNotice.datetime = moment(notice.datetime).fromNow();
+    if (newNotice.createdAt) {
+      newNotice.createdAt = moment(notice.createdAt).fromNow();
     }
 
-    if (newNotice.id) {
-      newNotice.key = newNotice.id;
+    if (newNotice._id) {
+      newNotice.key = newNotice._id;
     }
 
-    if (newNotice.extra && newNotice.status) {
+    if (newNotice.content.status) {
       const color = {
-        todo: '',
-        processing: 'blue',
-        urgent: 'red',
-        doing: 'gold',
-      }[newNotice.status];
+        pending: 'blue',
+        reject: 'red',
+        approve: 'green',
+        pending: 'gray',
+      }[newNotice.content.status];
       newNotice.extra = (
         <Tag
           color={color}
@@ -146,14 +149,13 @@ const getNoticeData = (notices) => {
             marginRight: 0,
           }}
         >
-          {newNotice.extra}
+          {newNotice.content.status}
         </Tag>
       );
     }
-
     return newNotice;
   });
-  return groupBy(newNotices, 'type');
+  return groupBy(newNotices, 'content.type');
 };
 
 const getUnreadData = (noticeData) => {
@@ -171,25 +173,57 @@ const getUnreadData = (noticeData) => {
   });
   return unreadMsg;
 };
-
-const NoticeIconView = () => {
-  // const { initialState } = useModel('@@initialState');
-  // const { currentUser } = initialState || {};
-  const [notices, setNotices] = useState([]);
+const getTotalUnreadCount = (unreadMsg) => {
+  let total = 0;
+  for (const key in unreadMsg) {
+    total += unreadMsg[key];
+  }
+  return total;
+};
+const NoticeIconView = ({ user, socket }) => {
+  const dispatch = useDispatch();
+  const location = useLocation();
+  const [random, setRandom] = useState({ key: Math.random() });
+  const { notifications, isLoading } = useSelector(
+    (state) => state.notifications
+  );
+  const [notices, setNotices] = useState(notifications);
+  let noticeData = getNoticeData(notices);
+  let unreadMsg = getUnreadData(noticeData || {});
+  let totalCount = getTotalUnreadCount(unreadMsg);
 
   useEffect(() => {
-    // getNotices().then(({ data }) => setNotices(data || []));
-    setNotices(getNotices().data || []);
+    if (user) {
+      dispatch(getNotificationsById(user._id));
+      setNotices(notifications);
+    }
   }, []);
 
-  const noticeData = getNoticeData(notices);
-  const unreadMsg = getUnreadData(noticeData || {});
+  useEffect(() => {
+    if (user) {
+      socket?.on('newNotification', () => {
+        dispatch(getNotificationsById(user._id)).then((data) => {
+          setNotices(data);
+        });
+      });
+    }
+  }, [socket, user]);
+
+  // const { initialState } = useModel('@@initialState');
+  // const { currentUser } = initialState || {};
+
+  /** 
+  useEffect(() => {
+    // getNotices().then(({ data }) => setNotices(data || []));
+    // setNotices(getNotices().data || []);
+  }, []);
+*/
 
   const changeReadState = (id) => {
     setNotices(
       notices.map((item) => {
         const notice = { ...item };
-        if (notice.id === id) {
+        if (notice._id === id) {
           notice.read = true;
         }
         return notice;
@@ -209,27 +243,26 @@ const NoticeIconView = () => {
     );
     message.success(`${'Clear'} ${title}`);
   };
-
   return (
     <NoticeIcon
       className={`action`}
       //count={currentUser&&currentUser.unreadCount}
-      count={10}
+      count={totalCount}
       onItemClick={(item) => {
-        changeReadState(item.id);
+        changeReadState(item._id);
       }}
       onClear={(title, key) => clearReadState(title, key)}
-      loading={false}
+      loading={isLoading}
       clearText='Clear'
       viewMoreText='View More'
       onViewMore={() => message.info('Click on view more')}
       clearClose
     >
       <NoticeIcon.Tab
-        tabKey='notification'
-        count={unreadMsg.notification}
-        list={noticeData.notification}
-        title='Notification'
+        tabKey='leave'
+        count={unreadMsg.leave}
+        list={noticeData.leave}
+        title='Leave'
         emptyText='You have no new notifiications'
       />
       {/**

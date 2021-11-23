@@ -17,7 +17,7 @@ import {
 
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import moment from 'moment';
-import 'antd/dist/antd.css';
+
 import PageLoading from '../PageLoading/PageLoading';
 import {
   PlusOutlined,
@@ -29,15 +29,15 @@ import ProTable, { TableDropdown } from '@ant-design/pro-table';
 import enUSIntl from 'antd/lib/locale/en_US';
 
 const LeaveHistory = () => {
-  const { leaves, isLoading } = useSelector((state) => state.leaves);
+  const { leaveHistory, isLoading } = useSelector((state) => state.leaves);
   const { leaveTypes } = useSelector((state) => state.leaveTypes);
   const user = JSON.parse(localStorage.getItem('profile')).result;
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const statusFilter = [
-    { text: 'Pending', value: 'pending' },
-    { text: 'Approved', value: 'approve' },
-    { text: 'Rejected', value: 'reject' },
+    { text: 'Pending', value: 'Pending' },
+    { text: 'Approved', value: 'Approved' },
+    { text: 'Rejected', value: 'Rejected' },
   ];
   var typeFilter = [];
 
@@ -54,17 +54,22 @@ const LeaveHistory = () => {
     navigate('/leaves/create');
   };
 
-  const actionRef = useRef();
+  const capitalizeFirstLetter = (string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  };
 
+  const actionRef = useRef();
+  console.log(leaveHistory);
   const columns = [
-    { title: 'Title', dataIndex: 'title', key: 'title' },
     {
       title: 'Leave Type',
       dataIndex: 'leaveType',
       key: 'leaveType',
       filters: typeFilter,
-      onFilter: (value, record) => record.leaveType.indexOf(value) === 0,
-      render: (text, record) => <Tag color='red'>{text}</Tag>,
+      onFilter: (value, record) => record.leaveType.code.indexOf(value) === 0,
+      render: (text, record) => (
+        <Tag color={text.color}>{capitalizeFirstLetter(text.code)}</Tag>
+      ),
     },
     {
       title: 'Start Date',
@@ -91,9 +96,9 @@ const LeaveHistory = () => {
       render: (text, record) => (
         <Badge
           status={
-            record.status == 'pending'
+            record.status == 'Pending'
               ? 'processing'
-              : record.status == 'approve'
+              : record.status == 'Approved'
               ? 'success'
               : 'error'
           }
@@ -107,8 +112,8 @@ const LeaveHistory = () => {
       valueType: 'option',
       render: (text, record) => (
         <Space size='middle' key={record._id}>
-          <Link to={`view/${record._id}`}>View</Link>
-          {record.status == 'pending' && (
+          <Link to={`/leaves/view/${record._id}`}>View</Link>
+          {record.status == 'Pending' && (
             <Link to={`/leaves/edit/${record._id}`}>Edit</Link>
           )}
         </Space>
@@ -116,41 +121,37 @@ const LeaveHistory = () => {
     },
   ];
 
-  if (isLoading) return <PageLoading />;
+  const reverseArr = (input) => {
+    var ret = new Array();
+    if (input)
+      for (var i = input.length - 1; i >= 0; i--) {
+        ret.push(input[i]);
+      }
+    return ret;
+  };
+
+  let temp = reverseArr(leaveHistory);
+
+  if (isLoading || !leaveHistory || !leaveTypes) return <PageLoading />;
 
   return (
     <>
       <h2>My Leave Applications</h2>
-      <Space style={{ marginBottom: 16 }}>
-        <Button onClick={applyLeave}>Apply Leave</Button>
-      </Space>
-      {!leaves.length ? (
+      {!leaveHistory.length ? (
         <Empty></Empty>
       ) : (
         <>
           <ConfigProvider locale={enUSIntl}>
             <ProTable
+              search={{
+                span: 24,
+              }}
               rowKey='id'
               columns={columns}
               actionRef={actionRef}
               request={(params, sorter, filter) => {
-                let dataSource = leaves.reverse();
+                let dataSource = temp;
 
-                if (filter) {
-                  if (Object.keys(filter).length > 0) {
-                    dataSource = dataSource.filter((item) => {
-                      return Object.keys(filter).some((key) => {
-                        if (!filter[key]) {
-                          return true;
-                        }
-                        if (filter[key].includes(`${item[key]}`)) {
-                          return true;
-                        }
-                        return false;
-                      });
-                    });
-                  }
-                }
                 if (params) {
                   if (Object.keys(params).length > 0) {
                     dataSource = dataSource.filter((item) => {
@@ -197,11 +198,6 @@ const LeaveHistory = () => {
                 pageSize: 10,
                 showQuickJumper: true,
               }}
-              search={{
-                layout: 'vertical',
-                defaultCollapsed: true,
-                span: 6,
-              }}
               dateFormatter='string'
               toolbar={{
                 title: 'Tips:',
@@ -217,9 +213,6 @@ const LeaveHistory = () => {
           </ConfigProvider>
         </>
       )}
-      <Button>
-        <Link to='/leaves/'>Back</Link>
-      </Button>
     </>
   );
 };

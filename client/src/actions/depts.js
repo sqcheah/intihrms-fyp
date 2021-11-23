@@ -1,15 +1,13 @@
 import * as api from '../api/index.js';
-import { message } from 'antd';
 import {
   CREATE_DEPT,
   DELETE_DEPT,
-  FETCH_ALL_DEPT,
-  FETCH_ONE_DEPT,
   DEPT_END_LOADING,
   DEPT_ERROR,
   DEPT_START_LOADING,
+  FETCH_ALL_DEPT,
+  FETCH_ONE_DEPT,
 } from '../constants/actionTypes';
-import { handleError } from './error.js';
 
 export const getDepts = () => async (dispatch) => {
   try {
@@ -18,7 +16,7 @@ export const getDepts = () => async (dispatch) => {
     dispatch({ type: FETCH_ALL_DEPT, payload: data });
     dispatch({ type: DEPT_END_LOADING });
   } catch (error) {
-    handleError(error, DEPT_ERROR);
+    dispatch({ type: DEPT_ERROR, error });
   }
 };
 export const getDept = (id) => async (dispatch) => {
@@ -27,8 +25,9 @@ export const getDept = (id) => async (dispatch) => {
     const { data } = await api.getDept(id);
     dispatch({ type: FETCH_ONE_DEPT, payload: data });
     dispatch({ type: DEPT_END_LOADING });
+    return data;
   } catch (error) {
-    handleError(error, DEPT_ERROR);
+    dispatch({ type: DEPT_ERROR, error });
   }
 };
 export const createDept = (dept) => async (dispatch) => {
@@ -38,7 +37,7 @@ export const createDept = (dept) => async (dispatch) => {
     dispatch({ type: CREATE_DEPT, payload: data });
     dispatch({ type: DEPT_END_LOADING });
   } catch (error) {
-    handleError(error, DEPT_ERROR);
+    dispatch({ type: DEPT_ERROR, error });
   }
 };
 export const deleteDept = (id) => async (dispatch) => {
@@ -48,6 +47,18 @@ export const deleteDept = (id) => async (dispatch) => {
     dispatch({ type: DELETE_DEPT, payload: data });
     dispatch({ type: DEPT_END_LOADING });
   } catch (error) {
-    handleError(error, DEPT_ERROR);
+    dispatch({ type: DEPT_ERROR, error });
+  }
+};
+
+export const updateDept = (id, formData) => async (dispatch) => {
+  try {
+    dispatch({ type: DEPT_START_LOADING });
+    const { data } = await api.updateDept(id, formData);
+    console.log(data);
+    dispatch({ type: DELETE_DEPT, payload: data });
+    dispatch({ type: DEPT_END_LOADING });
+  } catch (error) {
+    dispatch({ type: DEPT_ERROR, error });
   }
 };

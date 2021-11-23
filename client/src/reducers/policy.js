@@ -6,19 +6,23 @@ import {
   POLICY_END_LOADING,
   POLICY_ERROR,
   POLICY_START_LOADING,
+  POLICY_SUCCESS,
 } from '../constants/actionTypes';
-
+import { handleError } from './error.js';
 export default (
-  state = { error: null, isLoading: true, policies: [] },
+  state = { error: null, isLoading: true, policies: [], success: null },
   action
 ) => {
   switch (action.type) {
     case POLICY_START_LOADING:
-      return { ...state, isLoading: true, error: null };
+      return { ...state, isLoading: true, error: null, success: null };
     case POLICY_END_LOADING:
       return { ...state, isLoading: false };
     case POLICY_ERROR: {
-      return { ...state, error: action.error, isLoading: false };
+      return { ...state, error: handleError(action.error), isLoading: false };
+    }
+    case POLICY_SUCCESS: {
+      return { ...state, success: action.payload.success };
     }
 
     case UPDATE_POLICY:

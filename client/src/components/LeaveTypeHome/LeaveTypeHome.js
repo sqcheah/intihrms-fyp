@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Spin, Table, Space, Button } from 'antd';
-import 'antd/dist/antd.css';
+
 import './LeaveTypeHome.css';
 import { Link, useNavigate } from 'react-router-dom';
 import { getLeaveTypes } from '../../actions/leaveTypes';

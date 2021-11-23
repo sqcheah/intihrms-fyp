@@ -7,8 +7,9 @@ import {
   DatePicker,
   Typography,
   Upload,
+  Modal,
 } from 'antd';
-import 'antd/dist/antd.css';
+
 import './LeaveForm.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { createLeave, fetchLeaveById, updateLeave } from '../../actions/leaves';
@@ -20,19 +21,21 @@ import {
   UploadOutlined,
 } from '@ant-design/icons';
 import moment from 'moment';
+import { PageLoading } from '@ant-design/pro-layout';
 const { TextArea } = Input;
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 const { Text } = Typography;
 
-const LeaveForm = () => {
+const LeaveForm = ({ user }) => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const user = JSON.parse(localStorage.getItem('profile')).result;
   const { leave } = useSelector((state) => state.leaves);
+
   const { leaveTypes } = useSelector((state) => state.leaveTypes);
   const [form] = Form.useForm();
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const calcWorkingDays = (startDate, endDate) => {
     let day = moment(startDate);
@@ -45,14 +48,22 @@ const LeaveForm = () => {
     return workingDays;
   };
   const onFinish = (values) => {
+    return;
+    let existedFile = [];
     setError(null);
-
+    console.log(values);
     let formData = new FormData();
     if (values.upload) {
       for (let file of values.upload) {
         if (file.originFileObj) {
           formData.append('files', file.originFileObj);
+        } else {
+          existedFile.push(leave.attachments.find((a) => a.fileId == file.uid));
         }
+      }
+    } else {
+      if (id) {
+        existedFile = leave.attachments;
       }
     }
 
@@ -60,11 +71,17 @@ const LeaveForm = () => {
     const startDate = rangeValue[0];
     const endDate = rangeValue[1];
     const type = leaveTypes.find((rec) => rec._id === values['leaveType']);
-    let remainLeave = user.leaveCount[type['code']];
+    console.log(user.leaveCount);
+    user.leaveCount.forEach((l) => console.log(l.leaveType));
+    let { count: remainLeave } = user.leaveCount.find(
+      (l) => l.leaveType._id == values['leaveType']
+    );
+    console.log(remainLeave);
     const dateDiff = calcWorkingDays(startDate, endDate);
 
     const leaveData = {
-      reason: values.reason,
+      user_name: `${user.first_name} ${user.last_name}`,
+      reason: values.reason || '',
       leaveType: values.leaveType,
       user: user._id,
       department: user.department._id,
@@ -78,9 +95,22 @@ const LeaveForm = () => {
     console.log(remainLeave);
     if (remainLeave >= dateDiff) {
       if (id) {
+        formData.append('attachments', JSON.stringify(existedFile));
         dispatch(updateLeave(id, formData));
+        Modal.success({
+          content: 'Changes saved.',
+          onOk() {
+            navigate('/leaves/home');
+          },
+        });
       } else {
         dispatch(createLeave(formData));
+        Modal.success({
+          content: 'Leave application submitted.',
+          onOk() {
+            navigate('/leaves/home');
+          },
+        });
       }
     } else {
       setError('Insufficient leave balance');
@@ -103,11 +133,14 @@ const LeaveForm = () => {
     dispatch(getLeaveTypes());
     console.log(leaveTypes);
     if (id) {
+      setLoading(true);
       dispatch(fetchLeaveById(id)).then((leave) => {
         form.setFieldsValue({
-          ...leave,
+          reason: leave.reason || '',
+          leaveType: leave.leaveType._id,
           'range-picker': [moment(leave.fromDate), moment(leave.toDate)],
         });
+        setLoading(false);
       });
     }
   }, [dispatch, id]);
@@ -135,9 +168,10 @@ const LeaveForm = () => {
       onSuccess('ok');
     }, 0);
   };
+  if (loading) return <PageLoading />;
   return (
     <>
-      <h2 className='form-header'>Apply for Leave</h2>
+      <h2 className='form-header'>{id ? 'Edit Leave' : 'Apply for Leave'}</h2>
       <Form
         form={form}
         name='basic'
@@ -146,9 +180,6 @@ const LeaveForm = () => {
         }}
         wrapperCol={{
           span: 16,
-        }}
-        initialValues={{
-          remember: true,
         }}
         onFinish={onFinish}
         onFinishFailed={onFinishFailed}
@@ -165,9 +196,9 @@ const LeaveForm = () => {
           ]}
         >
           <Select>
-            {leaveTypes.map((leaveType) => (
-              <Option key={leaveType._id} value={leaveType._id}>
-                {leaveType.name}
+            {user.leaveCount.map((leave) => (
+              <Option key={leave.leaveType._id} value={leave.leaveType._id}>
+                {leave.leaveType.name}
               </Option>
             ))}
           </Select>
@@ -178,8 +209,7 @@ const LeaveForm = () => {
           name='reason'
           rules={[
             {
-              required: true,
-              message: 'Please input your reason!',
+              whitespace: true,
             },
           ]}
         >

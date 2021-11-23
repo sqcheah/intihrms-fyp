@@ -5,6 +5,7 @@ import leaveModel from '../models/leaveModel.js';
 import mailer from 'nodemailer';
 import holidayModel from '../models/holidayModel.js';
 import moment from 'moment';
+import trainingProgressModel from '../models/trainingProgressModel.js';
 export const fetchAllTrainings = async (req, res) => {
   try {
     const trainings = await trainingModel
@@ -63,6 +64,7 @@ export const createTraining = async (req, res) => {
     });
 };
 export const updateTraining = async (req, res) => {
+  //add internal training attendance
   const { id: _id } = req.params;
   const user_id = req.body.user_id;
   var status;
@@ -83,10 +85,18 @@ export const updateTraining = async (req, res) => {
       { path: 'user', select: 'first_name last_name' },
       { path: 'attendants.user', select: 'first_name last_name' },
     ]);
+  if (status == 'Approved') {
+    const newTrainingProgress = new trainingProgressModel({
+      user: user_id,
+      training: _id,
+    });
+    await newTrainingProgress.save();
+  }
 
   res.json(updatedTraining);
 };
 export const leaveTraining = async (req, res) => {
+  //cancel internal training attendance
   const { id: _id } = req.params;
   const user_id = req.body.user_id;
   if (!mongoose.Types.ObjectId.isValid(_id))
@@ -104,6 +114,12 @@ export const leaveTraining = async (req, res) => {
       { path: 'user', select: 'first_name last_name' },
       { path: 'attendants.user', select: 'first_name last_name' },
     ]);
+
+  const del = await trainingProgressModel.deleteOne({
+    user: user_id,
+    training: _id,
+  });
+  // console.log(del);
   res.json(updatedTraining);
 };
 export const fetchExtTraining = async (req, res) => {
@@ -168,6 +184,14 @@ export const updateTrainingStatus = async (req, res) => {
       { path: 'attendants.user', select: 'first_name last_name' },
       { path: 'department', select: 'name' },
     ]);
+  if (training.extra && training.extra.status == 'Approved') {
+    const newTrainingProgress = new trainingProgressModel({
+      user: training.extra.user,
+      training: _id,
+    });
+    await newTrainingProgress.save();
+  }
+
   res.json(updatedTraining);
 };
 export const fetchExtTrainingHistory = async (req, res) => {
@@ -260,6 +284,11 @@ export const fetchTrainingCount = async (req, res) => {
   try {
     const trainings = await trainingModel.aggregate([
       {
+        $match: {
+          $and: [{ trainingType: 'External' }, { status: 'Approved' }],
+        },
+      },
+      {
         $group: {
           _id: '$department',
           trainings: { $addToSet: '$_id' },
@@ -303,43 +332,4 @@ const fileSizeFormatter = (bytes, decimal) => {
   return (
     parseFloat((bytes / Math.pow(1000, index)).toFixed(dm)) + ' ' + sizes[index]
   );
-};
-
-export const sendMail = async (req, res) => {
-  let body = {
-    from: 'test <csq3411@gmail.com>',
-    to: 'shaoqi1688@gmail.com',
-    subject: 'This is subject',
-    html: '<h2>The html content</h2><br>',
-  };
-
-  const transporter = mailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-  });
-
-  transporter.verify(function (error, success) {
-    if (error) {
-      console.log(error);
-    } else {
-      console.log('Server is ready to take our messages');
-    }
-  });
-
-  transporter.sendMail(body, (err, result) => {
-    if (err) {
-      console.log(err);
-      return res.json({
-        msg: 'fail',
-      });
-      return false;
-    }
-    res.json({
-      msg: 'success',
-    });
-    console.log('email sent');
-  });
 };

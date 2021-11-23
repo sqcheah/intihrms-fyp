@@ -3,11 +3,9 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import routes from './routes/index.js';
-import multer from 'multer';
 import path from 'path';
 import { Server } from 'socket.io';
 import { createServer } from 'http';
-
 //https://pawelgrzybek.com/all-you-need-to-know-to-move-from-commonjs-to-ecmascript-modules-esm-in-node-js/
 //https://stackoverflow.com/a/68117993
 const app = express();
@@ -50,8 +48,11 @@ const io = new Server(httpServer, {
 let onlineUsers = [];
 
 const addNewUser = (data, socketId) => {
-  if (!onlineUsers.some((user) => user.email === data.email)) {
+  if (
+    !onlineUsers.some((user) => user._id.toString() === data._id.toString())
+  ) {
     onlineUsers.push({ ...data, socketId });
+    console.log({ ...data, socketId });
     console.log(`${data.email} joined`);
   }
 };
@@ -59,31 +60,64 @@ const addNewUser = (data, socketId) => {
 const removeUser = (socketId) => {
   onlineUsers = onlineUsers.filter((user) => user.socketId !== socketId);
 };
-const getUser = (email) => {
-  return onlineUsers.find((user) => user.email === email);
+const getUser = (id) => {
+  return onlineUsers.find((user) => user._id.toString() === id.toString());
 };
-
+/*
 io.on('connection', (socket) => {
   //const user = JSON.parse(localStorage.getItem('profile'))?.result;
   socket.on('newUser', (data) => {
     addNewUser(data, socket.id);
   });
   socket.on('listUser', () => {
+    console.log('userList');
+    // console.log(onlineUsers[0].leaveCount);
     onlineUsers.forEach((user) => {
-      console.log(user.email);
+      console.log(user.email, user._id);
     });
   });
-  socket.on('sendNoti', ({ senderName, receiverName, content }) => {
-    const receiver = getUser(receiverName);
-    io.to(receiver.socketId).emit('getNoti', { senderName, content });
+  socket.on('sendNoti', ({ sender, recipient, content }) => {
+    const receiver = getUser(recipient);
+    if (receiver) {
+      io.to(receiver.socketId).emit('newNotification', { sender, content });
+    }
   });
   socket.on('disconnect', () => {
     removeUser(socket.id);
     console.log('user disconnected');
   });
 });
+
+*/
+//let onlineUsers = [];
+io.on('connection', (socket) => {
+  //const user = JSON.parse(localStorage.getItem('profile'))?.result;
+  socket.on('newUser', (data) => {
+    socket.join(data._id.toString());
+    //console.log('new', socket.rooms);
+    //console.log(io.of('/').adapter.rooms.get(data._id.toString()));
+    //if (!onlineUsers[data._id]) onlineUsers[data._id] = data;
+  });
+  socket.on('listUser', () => {
+    //console.log('kist', socket.rooms);
+  });
+  socket.on('sendNoti', ({ sender, recipient, content }) => {
+    // const receiver = getUser(recipient);
+    io.to(recipient).emit('newNotification', { sender, content });
+  });
+  socket.on('disconnecting', () => {
+    // console.log('disg', socket.rooms);
+    // console.log('user disconnected');
+  });
+  socket.on('disconnect', () => {
+    // console.log('user disconnected');
+    // console.log('dis', socket.rooms);
+  });
+});
+
 //https://stackoverflow.com/questions/65712319/getting-port-already-in-use-error-when-adding-socket-io-to-express-app-happe
 httpServer.listen(PORT);
 
 //https://stackoverflow.com/a/62438729
-export { io };
+export { io, getUser };
+//export { io };

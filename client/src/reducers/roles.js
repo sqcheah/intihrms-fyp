@@ -6,21 +6,24 @@ import {
   ROLE_END_LOADING,
   ROLE_ERROR,
   ROLE_START_LOADING,
+  ROLE_SUCCESS,
 } from '../constants/actionTypes';
-
+import { handleError } from './error.js';
 export default (
-  state = { error: null, isLoading: true, roles: [] },
+  state = { error: null, isLoading: true, roles: [], success: null },
   action
 ) => {
   switch (action.type) {
     case ROLE_START_LOADING:
-      return { ...state, isLoading: true, error: null };
+      return { ...state, isLoading: true, error: null, success: null };
     case ROLE_END_LOADING:
       return { ...state, isLoading: false };
     case ROLE_ERROR: {
-      return { ...state, error: action.error, isLoading: false };
+      return { ...state, error: handleError(action.error), isLoading: false };
     }
-
+    case ROLE_SUCCESS: {
+      return { ...state, success: action.payload.success };
+    }
     case UPDATE_ROLE:
       return {
         ...state,

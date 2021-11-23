@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchLeaveRequests, fetchUpcomingLeaves } from '../../actions/leaves';
+import { getLeaveTypes } from '../../actions/leaveTypes';
 import {
   Spin,
   Table,
@@ -29,30 +30,40 @@ import recharts, {
   YAxis,
   XAxis,
 } from 'recharts';
-import 'antd/dist/antd.css';
+
 import './LeaveHome.css';
 import { set } from 'lodash';
 import PageLoading from '../PageLoading/PageLoading';
+import useBreakpoint from 'antd/lib/grid/hooks/useBreakpoint';
 const { Text } = Typography;
 
 const LeaveHome = () => {
+  const screens = useBreakpoint();
   const [loading, setLoading] = useState(true);
   const { leaves, upcomingLeave, isLoading } = useSelector(
     (state) => state.leaves
   );
+  const { leaveTypes } = useSelector((state) => state.leaveTypes);
   const user = JSON.parse(localStorage.getItem('profile')).result;
   const navigate = useNavigate();
   const dispatch = useDispatch();
   var count = 0;
 
-  const data = [
-    { name: 'Casual', value: user.leaveCount.casual },
-    { name: 'Medical', value: user.leaveCount.medical },
-  ];
-  const COLORS = ['#0088FE', '#2ce654'];
+  const leaveData = [];
+
+  user.leaveCount.forEach((element) => {
+    var temp = { name: element.leaveType.name, value: element.count };
+    leaveData.push(temp);
+  });
+  const COLORS = ['#0088FE', '#2ce654', '#ff00f0'];
+
+  const capitalizeFirstLetter = (string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  };
 
   useEffect(() => {
     dispatch(fetchUpcomingLeaves(user._id));
+    dispatch(getLeaveTypes());
     if (user.roles.name != 'staff')
       dispatch(
         fetchLeaveRequests(user.roles.name, user._id, user.department.name)
@@ -62,7 +73,7 @@ const LeaveHome = () => {
   }, [dispatch]);
 
   for (var element of leaves) {
-    if (element.status == 'pending') count++;
+    if (element.status == 'Pending') count++;
   }
 
   if (isLoading) return <PageLoading />;
@@ -76,6 +87,7 @@ const LeaveHome = () => {
               title='Profile Details'
               bordered
               column={{ sm: 2, xs: 1 }}
+              layout={screens.md ? 'horizontal' : 'vertical'}
             >
               <Descriptions.Item label='Name' span={2}>
                 {`${user.first_name} ${user.last_name}`}
@@ -83,12 +95,11 @@ const LeaveHome = () => {
               <Descriptions.Item label='Department' span={2}>
                 {user.department.name}
               </Descriptions.Item>
-              <Descriptions.Item label='Casual Leaves' span={1}>
-                {user.leaveCount.casual}
-              </Descriptions.Item>
-              <Descriptions.Item label='Medical Leaves' span={1}>
-                {user.leaveCount.medical}
-              </Descriptions.Item>
+              {user.leaveCount.map((entry, index) => (
+                <Descriptions.Item label={entry.leaveType.name} span={1}>
+                  {entry.count}
+                </Descriptions.Item>
+              ))}
             </Descriptions>
           </Card>
         </Col>
@@ -96,7 +107,7 @@ const LeaveHome = () => {
           <Card bordered>
             <ResponsiveContainer minHeight={215}>
               <BarChart
-                data={data}
+                data={leaveData}
                 margin={{
                   top: 5,
                   right: 30,
@@ -105,7 +116,7 @@ const LeaveHome = () => {
                 }}
               >
                 <Bar fill='#0088FE' dataKey='value'>
-                  {data.map((entry, index) => (
+                  {leaveData.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
                       fill={COLORS[index % COLORS.length]}
@@ -137,21 +148,25 @@ const LeaveHome = () => {
                       dataIndex='leaveType'
                       key='leaveType'
                       render={(text, record) => (
-                        <Tag color={text.color}>{text.name}</Tag>
+                        <Tag color={text.color}>
+                          {capitalizeFirstLetter(text.code)}
+                        </Tag>
                       )}
                     ></Table.Column>
                     <Table.Column
                       title='Reason'
                       dataIndex='reason'
                       key='reason'
-                      render={(text, record) => <Text ellipsis>{text}</Text>}
+                      //render={(text, record) => <Text ellipsis>{text}</Text>}
                     ></Table.Column>
                     <Table.Column
                       title='Date'
                       dataIndex='date'
                       key='date'
                       render={(text, record) =>
-                        moment(text).format('YYYY-MM-DD')
+                        `${moment(record.fromDate).format(
+                          'YYYY-MM-DD'
+                        )} - ${moment(record.toDate).format('YYYY-MM-DD')}`
                       }
                     ></Table.Column>
                   </Table>

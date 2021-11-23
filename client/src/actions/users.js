@@ -1,16 +1,15 @@
-import * as api from '../api/index.js';
 import { message } from 'antd';
+import * as api from '../api/index.js';
 import {
   CREATE_USER,
   FETCH_ALL_USER,
+  FETCH_DEPT_USER,
   FETCH_ONE_USER,
   UPDATE_USER,
   USER_END_LOADING,
   USER_ERROR,
   USER_START_LOADING,
-  FETCH_DEPT_USER,
 } from '../constants/actionTypes';
-import { handleError } from './error.js';
 
 export const getUsers = () => async (dispatch) => {
   try {
@@ -19,11 +18,12 @@ export const getUsers = () => async (dispatch) => {
     dispatch({ type: FETCH_ALL_USER, payload: data });
     dispatch({ type: USER_END_LOADING });
   } catch (error) {
-    handleError(error, USER_ERROR);
+    dispatch({ type: USER_ERROR, error });
   }
 };
 export const getUser = (id) => async (dispatch) => {
   try {
+    console.log('hrer', id);
     dispatch({ type: USER_START_LOADING });
     const { data } = await api.getUser(id);
     dispatch({ type: FETCH_ONE_USER, payload: data });
@@ -31,7 +31,7 @@ export const getUser = (id) => async (dispatch) => {
 
     return data;
   } catch (error) {
-    handleError(error, USER_ERROR);
+    dispatch({ type: USER_ERROR, error });
   }
 };
 export const createUser = (formData) => async (dispatch) => {
@@ -73,7 +73,7 @@ export const updateUser = (id, user) => async (dispatch) => {
     dispatch({ type: UPDATE_USER, payload: data });
     dispatch({ type: USER_END_LOADING });
   } catch (error) {
-    handleError(error, USER_ERROR);
+    dispatch({ type: USER_ERROR, error });
   }
 };
 
@@ -81,9 +81,11 @@ export const fetchDeptUsers = (department) => async (dispatch) => {
   try {
     dispatch({ type: USER_START_LOADING });
     const { data } = await api.fetchDeptUsers(department);
+    console.log('users', data);
+    //return data;
     dispatch({ type: FETCH_DEPT_USER, payload: data });
     dispatch({ type: USER_END_LOADING });
   } catch (error) {
-    handleError(error, USER_ERROR);
+    dispatch({ type: USER_ERROR, error });
   }
 };

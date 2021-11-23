@@ -11,11 +11,10 @@ import {
   Upload,
   Modal,
 } from 'antd';
-import 'antd/dist/antd.css';
 
 import { useDispatch, useSelector } from 'react-redux';
 import { createTraining } from '../../actions/training';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import {
   DeleteOutlined,
   DownloadOutlined,
@@ -30,7 +29,7 @@ const { Text } = Typography;
 
 const ExtTrainingForm = () => {
   const { id } = useParams();
-
+  const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('profile')).result;
   const { isLoading, training } = useSelector((state) => state.trainings);
   const [form] = Form.useForm();
@@ -81,7 +80,7 @@ const ExtTrainingForm = () => {
       content:
         'Request successfully submitted. You can check request status at Training History.',
       onOk() {
-        window.location = '/training';
+        navigate('/training/home');
       },
     });
   };

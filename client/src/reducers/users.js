@@ -7,18 +7,21 @@ import {
   USER_ERROR,
   USER_START_LOADING,
   FETCH_DEPT_USER,
+  USER_SUCCESS,
 } from '../constants/actionTypes';
-
-export default (state = { users: [], user: {} }, action) => {
+import { handleError } from './error.js';
+export default (state = { users: [], user: null, success: null }, action) => {
   switch (action.type) {
     case USER_START_LOADING:
-      return { ...state, isLoading: true, error: null };
+      return { ...state, isLoading: true, error: null, success: null };
     case USER_END_LOADING:
       return { ...state, isLoading: false };
     case USER_ERROR: {
-      return { ...state, error: action.error, isLoading: false };
+      return { ...state, error: handleError(action.error), isLoading: false };
     }
-
+    case USER_SUCCESS: {
+      return { ...state, success: action.payload.success };
+    }
     case UPDATE_USER:
       return {
         ...state,

@@ -3,7 +3,7 @@ import {
   SettingOutlined,
   UserOutlined,
 } from '@ant-design/icons';
-import { Avatar, Menu, Spin } from 'antd';
+import { Avatar, Menu, Spin, Typography } from 'antd';
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
@@ -11,15 +11,11 @@ import { LOGOUT } from '../../constants/actionTypes';
 import HeaderDropdown from '../HeaderDropdown';
 import styles from './index.less';
 
-const AvatarDropdown = ({ user }) => {
+const AvatarDropdown = ({ user, logout }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const logout = () => {
-    dispatch({ type: LOGOUT });
 
-    navigate('/auth');
-  };
   const login = () => {
     navigate('/auth');
   };
@@ -44,15 +40,21 @@ const AvatarDropdown = ({ user }) => {
   return user ? (
     <HeaderDropdown overlay={menuHeaderDropdown} trigger={['click']}>
       <span className={`${styles.action} ${styles.account}`}>
-        <Avatar
+        {/**
+         <Avatar
           size='small'
           className={styles.avatar}
           src='https://gw.alipayobjects.com/zos/rmsportal/BiazfanxmamNRoxxVxka.png'
           alt='avatar'
         />
-        <span
-          className={`${styles.name} anticon`}
-        >{`${user.first_name} ${user.last_name}`}</span>
+       */}
+
+        <span className={`${styles.name} anticon`}>
+          <Typography.Text
+            ellipsis
+            style={{ marginTop: '25px' }}
+          >{`${user.first_name} ${user.last_name}`}</Typography.Text>
+        </span>
       </span>
     </HeaderDropdown>
   ) : (

@@ -64,8 +64,10 @@ const NoticeList = ({
                 }
                 description={
                   <div>
-                    <div className={`description`}>{item.description}</div>
-                    <div className={`datetime`}>{item.datetime}</div>
+                    <div
+                      className={`description`}
+                    >{`${item.sender.first_name} ${item.sender.last_name} ${item.content.message}`}</div>
+                    <div className={`datetime`}>{item.createdAt}</div>
                   </div>
                 }
               />

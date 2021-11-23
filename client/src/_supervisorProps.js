@@ -30,7 +30,7 @@ export default {
         icon: <BarChartOutlined />,
         routes: [
           {
-            path: '/',
+            path: '/home',
             name: 'Personal',
             icon: <UserOutlined />,
             exact: true,
@@ -54,6 +54,29 @@ export default {
         name: 'Leaves',
         icon: <ScheduleOutlined />,
         exact: true,
+        routes: [
+          {
+            path: 'home',
+            name: 'Leaves Dashboard',
+            icon: <HomeOutlined />,
+            exact: true,
+          },
+          {
+            path: 'create',
+            name: 'Apply Leave',
+            icon: <UsergroupAddOutlined />,
+          },
+          {
+            path: 'history',
+            name: 'Leave History',
+            icon: <HistoryOutlined />,
+          },
+          {
+            path: 'list',
+            name: 'Leave Requests',
+            icon: <ExclamationCircleOutlined />,
+          },
+        ],
       },
       {
         path: '/training',
@@ -61,8 +84,8 @@ export default {
         icon: <SolutionOutlined />,
         routes: [
           {
-            path: './',
-            name: 'Training Home',
+            path: 'home',
+            name: 'Training Dashboard',
             icon: <HomeOutlined />,
             exact: true,
           },
@@ -83,23 +106,15 @@ export default {
           },
           {
             path: 'extList',
-            name: 'Pending External Requests',
+            name: 'External Requests List',
             icon: <ExclamationCircleOutlined />,
           },
         ],
       },
       {
-        path: '',
+        path: '/users/dept',
         name: 'Employee',
         icon: <BarChartOutlined />,
-        routes: [
-          {
-            path: '/leaves/list',
-            name: 'Leave Request',
-            icon: <ExclamationCircleOutlined />,
-            exact: true,
-          },
-        ],
       },
     ],
   },

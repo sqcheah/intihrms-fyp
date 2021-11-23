@@ -7,7 +7,7 @@ import listPlugin from '@fullcalendar/list';
 import { INITIAL_EVENTS, createEventId } from './events-utils';
 import { useDispatch, useSelector } from 'react-redux';
 import { Grid, Spin } from 'antd';
-import 'antd/dist/antd.css';
+
 import './Calendar.css';
 import { useNavigate } from 'react-router-dom';
 import { fetchLeaveByDateRange } from '../../actions/leaves';
@@ -84,27 +84,29 @@ const Calendar = () => {
     <>
       <div className='demo-app'>
         <div className='demo-app-main'>
-          <FullCalendar
-            ref={c}
-            plugins={[
-              dayGridPlugin,
-              timeGridPlugin,
-              interactionPlugin,
-              listPlugin,
-            ]}
-            headerToolbar={{
-              left: 'prevYear,prev,next,nextYear',
-              center: 'title',
-              right: 'today dayGridMonth,listMonth',
-            }}
-            initialView='dayGridMonth'
-            dayMaxEvents={true}
-            weekends
-            businessHours={{ daysOfWeek: [1, 2, 3, 4, 5] }}
-            events={handleEventsss}
-            eventContent={renderEventContent}
-            eventClick={handleEventClick}
-          />
+          <Spin spinning={isLoading}>
+            <FullCalendar
+              ref={c}
+              plugins={[
+                dayGridPlugin,
+                timeGridPlugin,
+                interactionPlugin,
+                listPlugin,
+              ]}
+              headerToolbar={{
+                left: 'prevYear,prev,next,nextYear',
+                center: 'title',
+                right: 'today dayGridMonth,listMonth',
+              }}
+              initialView='dayGridMonth'
+              dayMaxEvents={true}
+              weekends
+              businessHours={{ daysOfWeek: [1, 2, 3, 4, 5] }}
+              events={handleEventsss}
+              eventContent={renderEventContent}
+              eventClick={handleEventClick}
+            />
+          </Spin>
         </div>
       </div>
     </>

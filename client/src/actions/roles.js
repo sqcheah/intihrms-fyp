@@ -1,15 +1,11 @@
 import * as api from '../api/index.js';
-import { message } from 'antd';
 import {
   CREATE_ROLE,
   FETCH_ALL_ROLE,
-  FETCH_ONE_ROLE,
-  UPDATE_ROLE,
-  ROLE_END_LOADING,
+  FETCH_ONE_ROLE, ROLE_END_LOADING,
   ROLE_ERROR,
-  ROLE_START_LOADING,
+  ROLE_START_LOADING, UPDATE_ROLE
 } from '../constants/actionTypes';
-import { handleError } from './error.js';
 
 export const getRoles = () => async (dispatch) => {
   try {
@@ -18,7 +14,7 @@ export const getRoles = () => async (dispatch) => {
     dispatch({ type: FETCH_ALL_ROLE, payload: data });
     dispatch({ type: ROLE_END_LOADING });
   } catch (error) {
-    handleError(error, ROLE_ERROR);
+    dispatch({ type: ROLE_ERROR, error });
   }
 };
 export const getRole = (id) => async (dispatch) => {
@@ -28,7 +24,7 @@ export const getRole = (id) => async (dispatch) => {
     dispatch({ type: FETCH_ONE_ROLE, payload: data });
     dispatch({ type: ROLE_END_LOADING });
   } catch (error) {
-    handleError(error, ROLE_ERROR);
+    dispatch({ type: ROLE_ERROR, error });
   }
 };
 export const createRole = (role) => async (dispatch) => {
@@ -38,7 +34,7 @@ export const createRole = (role) => async (dispatch) => {
     dispatch({ type: CREATE_ROLE, payload: data });
     dispatch({ type: ROLE_END_LOADING });
   } catch (error) {
-    handleError(error, ROLE_ERROR);
+    dispatch({ type: ROLE_ERROR, error });
   }
 };
 export const updateRole = (id, role) => async (dispatch) => {
@@ -48,6 +44,6 @@ export const updateRole = (id, role) => async (dispatch) => {
     dispatch({ type: UPDATE_ROLE, payload: data });
     dispatch({ type: ROLE_END_LOADING });
   } catch (error) {
-    handleError(error, ROLE_ERROR);
+    dispatch({ type: ROLE_ERROR, error });
   }
 };

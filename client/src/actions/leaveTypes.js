@@ -1,15 +1,14 @@
 import * as api from '../api/index.js';
-import { message } from 'antd';
 import {
   CREATE_LEAVETYPE,
   FETCH_ALL_LEAVETYPE,
   FETCH_ONE_LEAVETYPE,
-  UPDATE_LEAVETYPE,
   LEAVETYPE_END_LOADING,
   LEAVETYPE_ERROR,
   LEAVETYPE_START_LOADING,
+  LEAVETYPE_SUCCESS,
+  UPDATE_LEAVETYPE,
 } from '../constants/actionTypes';
-import { handleError } from './error.js';
 
 export const getLeaveTypes = () => async (dispatch) => {
   try {
@@ -18,7 +17,7 @@ export const getLeaveTypes = () => async (dispatch) => {
     dispatch({ type: FETCH_ALL_LEAVETYPE, payload: data });
     dispatch({ type: LEAVETYPE_END_LOADING });
   } catch (error) {
-    handleError(error, LEAVETYPE_ERROR);
+    dispatch({ type: LEAVETYPE_ERROR, error });
   }
 };
 export const getLeaveType = (id) => async (dispatch) => {
@@ -30,7 +29,7 @@ export const getLeaveType = (id) => async (dispatch) => {
 
     return data;
   } catch (error) {
-    handleError(error, LEAVETYPE_ERROR);
+    dispatch({ type: LEAVETYPE_ERROR, error });
   }
 };
 export const createLeaveType = (formData) => async (dispatch) => {
@@ -38,9 +37,13 @@ export const createLeaveType = (formData) => async (dispatch) => {
     dispatch({ type: LEAVETYPE_START_LOADING });
     const { data } = await api.createLeaveType(formData);
     dispatch({ type: CREATE_LEAVETYPE, payload: data });
+    dispatch({
+      type: LEAVETYPE_SUCCESS,
+      payload: { success: 'Leave type successfully created' },
+    });
     dispatch({ type: LEAVETYPE_END_LOADING });
   } catch (error) {
-    handleError(error, LEAVETYPE_ERROR);
+    dispatch({ type: LEAVETYPE_ERROR, error });
   }
 };
 
@@ -51,6 +54,6 @@ export const updateLeaveType = (id, leaveType) => async (dispatch) => {
     dispatch({ type: UPDATE_LEAVETYPE, payload: data });
     dispatch({ type: LEAVETYPE_END_LOADING });
   } catch (error) {
-    handleError(error, LEAVETYPE_ERROR);
+    dispatch({ type: LEAVETYPE_ERROR, error });
   }
 };

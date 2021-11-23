@@ -1,29 +1,54 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Form, Input, Button, Select, Typography } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Form, Input, Button, Select, Typography, Modal } from 'antd';
 import { useDispatch } from 'react-redux';
 
-import 'antd/dist/antd.css';
 import './DeptForm.css';
-import { createDept } from '../../actions/depts';
+import { createDept, getDept, updateDept } from '../../actions/depts';
+import { useForm } from 'antd/lib/form/Form';
+import { PageLoading } from '@ant-design/pro-layout';
+import { userInfo } from 'os';
 const { Title } = Typography;
-const DeptForm = () => {
+const DeptForm = ({ user }) => {
+  const [loading, setLoading] = useState(false);
+  const [form] = useForm();
+  const { id } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const onFinish = (values) => {
     console.log('Success:', values);
-
-    dispatch(createDept(values));
+    if (id) {
+      dispatch(updateDept(id, values));
+      Modal.success({
+        content: 'Department updated',
+        onOk() {
+          navigate('/depts');
+        },
+      });
+    } else {
+      dispatch(createDept(values));
+    }
   };
+  useEffect(() => {
+    if (id) {
+      setLoading(true);
+      dispatch(getDept(id)).then((data) => {
+        form.setFieldsValue(data);
+        setLoading(false);
+        console.log(data);
+      });
+    }
+  }, [dispatch, id]);
 
   const onFinishFailed = (errorInfo) => {
     console.log('Failed:', errorInfo);
   };
-
+  if (loading) return <PageLoading />;
   return (
     <>
       <Title level={2}> Create Department</Title>
       <Form
+        form={form}
         name='basic'
         initialValues={{
           remember: true,

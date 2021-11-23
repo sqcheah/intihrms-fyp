@@ -29,7 +29,6 @@ import moment from 'moment';
 import ProTable, { TableDropdown } from '@ant-design/pro-table';
 import enUSIntl from 'antd/lib/locale/en_US';
 
-import 'antd/dist/antd.css';
 import PageLoading from '../PageLoading/PageLoading';
 import { ProFormDateRangePicker } from '@ant-design/pro-form';
 const { Text } = Typography;
@@ -42,9 +41,9 @@ const LeaveList = () => {
   const navigate = useNavigate();
   var deptFilters = [];
   const statusFilter = [
-    { text: 'Pending', value: 'pending' },
-    { text: 'Approved', value: 'approve' },
-    { text: 'Rejected', value: 'reject' },
+    { text: 'Pending', value: 'Pending' },
+    { text: 'Approved', value: 'Approved' },
+    { text: 'Rejected', value: 'Rejected' },
   ];
   var typeFilter = [];
 
@@ -55,6 +54,7 @@ const LeaveList = () => {
     );
     dispatch(getDepts());
     dispatch(getLeaveTypes());
+    console.log(leaves);
   }, [dispatch]);
   if (user.roles.name == 'admin')
     depts.map((element) => {
@@ -63,6 +63,11 @@ const LeaveList = () => {
   leaveTypes.map((element) => {
     typeFilter.push({ text: element.name, value: element.code });
   });
+
+  const capitalizeFirstLetter = (string) => {
+    if (string) return string.charAt(0).toUpperCase() + string.slice(1);
+    return string;
+  };
 
   const columns = [
     {
@@ -94,7 +99,9 @@ const LeaveList = () => {
       key: 'leaveType',
       filters: typeFilter,
       onFilter: (value, record) => record.leaveType.code.indexOf(value) === 0,
-      render: (text, record) => <Tag color={text.color}>{text.code}</Tag>,
+      render: (text, record) => (
+        <Tag color={text.color}>{capitalizeFirstLetter(text.code)}</Tag>
+      ),
     },
     {
       title: 'Start Date',
@@ -136,9 +143,9 @@ const LeaveList = () => {
       render: (text, record) => (
         <Badge
           status={
-            record.status == 'pending'
+            record.status == 'Pending'
               ? 'processing'
-              : record.status == 'approve'
+              : record.status == 'Approved'
               ? 'success'
               : 'error'
           }
@@ -152,12 +159,22 @@ const LeaveList = () => {
       valueType: 'option',
       render: (text, record) => (
         <Space size='middle' key={record._id}>
-          <Link to={`view/${record._id}`}>View</Link>
+          <Link to={`/leaves/view/${record._id}`}>View</Link>
         </Space>
       ),
     },
   ];
   const actionRef = useRef();
+
+  const reverseArr = (input) => {
+    var ret = new Array();
+    if (input)
+      for (var i = input.length - 1; i >= 0; i--) {
+        ret.push(input[i]);
+      }
+    return ret;
+  };
+  let temp = reverseArr(leaves);
   if (isLoading) return <PageLoading />;
   return (
     <>
@@ -171,7 +188,7 @@ const LeaveList = () => {
               columns={columns}
               actionRef={actionRef}
               request={(params, sorter, filter) => {
-                let dataSource = leaves.reverse();
+                let dataSource = temp;
                 if (params) {
                   if (Object.keys(params).length > 0) {
                     dataSource = dataSource.filter((item) => {
@@ -239,11 +256,6 @@ const LeaveList = () => {
               pagination={{
                 pageSize: 10,
                 showQuickJumper: true,
-              }}
-              search={{
-                layout: 'vertical',
-                defaultCollapsed: true,
-                span: 6,
               }}
               dateFormatter='string'
               toolbar={{

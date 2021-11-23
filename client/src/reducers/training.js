@@ -14,21 +14,24 @@ import {
   FETCH_UPCOMING_TRAINING,
   FETCH_TODAY_TRAINING,
   FETCH_TRAINING_COUNT,
+  TRAINING_SUCCESS,
 } from '../constants/actionTypes';
-
+import { handleError } from './error.js';
 export default (
-  state = { error: null, isLoading: true, trainings: [] },
+  state = { error: null, isLoading: true, trainings: [], success: null },
   action
 ) => {
   switch (action.type) {
     case TRAINING_START_LOADING:
-      return { ...state, isLoading: true, error: null };
+      return { ...state, isLoading: true, error: null, success: null };
     case TRAINING_END_LOADING:
       return { ...state, isLoading: false };
     case TRAINING_ERROR: {
-      return { ...state, error: action.error, isLoading: false };
+      return { ...state, error: handleError(action.error), isLoading: false };
     }
-
+    case TRAINING_SUCCESS: {
+      return { ...state, success: action.payload.success };
+    }
     case FETCH_ONE_TRAINING:
       return { ...state, training: action.payload };
     case FETCH_ALL_TRAINING:

@@ -32,15 +32,19 @@ export const createHoliday = async (req, res) => {
 };
 
 export const updateHoliday = async (req, res) => {
-  const { id: _id } = req.params;
-  const { year, holiday } = req.body;
+  const { year, id: _id } = req.params;
+  const holiday = req.body;
+  console.log(holiday);
   if (!mongoose.Types.ObjectId.isValid(_id))
     return res.status(404).send('No holiday with that id');
   const updatedHoliday = await holidayModel.findOneAndUpdate(
     { year, 'lists._id': _id },
     {
       $set: {
-        'lists.$': holiday,
+        'lists.$.title': holiday.title,
+        'lists.$.description': holiday.description,
+        'lists.$.startDate': holiday.startDate,
+        'lists.$.endDate': holiday.endDate,
       },
     },
     { new: true }
@@ -50,9 +54,38 @@ export const updateHoliday = async (req, res) => {
 };
 
 export const deleteHoliday = async (req, res) => {
-  const { year, _id } = req.body;
+  const { year, id: _id } = req.params;
+  console.log(year, _id);
+  console.log('here');
+  await holidayModel
+    .updateOne(
+      { year },
+      { $pull: { lists: { _id: mongoose.Types.ObjectId(_id) } } },
+      { new: true }
+    )
+    .exec(async (err, result) => {
+      const newHolidays = await holidayModel.findOne({ year });
+      console.log(newHolidays);
+      res.json(newHolidays);
+    });
+};
 
-  await holidayModel.findOneAndUpdate({ year }, { $pull: { _id } });
+export const getHoliday = async (req, res) => {
+  const { year, id: _id } = req.params;
+  try {
+    const holidays = await holidayModel
+      .aggregate([
+        { $unwind: { path: '$lists' } },
+        { $replaceRoot: { newRoot: '$lists' } },
+        {
+          $match: { _id: mongoose.Types.ObjectId(_id) },
+        },
+      ])
+      .exec();
 
-  res.json({ message: 'Holiday deleted successfully' });
+    ///const holidays = await holidayModel.find({ year, 'lists._id': _id });
+    res.status(200).json(holidays);
+  } catch (error) {
+    res.status(404).json({ message: error });
+  }
 };

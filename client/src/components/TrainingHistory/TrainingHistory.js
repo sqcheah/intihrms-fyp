@@ -26,7 +26,7 @@ import {
 
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import moment from 'moment';
-import 'antd/dist/antd.css';
+
 import PageLoading from '../PageLoading/PageLoading';
 import ProTable, { TableDropdown } from '@ant-design/pro-table';
 import enUSIntl from 'antd/lib/locale/en_US';
@@ -203,11 +203,23 @@ const TrainingHistory = ({ socket, user }) => {
   ];
   const actionRef = useRef();
 
+  const reverseArr = (input) => {
+    var ret = new Array();
+    if (input)
+      for (var i = input.length - 1; i >= 0; i--) {
+        ret.push(input[i]);
+      }
+    return ret;
+  };
+
+  let extReverse = reverseArr(extTrainings);
+  let historyReverse = reverseArr(trainingHistory);
+
   if (isLoading || !trainingHistory || !extTrainings) return <PageLoading />;
 
   return (
     <>
-      <h3>Your External Training Requests</h3>
+      <h3>My External Training Requests</h3>
       {extTrainings &&
         (!extTrainings.length ? (
           <Empty></Empty>
@@ -218,7 +230,7 @@ const TrainingHistory = ({ socket, user }) => {
                 columns={columns1}
                 actionRef={actionRef}
                 request={(params, sorter, filter) => {
-                  let dataSource = extTrainings.reverse();
+                  let dataSource = extReverse;
                   if (params) {
                     if (Object.keys(params).length > 0) {
                       dataSource = dataSource.filter((item) => {
@@ -292,7 +304,7 @@ const TrainingHistory = ({ socket, user }) => {
           </>
         ))}
 
-      <h3>Attending/Hosting Internal Training</h3>
+      <h3>My Attending Internal Training</h3>
       {!trainingHistory.length ? (
         <Empty></Empty>
       ) : (
@@ -302,7 +314,7 @@ const TrainingHistory = ({ socket, user }) => {
               columns={columns2}
               actionRef={actionRef}
               request={(params, sorter, filter) => {
-                let dataSource = trainingHistory.reverse();
+                let dataSource = historyReverse;
                 if (params) {
                   if (Object.keys(params).length > 0) {
                     dataSource = dataSource.filter((item) => {
@@ -349,11 +361,6 @@ const TrainingHistory = ({ socket, user }) => {
               pagination={{
                 pageSize: 5,
                 showQuickJumper: true,
-              }}
-              search={{
-                layout: 'vertical',
-                defaultCollapsed: true,
-                span: 6,
               }}
               dateFormatter='string'
               toolbar={{

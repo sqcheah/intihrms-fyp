@@ -16,6 +16,7 @@ import {
 import { Link } from 'react-router-dom';
 import { fetchAllLeaves, fetchTodayLeaves } from '../../actions/leaves';
 import { fetchTodayTrainings } from '../../actions/training';
+import { getLeaveTypes } from '../../actions/leaveTypes';
 import moment from 'moment';
 import recharts, {
   BarChart,
@@ -33,167 +34,57 @@ import recharts, {
   CartesianGrid,
   Line,
 } from 'recharts';
-import 'antd/dist/antd.css';
+
 import './Home.less';
 import PageLoading from '../PageLoading/PageLoading';
+import useBreakpoint from 'antd/lib/grid/hooks/useBreakpoint';
 
-const Home = () => {
-  const user = JSON.parse(localStorage.getItem('profile')).result;
+const Home = ({ user }) => {
+  const screens = useBreakpoint();
   const { leaves, isLoading, todayLeaves } = useSelector(
     (state) => state.leaves
   );
   const { trainings } = useSelector((state) => state.trainings);
+  const { leaveTypes } = useSelector((state) => state.leaveTypes);
   const dispatch = useDispatch();
-  var pass2MonthC = 0,
-    pass2MonthM = 0,
-    pass1MonthC = 0,
-    pass1MonthM = 0,
-    currentMonthC = 0,
-    currentMonthM = 0,
-    next1MonthC = 0,
-    next1MonthM = 0,
-    next2MonthC = 0,
-    next2MonthM = 0,
-    next3MonthC = 0,
-    next3MonthM = 0,
-    max = 0;
 
   useEffect(() => {
     dispatch(fetchAllLeaves());
     dispatch(fetchTodayLeaves());
     dispatch(fetchTodayTrainings());
+    dispatch(getLeaveTypes());
   }, [dispatch]);
 
-  console.log(trainings);
+  console.log(user);
 
-  const leaveData = [
-    { name: 'Casual', value: user.leaveCount.casual },
-    { name: 'Medical', value: user.leaveCount.medical },
-  ];
+  const leaveData = [];
 
-  //temp training data
-  var totalTraining = 20,
-    completedTraining = 15;
+  user.leaveCount.forEach((element) => {
+    var temp = { name: element.leaveType.name, value: element.count };
+    leaveData.push(temp);
+  });
+
+  const capitalizeFirstLetter = (string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  };
+
+  const checkSelfLeave = () => {
+    if (todayLeaves.some((e) => e.user._id === user._id)) return true;
+    else return false;
+  };
+
+  var totalTraining = user.trainingHours,
+    completedTraining = user.completedHours;
   var trainingNeeded = totalTraining - completedTraining;
   var completionPercentage = completedTraining / totalTraining;
-  trainingNeeded = trainingNeeded < 0 ? 0 : trainingNeeded;
+  trainingNeeded = trainingNeeded < 0 ? '' : trainingNeeded;
 
   const trainingData = [
-    //test example data
     { name: 'Hours Completed', value: completedTraining },
     { name: 'Hours Required', value: trainingNeeded },
   ];
 
-  leaves.map((element) => {
-    var d = new Date(element.fromDate);
-    if (
-      element.status == 'approve' &&
-      element.leaveType == 'casual' &&
-      d.getMonth() == moment().subtract(2, 'months').month()
-    )
-      max = Math.max(++pass2MonthC, max);
-    else if (
-      element.status == 'approve' &&
-      element.leaveType == 'medical' &&
-      d.getMonth() == moment().subtract(2, 'months').month()
-    )
-      max = Math.max(++pass2MonthM, max);
-    else if (
-      element.status == 'approve' &&
-      element.leaveType == 'casual' &&
-      d.getMonth() == moment().subtract(1, 'months').month()
-    )
-      max = Math.max(++pass1MonthC, max);
-    else if (
-      element.status == 'approve' &&
-      element.leaveType == 'medical' &&
-      d.getMonth() == moment().subtract(1, 'months').month()
-    )
-      max = Math.max(++pass1MonthM, max);
-    else if (
-      element.status == 'approve' &&
-      element.leaveType == 'casual' &&
-      d.getMonth() == moment().month()
-    )
-      max = Math.max(++currentMonthC, max);
-    else if (
-      element.status == 'approve' &&
-      element.leaveType == 'medical' &&
-      d.getMonth() == moment().month()
-    )
-      max = Math.max(++currentMonthM, max);
-    else if (
-      element.status == 'approve' &&
-      element.leaveType == 'casual' &&
-      d.getMonth() == moment().add(1, 'months').month()
-    )
-      max = Math.max(++next1MonthC, max);
-    else if (
-      element.status == 'approve' &&
-      element.leaveType == 'medical' &&
-      d.getMonth() == moment().add(1, 'months').month()
-    )
-      max = Math.max(++next1MonthM, max);
-    else if (
-      element.status == 'approve' &&
-      element.leaveType == 'casual' &&
-      d.getMonth() == moment().add(2, 'months').month()
-    )
-      max = Math.max(++next2MonthC, max);
-    else if (
-      element.status == 'approve' &&
-      element.leaveType == 'medical' &&
-      d.getMonth() == moment().add(2, 'months').month()
-    )
-      max = Math.max(++next2MonthM, max);
-    else if (
-      element.status == 'approve' &&
-      element.leaveType == 'casual' &&
-      d.getMonth() == moment().add(3, 'months').month()
-    )
-      max = Math.max(++next3MonthC, max);
-    else if (
-      element.status == 'approve' &&
-      element.leaveType == 'medical' &&
-      d.getMonth() == moment().add(3, 'months').month()
-    )
-      max = Math.max(++next3MonthM, max);
-  });
-
-  const empLeaveData = [
-    {
-      name: moment().subtract(2, 'months').format('MMMM'),
-      Casual: pass2MonthC,
-      Medical: pass2MonthM,
-    },
-    {
-      name: moment().subtract(1, 'months').format('MMMM'),
-      Casual: pass1MonthC,
-      Medical: pass1MonthM,
-    },
-    {
-      name: moment().format('MMMM'),
-      Casual: currentMonthC,
-      Medical: currentMonthM,
-    },
-    {
-      name: moment().add(1, 'months').format('MMMM'),
-      Casual: next1MonthC,
-      Medical: next1MonthM,
-    },
-    {
-      name: moment().add(2, 'months').format('MMMM'),
-      Casual: next2MonthC,
-      Medical: next2MonthM,
-    },
-    {
-      name: moment().add(3, 'months').format('MMMM'),
-      Casual: next3MonthC,
-      Medical: next3MonthM,
-    },
-  ];
-
-  const COLORS1 = ['#0088FE', '#2ce654'];
+  const COLORS1 = ['#0088FE', '#2ce654', '#ff00f0'];
   const COLORS2 = ['#0088FE', '#de0b0b'];
 
   const renderCustomizedLabel = ({ x, y, value }) => {
@@ -216,6 +107,7 @@ const Home = () => {
               title='Profile Details'
               bordered
               column={{ sm: 2, xs: 1 }}
+              layout={screens.md ? 'horizontal' : 'vertical'}
             >
               <Descriptions.Item label='Name' span={3}>
                 {`${user.first_name} ${user.last_name}`}
@@ -223,20 +115,25 @@ const Home = () => {
               <Descriptions.Item label='Department' span={2}>
                 {user.department.name}
               </Descriptions.Item>
-              <Descriptions.Item label='Casual Leaves' span={1}>
-                {user.leaveCount.casual}
-              </Descriptions.Item>
+              {user.leaveCount.map((entry, index) => (
+                <Descriptions.Item label={entry.leaveType.name} span={2}>
+                  {entry.count}
+                </Descriptions.Item>
+              ))}
               <Descriptions.Item label='Total Training Hours Required' span={1}>
                 {totalTraining}
-              </Descriptions.Item>
-              <Descriptions.Item label='Medical Leaves' span={1}>
-                {user.leaveCount.medical}
               </Descriptions.Item>
               <Descriptions.Item label='Training Hours Completed' span={1}>
                 {completedTraining}
               </Descriptions.Item>
             </Descriptions>
             <br />
+            {checkSelfLeave() && (
+              <>
+                <Alert message='You are on leave today.' type='info' showIcon />
+                <br />
+              </>
+            )}
             {completionPercentage <= 0.25 ? (
               <Alert
                 message='Low Training Hours Completed'
@@ -342,22 +239,27 @@ const Home = () => {
                       title='Leave Type'
                       dataIndex='leaveType'
                       key='leaveType'
-                      render={(text, record) => <Tag color='red'>{text}</Tag>}
+                      render={(text, record) => (
+                        <Tag color={text.color}>
+                          {capitalizeFirstLetter(text.code)}
+                        </Tag>
+                      )}
                     ></Table.Column>
                     <Table.Column
-                      title='Action'
-                      key='action'
-                      render={(text, record) => (
-                        <Space size='middle' key={record._id}>
-                          <Link to={`leaves/view/${record._id}`}>View</Link>
-                        </Space>
-                      )}
+                      title='Date'
+                      dataIndex='date'
+                      key='date'
+                      render={(text, record) =>
+                        `${moment(record.fromDate).format(
+                          'YYYY-MM-DD'
+                        )} - ${moment(record.toDate).format('YYYY-MM-DD')}`
+                      }
                     ></Table.Column>
                   </Table>
                 </>
               ))}
             <Button type='danger'>
-              <Link to='/leaves'>Leaves Dashboard</Link>
+              <Link to='/leaves/home'>Leaves Dashboard</Link>
             </Button>
           </Card>
         </Col>
@@ -393,7 +295,7 @@ const Home = () => {
                 </>
               ))}
             <Button type='danger'>
-              <Link to='/training'>Training Dashboard</Link>
+              <Link to='/training/home'>Training Dashboard</Link>
             </Button>
           </Card>
         </Col>

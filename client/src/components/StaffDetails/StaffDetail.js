@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import 'antd/dist/antd.css';
+import React, { useEffect, useState } from 'react';
+
 import './StaffDetail.css';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -7,21 +7,27 @@ import { Descriptions, Badge, Button } from 'antd';
 import { getUser } from '../../actions/users';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import moment from 'moment';
+import useBreakpoint from 'antd/lib/grid/hooks/useBreakpoint';
+import PageLoading from '../PageLoading/PageLoading';
 const StaffDetail = () => {
-  const { user } = useSelector((state) => state.users);
+  const screens = useBreakpoint();
+  const { user, isLoading } = useSelector((state) => state.users);
+  const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { id } = useParams();
   useEffect(() => {
-    dispatch(getUser(id));
-  }, [dispatch, id]);
-  if (!user) return null;
-  console.log(user);
+    setLoading(true);
+    dispatch(getUser(id)).then(() => setLoading(false));
+  }, [dispatch]);
+
+  if (loading||!user) return <PageLoading />;
   return (
     <>
       <Descriptions
         title='User Info'
         bordered
+        layout={screens.md ? 'horizontal' : 'vertical'}
         column={{ xxl: 4, xl: 3, lg: 3, md: 3, sm: 2, xs: 1 }}
       >
         <Descriptions.Item label='Employee ID'>{user.emp_id}</Descriptions.Item>
@@ -34,16 +40,19 @@ const StaffDetail = () => {
 
         <Descriptions.Item label='Email'>{user.email}</Descriptions.Item>
         <Descriptions.Item label='Department'>
-          {user.department.name}
+          {user.department?.name}
         </Descriptions.Item>
         <Descriptions.Item label='Employment Date'>
           {moment(user.employment_date).format('YYYY-MM-DD')}
         </Descriptions.Item>
       </Descriptions>
       <Descriptions title='Leave Balance' bordered>
-        {Object.entries(user.leaveCount).map(([key, value]) => (
-          <Descriptions.Item key={key} label={key}>
-            {value}
+        {user?.leaveCount?.map((leave) => (
+          <Descriptions.Item
+            key={leave.leaveType._id}
+            label={leave.leaveType.name}
+          >
+            {leave.leaveType.count}
           </Descriptions.Item>
         ))}
       </Descriptions>

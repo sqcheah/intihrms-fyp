@@ -1,14 +1,15 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Spin, Table, Space, Button } from 'antd';
-import 'antd/dist/antd.css';
+
 import './DeptHome.css';
 import { Link, useNavigate } from 'react-router-dom';
 import { deleteDept, getDepts } from '../../actions/depts';
 const { Column } = Table;
 const DeptHome = () => {
-  const deleteD = (rec) => {
+  const edit = (id) => {
     // dispatch(deleteDept(rec._id));
+    navigate(`/depts/edit/${id}`);
   };
   const { depts } = useSelector((state) => state.depts);
   const dispatch = useDispatch();
@@ -41,16 +42,11 @@ const DeptHome = () => {
               key='action'
               render={(text, record) => (
                 <Space size='middle'>
-                  <Button danger onClick={() => deleteD(record)}>
-                    Delete
-                  </Button>
+                  <Button onClick={() => edit(record._id)}>edit</Button>
                 </Space>
               )}
             />
           </Table>
-          <Button>
-            <Link to='/'>Back</Link>
-          </Button>
         </>
       )}
     </>

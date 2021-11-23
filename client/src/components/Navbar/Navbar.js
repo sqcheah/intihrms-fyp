@@ -17,7 +17,7 @@ import {
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { BellOutlined, UserOutlined } from '@ant-design/icons';
 import jwtDecode from 'jwt-decode';
-import 'antd/dist/antd.css';
+
 import './Navbar.less';
 import { useDispatch } from 'react-redux';
 import { LOGOUT } from '../../constants/actionTypes';

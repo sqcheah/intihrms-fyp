@@ -1,12 +1,10 @@
 import * as api from '../api/index.js';
-import { message } from 'antd';
 import {
   AUTH,
   AUTH_END_LOADING,
-  AUTH_START_LOADING,
   AUTH_ERROR,
+  AUTH_START_LOADING,
 } from '../constants/actionTypes';
-import { handleError } from './error.js';
 
 export const signIn = (formData, navigate) => async (dispatch) => {
   try {
@@ -16,9 +14,9 @@ export const signIn = (formData, navigate) => async (dispatch) => {
     dispatch({ type: AUTH, data });
     dispatch({ type: AUTH_END_LOADING });
 
-    navigate('/');
+    navigate('/home');
   } catch (error) {
-    handleError(error, AUTH_ERROR);
+    dispatch({ type: AUTH_ERROR, error });
   }
 };
 
@@ -32,7 +30,7 @@ export const signUp = (formData, navigate) => async (dispatch) => {
 
     navigate('/');
   } catch (error) {
-    handleError(error, AUTH_ERROR);
+    dispatch({ type: AUTH_ERROR, error });
   }
 };
 
@@ -44,6 +42,6 @@ export const resetPassword = (email) => async (dispatch) => {
     dispatch({ type: AUTH, data });
     dispatch({ type: AUTH_END_LOADING });
   } catch (error) {
-    handleError(error, AUTH_ERROR);
+    dispatch({ type: AUTH_ERROR, error });
   }
 };

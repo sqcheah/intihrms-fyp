@@ -1,6 +1,7 @@
 import { StarOutlined } from '@ant-design/icons';
 import { Badge, Button, Descriptions, List, Space, Upload } from 'antd';
-import 'antd/dist/antd.css';
+
+import useBreakpoint from 'antd/lib/grid/hooks/useBreakpoint';
 import moment from 'moment';
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -14,6 +15,7 @@ import {
 import PageLoading from '../PageLoading/PageLoading';
 import './TrainingDetails.css';
 const TrainingDetails = ({ socket, user }) => {
+  const screens = useBreakpoint();
   const { isLoading, training } = useSelector((state) => state.trainings);
   //const user = JSON.parse(localStorage.getItem('profile')).result;
 
@@ -59,7 +61,11 @@ const TrainingDetails = ({ socket, user }) => {
     });
 
     dispatch(
-      updateTrainingStatus(id, { ...training, attendants: updatedAttendant })
+      updateTrainingStatus(id, {
+        ...training,
+        attendants: updatedAttendant,
+        extra: { user: attendant_id, status: newStatus },
+      })
     );
   };
 
@@ -86,6 +92,7 @@ const TrainingDetails = ({ socket, user }) => {
         style={{ marginBottom: 16 }}
         title='Training Info'
         bordered
+        layout={screens.md ? 'horizontal' : 'vertical'}
         column={{ xxl: 4, xl: 3, lg: 3, md: 3, sm: 2, xs: 1 }}
       >
         <Descriptions.Item label='Training Type' span={3}>
@@ -232,7 +239,8 @@ const TrainingDetails = ({ socket, user }) => {
       <Space>
         <Button onClick={() => navigate(-1)}>Back</Button>
         {!training.attendants.some((e) => e.user._id === user._id) &&
-        training.trainingType == 'Internal' ? (
+        training.trainingType == 'Internal' &&
+        moment(training.fromDate) > moment() ? (
           <>
             <Button
               className='btn-success'
@@ -241,7 +249,8 @@ const TrainingDetails = ({ socket, user }) => {
               Join Training
             </Button>
           </>
-        ) : training.trainingType == 'Internal' ? (
+        ) : training.trainingType == 'Internal' &&
+          moment(training.fromDate) > moment() ? (
           <>
             <Button danger onClick={() => cancelAttendance(user._id)}>
               Cancel Attendance

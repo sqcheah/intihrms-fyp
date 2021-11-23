@@ -7,8 +7,14 @@ const UserSchema = mongoose.Schema({
   email: { type: String, required: true },
   employment_date: { type: Date, required: true },
   password: { type: String, required: true },
-  leaveCount: {},
+  leaveCount: [
+    {
+      leaveType: { type: mongoose.Schema.Types.ObjectId, ref: 'leaveType' },
+      count: { type: Number },
+    },
+  ],
   trainingHours: { type: Number, default: 60 },
+  completedHours: { type: Number, default: 0 },
   department: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'department',

@@ -1,11 +1,24 @@
-import { Typography, DatePicker, Button, Table, Empty } from 'antd';
+import {
+  Typography,
+  DatePicker,
+  Button,
+  Table,
+  Empty,
+  Space,
+  Popconfirm,
+  Modal,
+} from 'antd';
 import React, { useEffect, useState } from 'react';
 import moment from 'moment';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchHolidaysByYear } from '../../actions/holidays';
-import { Link } from 'react-router-dom';
+import { deleteHoliday, fetchHolidaysByYear } from '../../actions/holidays';
+import { Link, useNavigate } from 'react-router-dom';
+import PageLoading from '../PageLoading/PageLoading';
 const HolidayHome = ({ socket, user }) => {
-  const { holidays } = useSelector((state) => state.holidays);
+  const navigate = useNavigate();
+  const { holidays, isLoading, success, error } = useSelector(
+    (state) => state.holidays
+  );
   const today = moment();
   const dispatch = useDispatch();
   const [year, setYear] = useState(today.year().toString());
@@ -16,15 +29,13 @@ const HolidayHome = ({ socket, user }) => {
     dispatch(fetchHolidaysByYear(year));
   }, [dispatch, year]);
 
-  const testNoti = () => {
-    console.log(user);
-    socket?.emit('sendNoti', {
-      senderName: user.email,
-      receiverName: 'ShamsuzlynnMahat244@gmail.com',
-      content: 'test',
+  const deleteHo = async (year, id) => {
+    dispatch(deleteHoliday(year, id));
+    Modal.success({
+      content: 'Holiday Deleted',
     });
   };
-
+  if (isLoading) return <PageLoading />;
   return (
     <>
       <Typography.Title level={1}>Holidays</Typography.Title>
@@ -37,7 +48,7 @@ const HolidayHome = ({ socket, user }) => {
           <Table
             dataSource={holidays.lists}
             rowKey='_id'
-            style={{ 'overflow-x': 'scroll' }}
+            style={{ overflowX: 'scroll' }}
           >
             <Table.Column
               title='Title'
@@ -56,15 +67,37 @@ const HolidayHome = ({ socket, user }) => {
               key='endDate'
               render={(text, record) => moment(text).format('YYYY-MM-DD')}
             ></Table.Column>
+            <Table.Column
+              title='Action'
+              dataIndex='option'
+              render={(text, record) => (
+                <Space size='middle' key={record._id}>
+                  <Button
+                    type='primary'
+                    onClick={() =>
+                      navigate(`/holidays/edit/${year}/${record._id}`)
+                    }
+                  >
+                    Edit
+                  </Button>
+                  <Popconfirm
+                    title='Are you sure you want to delete this holiday?'
+                    onConfirm={() => deleteHo(year, record._id)}
+                    okText='Yes'
+                    cancelText='No'
+                  >
+                    <Button type='primary' danger>
+                      Delete
+                    </Button>
+                  </Popconfirm>
+                </Space>
+              )}
+            ></Table.Column>
           </Table>
         </>
       ) : (
         <Empty />
       )}
-      <Button>
-        <Link to='/'>Back</Link>
-      </Button>
-      <Button onClick={testNoti}>Test</Button>
     </>
   );
 };

@@ -15,7 +15,7 @@ const leaveSchema = mongoose.Schema({
   },
   fromDate: { type: Date, required: true },
   toDate: { type: Date, required: true },
-  status: { type: String, default: 'pending' },
+  status: { type: String, default: 'Pending' },
   attachments: [],
 });
 const leaveModel = mongoose.model('leave', leaveSchema);

@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import leaveTypeModel from '../models/leaveTypeModel.js';
+import userModel from '../models/userModel.js';
 
 export const getLeaveTypes = async (req, res) => {
   try {
@@ -23,15 +24,32 @@ export const getLeaveType = async (req, res) => {
 export const createLeaveType = async (req, res) => {
   const leaveType = req.body;
   const newLeaveType = new leaveTypeModel(leaveType);
-
-  newLeaveType
-    .save()
-    .then((result) => {
-      return res.status(201).json(newLeaveType);
-    })
-    .catch((error) => {
-      return res.status(409).json({ message: error });
+  const exist = await leaveTypeModel.findOne({ code: leaveType.code });
+  if (!exist) {
+    await newLeaveType
+      .save()
+      .then(async (result) => {
+        const leaveCount = {
+          leaveType: newLeaveType._id,
+          count: leaveType.count,
+        };
+        const user = await userModel.updateMany(
+          {},
+          { $push: { leaveCount: leaveCount } },
+          { upsert: true }
+        );
+        return res.status(201).json(newLeaveType);
+      })
+      .catch((error) => {
+        console.log(error);
+        return res.status(409).json({ message: error });
+      });
+  } else {
+    console.log('?');
+    return res.status(409).json({
+      message: 'There is already another leave type with same short name',
     });
+  }
 };
 export const updateLeaveType = async (req, res) => {
   const { id: _id } = req.params;

@@ -4,21 +4,24 @@ import {
   AUTH_END_LOADING,
   AUTH_START_LOADING,
   AUTH_ERROR,
+  AUTH_SUCCESS,
 } from '../constants/actionTypes';
-
+import { handleError } from './error.js';
 const authReducer = (
-  state = { error: null, isLoading: true, authData: null },
+  state = { error: null, isLoading: true, authData: null, success: null },
   action
 ) => {
   switch (action.type) {
     case AUTH_START_LOADING:
-      return { ...state, isLoading: true, error: null };
+      return { ...state, isLoading: true, error: null, success: null };
     case AUTH_END_LOADING:
       return { ...state, isLoading: false };
     case AUTH_ERROR: {
-      return { ...state, error: action.error, isLoading: false };
+      return { ...state, error: handleError(action.error), isLoading: false };
     }
-
+    case AUTH_SUCCESS: {
+      return { ...state, success: action.payload.success };
+    }
     case AUTH:
       localStorage.setItem('profile', JSON.stringify({ ...action?.data }));
       return { ...state, authData: action?.data };

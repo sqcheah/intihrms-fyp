@@ -1,5 +1,4 @@
 import * as api from '../api/index.js';
-import { message } from 'antd';
 import {
   CREATE_HOLIDAY,
   DELETE_HOLIDAY,
@@ -9,8 +8,8 @@ import {
   HOLIDAY_END_LOADING,
   HOLIDAY_ERROR,
   HOLIDAY_START_LOADING,
+  HOLIDAY_SUCCESS,
 } from '../constants/actionTypes';
-import { handleError } from './error.js';
 
 export const fetchAllHolidays = () => async (dispatch) => {
   try {
@@ -19,7 +18,7 @@ export const fetchAllHolidays = () => async (dispatch) => {
     dispatch({ type: FETCH_ALL_HOLIDAY, payload: data });
     dispatch({ type: HOLIDAY_END_LOADING });
   } catch (error) {
-    handleError(error, HOLIDAY_ERROR);
+    dispatch({ type: HOLIDAY_ERROR, error });
   }
 };
 export const fetchHolidaysByYear = (year) => async (dispatch) => {
@@ -29,7 +28,7 @@ export const fetchHolidaysByYear = (year) => async (dispatch) => {
     dispatch({ type: FETCH_HOLIDAY_BY_YEAR, payload: data });
     dispatch({ type: HOLIDAY_END_LOADING });
   } catch (error) {
-    handleError(error, HOLIDAY_ERROR);
+    dispatch({ type: HOLIDAY_ERROR, error });
   }
 };
 export const createHoliday = (formData) => async (dispatch) => {
@@ -37,18 +36,54 @@ export const createHoliday = (formData) => async (dispatch) => {
     dispatch({ type: HOLIDAY_START_LOADING });
     const { data } = await api.createHoliday(formData);
     dispatch({ type: CREATE_HOLIDAY, payload: data });
+    dispatch({
+      type: HOLIDAY_SUCCESS,
+      payload: { success: 'Create success' },
+    });
     dispatch({ type: HOLIDAY_END_LOADING });
   } catch (error) {
-    handleError(error, HOLIDAY_ERROR);
+    dispatch({ type: HOLIDAY_ERROR, error });
   }
 };
-export const updateHoliday = (id, formData) => async (dispatch) => {
+export const updateHoliday = (year, id, formData) => async (dispatch) => {
   try {
     dispatch({ type: HOLIDAY_START_LOADING });
-    const { data } = await api.updateHoliday(id, formData);
+    const { data } = await api.updateHoliday(year, id, formData);
     dispatch({ type: DELETE_HOLIDAY, payload: data });
+    dispatch({
+      type: HOLIDAY_SUCCESS,
+      payload: { success: 'Update success' },
+    });
+    dispatch({ type: HOLIDAY_END_LOADING });
+
+    return data;
+  } catch (error) {
+    dispatch({ type: HOLIDAY_ERROR, error });
+  }
+};
+
+export const getHoliday = (year, id) => async (dispatch) => {
+  try {
+    dispatch({ type: HOLIDAY_START_LOADING });
+    const { data } = await api.getHoliday(year, id);
+    dispatch({ type: FETCH_ONE_HOLIDAY, payload: data });
+    dispatch({ type: HOLIDAY_END_LOADING });
+    return data;
+  } catch (error) {
+    dispatch({ type: HOLIDAY_ERROR, error });
+  }
+};
+export const deleteHoliday = (year, id) => async (dispatch) => {
+  try {
+    dispatch({ type: HOLIDAY_START_LOADING });
+    const { data } = await api.deleteHoliday(year, id);
+    dispatch({ type: DELETE_HOLIDAY, payload: data });
+    dispatch({
+      type: HOLIDAY_SUCCESS,
+      payload: { success: 'Delete success' },
+    });
     dispatch({ type: HOLIDAY_END_LOADING });
   } catch (error) {
-    handleError(error, HOLIDAY_ERROR);
+    dispatch({ type: HOLIDAY_ERROR, error });
   }
 };

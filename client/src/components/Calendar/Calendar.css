@@ -13,6 +13,12 @@ https://stackoverflow.com/questions/18492078/fullcalendar-js-adjust-header-for-m
   }
 }
 
+/**
 .fc-event-main {
-  mix-blend-mode: difference;
+  mix-blend-mode: exclusion;
+}
+*/
+.fc-event-main {
+  font-weight: bolder;
+  color: white !important;
 }

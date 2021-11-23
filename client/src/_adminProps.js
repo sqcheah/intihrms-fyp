@@ -17,6 +17,8 @@ import {
   CalendarOutlined,
   ExclamationCircleOutlined,
   LaptopOutlined,
+  SettingOutlined,
+  AuditOutlined,
 } from '@ant-design/icons';
 import Home from './components/Home/Home';
 import LeaveHome from './components/LeaveHome/LeaveHome';
@@ -31,7 +33,7 @@ export default {
         icon: <BarChartOutlined />,
         routes: [
           {
-            path: '/',
+            path: '/home',
             name: 'Personal',
             icon: <UserOutlined />,
             exact: true,
@@ -61,6 +63,29 @@ export default {
         name: 'Leaves',
         icon: <ScheduleOutlined />,
         exact: true,
+        routes: [
+          {
+            path: 'home',
+            name: 'Leaves Dashboard',
+            icon: <HomeOutlined />,
+            exact: true,
+          },
+          {
+            path: 'create',
+            name: 'Apply Leave',
+            icon: <UsergroupAddOutlined />,
+          },
+          {
+            path: 'history',
+            name: 'Leave History',
+            icon: <HistoryOutlined />,
+          },
+          {
+            path: 'list',
+            name: 'Leave Requests',
+            icon: <ExclamationCircleOutlined />,
+          },
+        ],
       },
       {
         path: '/training',
@@ -68,8 +93,8 @@ export default {
         icon: <SolutionOutlined />,
         routes: [
           {
-            path: './',
-            name: 'Training Home',
+            path: 'home',
+            name: 'Training Dashboard',
             icon: <HomeOutlined />,
             exact: true,
           },
@@ -95,23 +120,32 @@ export default {
           },
           {
             path: 'extList',
-            name: 'Pending External Requests',
+            name: 'External Requests List',
             icon: <ExclamationCircleOutlined />,
           },
         ],
       },
       {
-        path: './',
-        name: 'Employee',
-        icon: <BarChartOutlined />,
+        path: '/',
+        name: 'Settings',
+        icon: <SettingOutlined />,
         routes: [
           {
-            path: '/leaves/list',
-            name: 'Leave Request',
-            icon: <ExclamationCircleOutlined />,
-            exact: true,
+            path: 'holidays',
+            name: 'Holidays',
+            icon: <CalendarOutlined />,
+          },
+          {
+            path: 'depts',
+            name: 'Departments',
+            icon: <AuditOutlined />,
           },
         ],
+      },
+      {
+        path: '/users',
+        name: 'Employee',
+        icon: <BarChartOutlined />,
       },
     ],
   },

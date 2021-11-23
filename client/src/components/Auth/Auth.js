@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Form, Input, Button, Select, Typography } from 'antd';
 import { useDispatch } from 'react-redux';
 
-import 'antd/dist/antd.css';
 import './Auth.css';
 import { signIn } from '../../actions/auth';
 const { Title } = Typography;
@@ -31,10 +30,6 @@ const Auth = () => {
         labelCol={{ span: 8 }}
         wrapperCol={{ span: 8 }}
         name='basic'
-        initialValues={{
-          email: 'LarLex579@gmail.com',
-          password: 'test',
-        }}
         onFinish={onFinish}
         onFinishFailed={onFinishFailed}
         autoComplete='off'

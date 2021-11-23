@@ -1,5 +1,5 @@
 import React from 'react';
-import 'antd/dist/antd.css';
+
 import './App.less';
 import { Layout, Menu, Breadcrumb, Grid, Icon, Image } from 'antd';
 import {

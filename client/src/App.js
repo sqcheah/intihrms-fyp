@@ -12,6 +12,8 @@ import {
 } from 'antd';
 import {
   CheckCircleOutlined,
+  CloseCircleOutlined,
+  InfoCircleOutlined,
   LikeOutlined,
   UserOutlined,
 } from '@ant-design/icons';
@@ -73,11 +75,17 @@ import {
   Link,
   useLocation,
   useNavigate,
+  Navigate,
 } from 'react-router-dom';
 import { LOGOUT } from './constants/actionTypes';
 import jwtDecode from 'jwt-decode';
-
 import { io } from 'socket.io-client';
+import { getNotificationsById } from './actions/notification';
+import CalendarPersonal from './components/CalendarPersonal/CalendarPersonal';
+import TrainingProgressForm from './components/TrainingProgressForm/TrainingProgressForm';
+import TrainingProgressDetail from './components/TrainingProgressDetails/TrainingProgressDetails';
+import TrainingProgressHistory from './components/TrainingProgressHistory/TrainingProgressHistory';
+import TrainingProgressList from './components/TrainingProgressList/TrainingProgressList';
 
 const { Header, Footer, Sider, Content } = Layout;
 const App = () => {
@@ -98,6 +106,7 @@ const App = () => {
   var temp = defaultProps;
   const navigate = useNavigate();
   const logout = () => {
+    socket?.emit('removeUser');
     dispatch({ type: LOGOUT });
     navigate('/auth');
   };
@@ -121,15 +130,33 @@ const App = () => {
       socket?.emit('newUser', user);
       socket.emit('listUser');
 
-      socket.on('getNotif', (data) => {
+      socket?.on('newNotification', (data) => {
+        let title = 'Notification';
+        let icon = <InfoCircleOutlined />;
+        if (data.content.type == 'leave') {
+          if (data.content.status == 'Pending') {
+            title = 'Leave Request';
+          } else if (data.content.status == 'Approved') {
+            title = 'Leave Approval';
+            icon = <CheckCircleOutlined />;
+          } else if (data.content.status == 'Rejected') {
+            title = 'Leave Approval';
+            icon = <CloseCircleOutlined />;
+          }
+        }
+
         notification.open({
-          message: 'title',
-          description: 'body',
-          icon: <CheckCircleOutlined />,
+          message: title,
+          description: `${data.sender} ${data.content.message}`,
+          icon: icon,
           placement: 'bottomRight',
+          duration: 300,
         });
       });
     }
+    return () => {
+      socket?.off('newNotification');
+    };
   }, [socket, user]);
 
   if (user?.roles?.name == 'supervisor') temp = supervisorProps;
@@ -156,23 +183,25 @@ const App = () => {
         }}
         onMenuHeaderClick={(e) => console.log(e)}
         menuItemRender={(item, dom) => {
-          let path = item.path.split('/./')[0];
-          return <Link to={path || '/'}>{dom}</Link>;
+          // let path = item.path.split('/./')[0];
+          return <Link to={item.path || '/'}>{dom}</Link>;
         }}
         rightContentRender={() => (
           <Space size='large'>
-            <NoticeIcon user={user} />
-            <Avatar user={user} />
+            {user && <NoticeIcon user={user} socket={socket} />}
+            <Avatar user={user} logout={logout} />
           </Space>
         )}
+        locale='en-US'
         {...settings}
       >
-        <Content className='site-layout-background'>
+        <div className='site-layout-background'>
           <Routes>
+            {/**dashboard */}
             <Route
-              path='/'
+              path='/home'
               element={
-                <PrivateRoute>
+                <PrivateRoute user={user}>
                   <Home socket={socket} user={user} />
                 </PrivateRoute>
               }
@@ -180,7 +209,7 @@ const App = () => {
             <Route
               path='/supervisor'
               element={
-                <PrivateRoute>
+                <PrivateRoute user={user}>
                   <SupervisorHome socket={socket} user={user} />
                 </PrivateRoute>
               }
@@ -188,23 +217,24 @@ const App = () => {
             <Route
               path='/admin'
               element={
-                <PrivateRoute>
+                <PrivateRoute user={user}>
                   <AdminHome socket={socket} user={user} />
                 </PrivateRoute>
               }
             />
             <Route
-              path='/leaves'
+              path='/leaves/home'
               element={
-                <PrivateRoute>
+                <PrivateRoute user={user}>
                   <LeaveHome socket={socket} user={user} />
                 </PrivateRoute>
               }
             />
+            {/**leave */}
             <Route
               path='/leaves/create'
               element={
-                <PrivateRoute>
+                <PrivateRoute user={user}>
                   <LeaveForm socket={socket} user={user} />
                 </PrivateRoute>
               }
@@ -212,7 +242,7 @@ const App = () => {
             <Route
               path='/leaves/view/:id'
               element={
-                <PrivateRoute>
+                <PrivateRoute user={user}>
                   <LeaveDetail socket={socket} user={user} />
                 </PrivateRoute>
               }
@@ -220,7 +250,7 @@ const App = () => {
             <Route
               path='/leaves/edit/:id'
               element={
-                <PrivateRoute>
+                <PrivateRoute user={user}>
                   <LeaveForm socket={socket} user={user} />
                 </PrivateRoute>
               }
@@ -228,7 +258,7 @@ const App = () => {
             <Route
               path='/leaves/list'
               element={
-                <PrivateRoute>
+                <PrivateRoute user={user}>
                   <LeaveList socket={socket} user={user} />
                 </PrivateRoute>
               }
@@ -236,88 +266,24 @@ const App = () => {
             <Route
               path='/leaves/history'
               element={
-                <PrivateRoute>
+                <PrivateRoute user={user}>
                   <LeaveHistory socket={socket} user={user} />
                 </PrivateRoute>
               }
             />
-
-            <Route
-              path='/depts'
-              element={
-                <PrivateRoute>
-                  <DeptHome socket={socket} user={user} />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path='/depts/create'
-              element={
-                <PrivateRoute>
-                  <DeptForm socket={socket} user={user} />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path='/users'
-              element={
-                <PrivateRoute>
-                  <StaffHome socket={socket} user={user} />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path='/profile'
-              element={
-                <PrivateRoute>
-                  <Profile socket={socket} user={user} />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path='/users/create'
-              element={
-                <PrivateRoute>
-                  <StaffForm socket={socket} user={user} />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path='/users/view/:id'
-              element={
-                <PrivateRoute>
-                  <StaffDetail socket={socket} user={user} />
-                </PrivateRoute>
-              }
-            />
+            {/**leave type */}
             <Route
               path='/leaveTypes'
               element={
-                <PrivateRoute>
+                <PrivateRoute user={user}>
                   <LeaveTypeHome socket={socket} user={user} />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path='/test'
-              element={
-                <PrivateRoute>
-                  <Test socket={socket} user={user} />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path='/test2'
-              element={
-                <PrivateRoute>
-                  <Test2 socket={socket} user={user} />
                 </PrivateRoute>
               }
             />
             <Route
               path='/leaveTypes/create'
               element={
-                <PrivateRoute>
+                <PrivateRoute user={user}>
                   <LeaveTypeForm socket={socket} user={user} />
                 </PrivateRoute>
               }
@@ -325,15 +291,82 @@ const App = () => {
             <Route
               path='/leaveTypes/edit/:id'
               element={
-                <PrivateRoute>
+                <PrivateRoute user={user}>
                   <LeaveTypeForm socket={socket} user={user} />
                 </PrivateRoute>
               }
             />
+            {/**department */}
+            <Route
+              path='/depts'
+              element={
+                <PrivateRoute user={user}>
+                  <DeptHome socket={socket} user={user} />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path='/depts/create'
+              element={
+                <PrivateRoute user={user}>
+                  <DeptForm socket={socket} user={user} />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path='/depts/edit/:id'
+              element={
+                <PrivateRoute user={user}>
+                  <DeptForm socket={socket} user={user} />
+                </PrivateRoute>
+              }
+            />
+            {/**user */}
+            <Route
+              path='/profile'
+              element={
+                <PrivateRoute user={user}>
+                  <Profile socket={socket} user={user} />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path='/users'
+              element={
+                <PrivateRoute user={user}>
+                  <StaffHome socket={socket} user={user} />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path='/users/dept'
+              element={
+                <PrivateRoute user={user}>
+                  <StaffHome socket={socket} user={user} />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path='/users/create'
+              element={
+                <PrivateRoute user={user}>
+                  <StaffForm socket={socket} user={user} />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path='/users/view/:id'
+              element={
+                <PrivateRoute user={user}>
+                  <StaffDetail socket={socket} user={user} />
+                </PrivateRoute>
+              }
+            />
+            {/**role */}
             <Route
               path='/roles'
               element={
-                <PrivateRoute>
+                <PrivateRoute user={user}>
                   <RoleHome socket={socket} user={user} />
                 </PrivateRoute>
               }
@@ -341,7 +374,7 @@ const App = () => {
             <Route
               path='/roles/create'
               element={
-                <PrivateRoute>
+                <PrivateRoute user={user}>
                   <RoleForm socket={socket} user={user} />
                 </PrivateRoute>
               }
@@ -349,41 +382,59 @@ const App = () => {
             <Route
               path='/roles/edit/:id'
               element={
-                <PrivateRoute>
+                <PrivateRoute user={user}>
                   <RoleForm socket={socket} user={user} />
                 </PrivateRoute>
               }
             />
+            {/**calendar */}
             <Route
               path='/calendar'
               element={
-                <PrivateRoute>
+                <PrivateRoute user={user}>
                   <Calendar socket={socket} user={user} />
                 </PrivateRoute>
               }
             />
 
             <Route
+              path='/calendar/personal'
+              element={
+                <PrivateRoute user={user}>
+                  <CalendarPersonal socket={socket} user={user} />
+                </PrivateRoute>
+              }
+            />
+            {/**holiday */}
+            <Route
               path='/holidays'
               element={
-                <PrivateRoute>
+                <PrivateRoute user={user}>
                   <HolidayHome socket={socket} user={user} />
                 </PrivateRoute>
               }
             />
             <Route
-              path='/holidays/create/:id'
+              path='/holidays/create/:year'
               element={
-                <PrivateRoute>
+                <PrivateRoute user={user}>
                   <HolidayForm socket={socket} user={user} />
                 </PrivateRoute>
               }
             />
-
             <Route
-              path='/training/*'
+              path='/holidays/edit/:year/:id'
               element={
-                <PrivateRoute>
+                <PrivateRoute user={user}>
+                  <HolidayForm socket={socket} user={user} />
+                </PrivateRoute>
+              }
+            />
+            {/**training */}
+            <Route
+              path='/training/home'
+              element={
+                <PrivateRoute user={user}>
                   <TrainingHome socket={socket} user={user} />
                 </PrivateRoute>
               }
@@ -391,7 +442,7 @@ const App = () => {
             <Route
               path='/training/create'
               element={
-                <PrivateRoute>
+                <PrivateRoute user={user}>
                   <TrainingForm socket={socket} user={user} />
                 </PrivateRoute>
               }
@@ -399,7 +450,7 @@ const App = () => {
             <Route
               path='/training/list'
               element={
-                <PrivateRoute>
+                <PrivateRoute user={user}>
                   <TrainingList socket={socket} user={user} />
                 </PrivateRoute>
               }
@@ -407,7 +458,7 @@ const App = () => {
             <Route
               path='/training/view/:id'
               element={
-                <PrivateRoute>
+                <PrivateRoute user={user}>
                   <TrainingDetails socket={socket} user={user} />
                 </PrivateRoute>
               }
@@ -415,7 +466,7 @@ const App = () => {
             <Route
               path='/training/submitExt'
               element={
-                <PrivateRoute>
+                <PrivateRoute user={user}>
                   <ExtTrainingForm socket={socket} user={user} />
                 </PrivateRoute>
               }
@@ -423,7 +474,7 @@ const App = () => {
             <Route
               path='/training/extList'
               element={
-                <PrivateRoute>
+                <PrivateRoute user={user}>
                   <ExtTrainingList socket={socket} user={user} />
                 </PrivateRoute>
               }
@@ -431,16 +482,49 @@ const App = () => {
             <Route
               path='/training/history'
               element={
-                <PrivateRoute>
+                <PrivateRoute user={user}>
                   <TrainingHistory socket={socket} user={user} />
                 </PrivateRoute>
               }
             />
-
+            {/**training progress */}
+            <Route
+              path='/trainingProgress/edit/:id'
+              element={
+                <PrivateRoute user={user}>
+                  <TrainingProgressForm socket={socket} user={user} />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path='/trainingProgress/view/:id'
+              element={
+                <PrivateRoute user={user}>
+                  <TrainingProgressDetail socket={socket} user={user} />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path='/trainingProgress/history'
+              element={
+                <PrivateRoute user={user}>
+                  <TrainingProgressHistory socket={socket} user={user} />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path='/trainingProgress/list'
+              element={
+                <PrivateRoute user={user}>
+                  <TrainingProgressList socket={socket} user={user} />
+                </PrivateRoute>
+              }
+            />
+            {/**policy */}
             <Route
               path='/policy'
               element={
-                <PrivateRoute>
+                <PrivateRoute user={user}>
                   <LeavePolicyHome socket={socket} user={user} />
                 </PrivateRoute>
               }
@@ -448,7 +532,7 @@ const App = () => {
             <Route
               path='/policy/create'
               element={
-                <PrivateRoute>
+                <PrivateRoute user={user}>
                   <LeavePolicyForm socket={socket} user={user} />
                 </PrivateRoute>
               }
@@ -456,16 +540,16 @@ const App = () => {
             <Route
               path='/policy/edit/:id'
               element={
-                <PrivateRoute>
+                <PrivateRoute user={user}>
                   <LeavePolicyForm socket={socket} user={user} />
                 </PrivateRoute>
               }
             />
-
+            {/**auth */}
             <Route
               path='/auth'
               element={
-                <PublicRoute>
+                <PublicRoute user={user}>
                   <Auth socket={socket} user={user} />
                 </PublicRoute>
               }
@@ -474,9 +558,27 @@ const App = () => {
               path='/resetPassword'
               element={<ResetPasswordForm socket={socket} user={user} />}
             />
-            <Route element={<Error404 />} />
+            {/**other */}
+            <Route
+              path='/test'
+              element={
+                <PrivateRoute user={user}>
+                  <Test socket={socket} user={user} />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path='/test2'
+              element={
+                <PrivateRoute user={user}>
+                  <Test2 socket={socket} user={user} />
+                </PrivateRoute>
+              }
+            />
+            <Route path='/' element={<Navigate to='/auth' replace />} />
+            <Route path='*' element={<Error404 />} />
           </Routes>
-        </Content>
+        </div>
         {/**   <div
             style={{
               height: '120vh',

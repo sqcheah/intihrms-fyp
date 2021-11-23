@@ -20,6 +20,8 @@ export const fetchAllLeaves = () => API.get('/leaves');
 export const fetchLeaveById = (id) => API.get(`/leaves/${id}`);
 export const fetchLeaveByDateRange = (dateRange) =>
   API.post(`/leaves/range`, dateRange);
+export const fetchLeaveByDateRangePersonal = (dateRange) =>
+  API.post(`/leaves/range/personal`, dateRange);
 export const createLeave = (newLeave) => API.post('/leaves', newLeave);
 export const updateLeave = (id, updatedLeave) =>
   API.patch(`/leaves/${id}`, updatedLeave);
@@ -36,6 +38,7 @@ export const resetPassword = (email) => API.post('/users/resetPassword', email);
 
 export const getDepts = () => API.get('/depts');
 export const getDept = (id) => API.get(`depts/${id}`);
+export const updateDept = (id, formData) => API.post(`/depts/${id}`, formData);
 export const createDept = (newDept) => API.post('/depts', newDept);
 export const deleteDept = (id) => API.delete(`/depts/${id}`);
 
@@ -62,8 +65,11 @@ export const updateRole = (id, updatedRole) =>
 export const fetchAllHolidays = () => API.get('/holidays');
 export const fetchHolidaysByYear = (year) => API.get(`/holidays/${year}`);
 export const createHoliday = (formData) => API.post('/holidays', formData);
-export const updateHoliday = (id, formData) =>
-  API.patch(`/holidays/${id}`, formData);
+export const updateHoliday = (year, id, formData) =>
+  API.post(`/holidays/${year}/${id}`, formData);
+export const getHoliday = (year, id) => API.get(`/holidays/${year}/${id}`);
+export const deleteHoliday = (year, id) =>
+  API.delete(`/holidays/${year}/${id}`);
 
 export const createTraining = (newTraining) =>
   API.post('/training', newTraining);
@@ -90,3 +96,14 @@ export const getPolicies = () => API.get('/policy');
 export const getPolicy = (id) => API.get(`/policy/${id}`);
 export const updatePolicy = (id, updatedPolicy) =>
   API.patch(`/policy/${id}`, updatedPolicy);
+
+export const getNotificationsById = (id) => API.get(`/notification/${id}`);
+
+export const getTrainingProgresses = () => API.get('/trainingProgress');
+export const getTrainingProgress = (id) => API.get(`trainingProgress/${id}`);
+export const updateTrainingProgress = (id, updatedProgress) =>
+  API.post(`/trainingProgress/${id}`, updatedProgress);
+export const getTrainingProgressUser = (id) =>
+  API.get(`trainingProgress/user/${id}`);
+export const getTrainingProgressDept = (id) =>
+  API.get(`trainingProgress/dept/${id}`);

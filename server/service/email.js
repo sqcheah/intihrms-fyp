@@ -19,6 +19,14 @@ export const sendMail = async (content) => {
       };
       break;
     }
+    case 'newLeave': {
+      emailTemplate = {
+        subject: 'New Leave Request',
+        html: `<p> Email: ${content.email}</p><br><p> Password: ${content.password}</p>
+        <br><a href="http://localhost:3000/auth">Click here to sign in</a>`,
+      };
+      break;
+    }
     default: {
       emailTemplate = {
         subject: 'This is subject',

@@ -9,7 +9,7 @@ import {
   Checkbox,
   Typography,
 } from 'antd';
-import 'antd/dist/antd.css';
+
 import './RoleForm.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useParams } from 'react-router-dom';

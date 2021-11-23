@@ -9,10 +9,10 @@ import {
 //https://stackoverflow.com/questions/69864165/error-privateroute-is-not-a-route-component-all-component-children-of-rou
 function PrivateRoute({
   children,
+  user,
   requiredPermissions = null,
   matchAllPermissions = false,
 }) {
-  const user = JSON.parse(localStorage.getItem('profile'));
   let hasAccess = true;
   if (requiredPermissions) {
     if (matchAllPermissions) {

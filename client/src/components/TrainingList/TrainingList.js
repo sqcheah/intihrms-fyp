@@ -23,7 +23,6 @@ import {
 
 import { Link, useNavigate } from 'react-router-dom';
 import moment from 'moment';
-import 'antd/dist/antd.css';
 import PageLoading from '../PageLoading/PageLoading';
 import ProTable, { TableDropdown } from '@ant-design/pro-table';
 import enUSIntl from 'antd/lib/locale/en_US';
@@ -119,6 +118,17 @@ const TrainingList = () => {
     },
   ];
   const actionRef = useRef();
+
+  const reverseArr = (input) => {
+    var ret = new Array();
+    if (input)
+      for (var i = input.length - 1; i >= 0; i--) {
+        ret.push(input[i]);
+      }
+    return ret;
+  };
+  let temp = reverseArr(trainings);
+
   if (isLoading) return <PageLoading />;
   return (
     <>
@@ -132,7 +142,7 @@ const TrainingList = () => {
               columns={columns}
               actionRef={actionRef}
               request={(params, sorter, filter) => {
-                let dataSource = trainings.reverse();
+                let dataSource = temp;
                 if (params) {
                   if (Object.keys(params).length > 0) {
                     dataSource = dataSource.filter((item) => {
@@ -179,11 +189,6 @@ const TrainingList = () => {
               pagination={{
                 pageSize: 10,
                 showQuickJumper: true,
-              }}
-              search={{
-                layout: 'vertical',
-                defaultCollapsed: true,
-                span: 6,
               }}
               dateFormatter='string'
               toolbar={{

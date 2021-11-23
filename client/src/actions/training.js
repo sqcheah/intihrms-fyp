@@ -1,23 +1,12 @@
-import * as api from '../api/index.js';
 import { message } from 'antd';
+import * as api from '../api/index.js';
 import {
   CREATE_TRAINING,
-  FETCH_ALL_TRAINING,
-  FETCH_ONE_TRAINING,
-  TRAINING_START_LOADING,
-  TRAINING_END_LOADING,
-  TRAINING_ERROR,
-  UPDATE_TRAINING,
-  LEAVE_TRAINING,
-  FETCH_EXT_TRAINING,
-  UPDATE_TRAINING_STATUS,
-  FETCH_EXT_TRAINING_HISTORY,
-  FETCH_TRAINING_HISTORY,
-  FETCH_UPCOMING_TRAINING,
-  FETCH_TODAY_TRAINING,
-  FETCH_TRAINING_COUNT,
+  FETCH_ALL_TRAINING, FETCH_EXT_TRAINING, FETCH_EXT_TRAINING_HISTORY, FETCH_ONE_TRAINING, FETCH_TODAY_TRAINING,
+  FETCH_TRAINING_COUNT, FETCH_TRAINING_HISTORY,
+  FETCH_UPCOMING_TRAINING, LEAVE_TRAINING, TRAINING_END_LOADING,
+  TRAINING_ERROR, TRAINING_START_LOADING, UPDATE_TRAINING, UPDATE_TRAINING_STATUS
 } from '../constants/actionTypes';
-import { handleError } from './error.js';
 
 export const fetchAllTrainings = () => async (dispatch) => {
   try {
@@ -88,30 +77,7 @@ export const createTraining = (training) => async (dispatch) => {
     dispatch({ type: CREATE_TRAINING, payload: data });
     dispatch({ type: TRAINING_END_LOADING });
   } catch (error) {
-    if (error.response) {
-      // Request made and server responded
-      dispatch({
-        type: TRAINING_ERROR,
-        error: error.response.data.message,
-      });
-      console.log(error.response.data.message);
-      console.log(error);
-      message.error(error.response.data.message.toString());
-    } else if (error.request) {
-      // The request was made but no response was received
-      dispatch({
-        type: TRAINING_ERROR,
-        error: error.request,
-      });
-      message.error(error.request.toString());
-    } else {
-      // Something happened in setting up the request that triggered an Error
-      dispatch({
-        type: TRAINING_ERROR,
-        error: error.message,
-      });
-      message.error(error.message.toString());
-    }
+    dispatch({ type: TRAINING_ERROR, error });
   }
 };
 export const updateTraining = (id, training) => async (dispatch) => {
@@ -121,30 +87,7 @@ export const updateTraining = (id, training) => async (dispatch) => {
     dispatch({ type: UPDATE_TRAINING, payload: data });
     dispatch({ type: TRAINING_END_LOADING });
   } catch (error) {
-    if (error.response) {
-      // Request made and server responded
-      dispatch({
-        type: TRAINING_ERROR,
-        error: error.response.data.message,
-      });
-      console.log(error.response.data.message);
-      console.log(error);
-      // message.error(error.response.data.message.toString());
-    } else if (error.request) {
-      // The request was made but no response was received
-      dispatch({
-        type: TRAINING_ERROR,
-        error: error.request,
-      });
-      message.error(error.request.toString());
-    } else {
-      // Something happened in setting up the request that triggered an Error
-      dispatch({
-        type: TRAINING_ERROR,
-        error: error.message,
-      });
-      message.error(error.message.toString());
-    }
+    dispatch({ type: TRAINING_ERROR, error });
   }
 };
 export const leaveTraining = (id, training) => async (dispatch) => {
@@ -154,7 +97,7 @@ export const leaveTraining = (id, training) => async (dispatch) => {
     dispatch({ type: LEAVE_TRAINING, payload: data });
     dispatch({ type: TRAINING_END_LOADING });
   } catch (error) {
-    handleError(error, TRAINING_ERROR);
+    dispatch({ type: TRAINING_ERROR, error });
   }
 };
 export const fetchExtTraining =
@@ -165,7 +108,7 @@ export const fetchExtTraining =
       dispatch({ type: FETCH_EXT_TRAINING, payload: data });
       dispatch({ type: TRAINING_END_LOADING });
     } catch (error) {
-      handleError(error, TRAINING_ERROR);
+      dispatch({ type: TRAINING_ERROR, error });
     }
   };
 export const updateTrainingStatus = (id, training) => async (dispatch) => {
@@ -175,7 +118,7 @@ export const updateTrainingStatus = (id, training) => async (dispatch) => {
     dispatch({ type: UPDATE_TRAINING_STATUS, payload: data });
     dispatch({ type: TRAINING_END_LOADING });
   } catch (error) {
-    handleError(error, TRAINING_ERROR);
+    dispatch({ type: TRAINING_ERROR, error });
   }
 };
 export const fetchExtTrainingHistory = (id) => async (dispatch) => {
@@ -185,7 +128,7 @@ export const fetchExtTrainingHistory = (id) => async (dispatch) => {
     dispatch({ type: FETCH_EXT_TRAINING_HISTORY, payload: data });
     dispatch({ type: TRAINING_END_LOADING });
   } catch (error) {
-    handleError(error, TRAINING_ERROR);
+    dispatch({ type: TRAINING_ERROR, error });
   }
 };
 export const fetchTrainingHistory = (id) => async (dispatch) => {
@@ -195,7 +138,7 @@ export const fetchTrainingHistory = (id) => async (dispatch) => {
     dispatch({ type: FETCH_TRAINING_HISTORY, payload: data });
     dispatch({ type: TRAINING_END_LOADING });
   } catch (error) {
-    handleError(error, TRAINING_ERROR);
+    dispatch({ type: TRAINING_ERROR, error });
   }
 };
 export const fetchUpcomingTraining = (id) => async (dispatch) => {
@@ -205,7 +148,7 @@ export const fetchUpcomingTraining = (id) => async (dispatch) => {
     dispatch({ type: FETCH_UPCOMING_TRAINING, payload: data });
     dispatch({ type: TRAINING_END_LOADING });
   } catch (error) {
-    handleError(error, TRAINING_ERROR);
+    dispatch({ type: TRAINING_ERROR, error });
   }
 };
 export const fetchTodayTrainings = () => async (dispatch) => {
@@ -215,7 +158,7 @@ export const fetchTodayTrainings = () => async (dispatch) => {
     dispatch({ type: FETCH_TODAY_TRAINING, payload: data });
     dispatch({ type: TRAINING_END_LOADING });
   } catch (error) {
-    handleError(error, TRAINING_ERROR);
+    dispatch({ type: TRAINING_ERROR, error });
   }
 };
 export const fetchTrainingCount = () => async (dispatch) => {
@@ -225,6 +168,6 @@ export const fetchTrainingCount = () => async (dispatch) => {
     dispatch({ type: FETCH_TRAINING_COUNT, payload: data });
     dispatch({ type: TRAINING_END_LOADING });
   } catch (error) {
-    handleError(error, TRAINING_ERROR);
+    dispatch({ type: TRAINING_ERROR, error });
   }
 };

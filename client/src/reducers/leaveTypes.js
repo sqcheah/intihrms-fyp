@@ -6,19 +6,26 @@ import {
   LEAVETYPE_END_LOADING,
   LEAVETYPE_ERROR,
   LEAVETYPE_START_LOADING,
+  LEAVETYPE_SUCCESS,
 } from '../constants/actionTypes';
-
+import { handleError } from './error.js';
 export default (
-  state = { error: null, isLoading: true, leaveTypes: [] },
+  state = { error: null, isLoading: true, leaveTypes: [], success: null },
   action
 ) => {
   switch (action.type) {
-    case LEAVETYPE_START_LOADING:
-      return { ...state, isLoading: true, error: null };
-    case LEAVETYPE_END_LOADING:
+    case LEAVETYPE_START_LOADING: {
+      return { ...state, isLoading: true, error: null, success: null };
+    }
+    case LEAVETYPE_END_LOADING: {
       return { ...state, isLoading: false };
+    }
+    case LEAVETYPE_SUCCESS: {
+      return { ...state, success: action.payload.success };
+    }
     case LEAVETYPE_ERROR: {
-      return { ...state, error: action.error, isLoading: false };
+      console.log('hre');
+      return { ...state, error: handleError(action.error), isLoading: false };
     }
 
     case UPDATE_LEAVETYPE:

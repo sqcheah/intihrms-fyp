@@ -1,15 +1,11 @@
 import * as api from '../api/index.js';
-import { message } from 'antd';
 import {
   CREATE_POLICY,
   FETCH_ALL_POLICY,
-  FETCH_ONE_POLICY,
-  UPDATE_POLICY,
-  POLICY_END_LOADING,
+  FETCH_ONE_POLICY, POLICY_END_LOADING,
   POLICY_ERROR,
-  POLICY_START_LOADING,
+  POLICY_START_LOADING, UPDATE_POLICY
 } from '../constants/actionTypes';
-import { handleError } from './error.js';
 
 export const getPolicies = () => async (dispatch) => {
   try {
@@ -18,7 +14,7 @@ export const getPolicies = () => async (dispatch) => {
     dispatch({ type: FETCH_ALL_POLICY, payload: data });
     dispatch({ type: POLICY_END_LOADING });
   } catch (error) {
-    handleError(error, POLICY_ERROR);
+    dispatch({ type: POLICY_ERROR, error });
   }
 };
 export const getPolicy = (id) => async (dispatch) => {
@@ -28,7 +24,7 @@ export const getPolicy = (id) => async (dispatch) => {
     dispatch({ type: FETCH_ONE_POLICY, payload: data });
     dispatch({ type: POLICY_END_LOADING });
   } catch (error) {
-    handleError(error, POLICY_ERROR);
+    dispatch({ type: POLICY_ERROR, error });
   }
 };
 export const createPolicy = (role) => async (dispatch) => {
@@ -39,7 +35,7 @@ export const createPolicy = (role) => async (dispatch) => {
     dispatch({ type: CREATE_POLICY, payload: data });
     dispatch({ type: POLICY_END_LOADING });
   } catch (error) {
-    handleError(error, POLICY_ERROR);
+    dispatch({ type: POLICY_ERROR, error });
   }
 };
 export const updatePolicy = (id, role) => async (dispatch) => {
@@ -49,6 +45,6 @@ export const updatePolicy = (id, role) => async (dispatch) => {
     dispatch({ type: UPDATE_POLICY, payload: data });
     dispatch({ type: POLICY_END_LOADING });
   } catch (error) {
-    handleError(error, POLICY_ERROR);
+    dispatch({ type: POLICY_ERROR, error });
   }
 };

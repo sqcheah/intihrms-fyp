@@ -7,9 +7,10 @@ import {
   DatePicker,
   InputNumber,
   Row,
+  Divider,
   Col,
 } from 'antd';
-import 'antd/dist/antd.css';
+
 import './StaffForm.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { createUser } from '../../actions/users';
@@ -47,6 +48,13 @@ const StaffForm = () => {
   const { policy } = useSelector((state) => state.policy);
   const { leaveTypes } = useSelector((state) => state.leaveTypes);
   const onFinish = (values) => {
+    console.log(values);
+    const leaveCount = [];
+    for (const [key, value] of Object.entries(values.leaveType)) {
+      leaveCount.push({ leaveType: key, count: value });
+    }
+    console.log(leaveCount);
+
     dispatch(
       createUser({
         emp_id: values.emp_id,
@@ -57,6 +65,7 @@ const StaffForm = () => {
         password: 'test',
         department: values.department,
         roles: values.roles,
+        leaveCount: leaveCount,
       })
     );
   };
@@ -148,22 +157,7 @@ const StaffForm = () => {
       >
         <Input />
       </Form.Item>
-      {leaveTypes.map((leaveType) => (
-        <Form.Item
-          key={leaveType._id}
-          label={leaveType.name}
-          name={leaveType._id}
-          initialValue={leaveType.count}
-          rules={[
-            {
-              required: true,
-              message: 'Please input your reason!',
-            },
-          ]}
-        >
-          <InputNumber />
-        </Form.Item>
-      ))}
+
       <Form.Item
         label='Email'
         name='email'
@@ -186,7 +180,7 @@ const StaffForm = () => {
           },
         ]}
       >
-        <DatePicker placeholder='hi' onChange={onDateChange} />
+        <DatePicker placeholder='Enter employment date' />
       </Form.Item>
       <Form.Item
         label='Department'
@@ -224,6 +218,36 @@ const StaffForm = () => {
           ))}
         </Select>
       </Form.Item>
+      <Form.Item
+        label='Training Hours'
+        name='trainingHours'
+        initialValue={60}
+        rules={[
+          {
+            required: true,
+            message: 'Please input your reason!',
+          },
+        ]}
+      >
+        <InputNumber />
+      </Form.Item>
+      {/**<Divider  orientation='leftText'>Leave</Divider>*/}
+      {leaveTypes.map((leaveType) => (
+        <Form.Item
+          key={leaveType._id}
+          label={leaveType.name}
+          name={[['leaveType'], [leaveType._id]]}
+          initialValue={leaveType.count}
+          rules={[
+            {
+              required: true,
+              message: 'Please input your reason!',
+            },
+          ]}
+        >
+          <InputNumber />
+        </Form.Item>
+      ))}
       <Form.Item
         wrapperCol={{
           offset: 8,

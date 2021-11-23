@@ -45,7 +45,7 @@ const ResetPasswordForm = () => {
         <Form.Item
           label='Password'
           name='password'
-          initialValue='test'
+          initialValue=''
           rules={[{ required: true, message: 'Please input your email!' }]}
         >
           <Input />
@@ -53,7 +53,7 @@ const ResetPasswordForm = () => {
         <Form.Item
           label='Confirm Password'
           name='confirmPassword'
-          initialValue='test'
+          initialValue=''
           rules={[{ required: true, message: 'Please input your email!' }]}
         >
           <Input />

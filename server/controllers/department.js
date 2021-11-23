@@ -42,6 +42,7 @@ export const updateDept = async (req, res) => {
     { ...dept, _id },
     { new: true }
   );
+  console.log(updatedDept);
   res.json(updatedDept);
 };
 

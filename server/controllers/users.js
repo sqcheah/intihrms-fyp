@@ -12,7 +12,7 @@ export const signIn = async (req, res) => {
   try {
     const existingUser = await userModel
       .findOne({ email })
-      .populate('department roles');
+      .populate('department roles leaveCount.leaveType');
     if (!existingUser)
       return res.status(404).json({ message: "User doesn't exist" });
 
@@ -28,8 +28,10 @@ export const signIn = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRY }
     );
+    console.log(existingUser);
     res.status(200).json({ result: existingUser, token });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: error });
   }
 };
@@ -93,7 +95,9 @@ export const createUser = async (req, res) => {
 };
 export const getUsers = async (req, res) => {
   try {
-    const users = await userModel.find().populate('department roles');
+    const users = await userModel
+      .find()
+      .populate('department roles leaveCount.leaveType');
     res.status(200).json(users);
   } catch (error) {
     console.log(err);
@@ -102,9 +106,12 @@ export const getUsers = async (req, res) => {
 };
 export const getUser = async (req, res) => {
   const { id: _id } = req.params;
-
+  console.log(_id);
   try {
-    const user = await userModel.findById(_id).populate('department roles');
+    const user = await userModel
+      .findById(_id)
+      .populate('department roles leaveCount.leaveType')
+      .lean();
     console.log(user);
     res.status(200).json(user);
   } catch (error) {
@@ -121,8 +128,10 @@ export const updateUser = async (req, res) => {
   const updatedUser = await userModel
     .findByIdAndUpdate(_id, { ...user, _id }, { new: true })
     .populate([
-      { path: 'user', select: 'first_name last_name' },
+      //  { path: 'user', select: 'first_name last_name' },
       { path: 'department', select: 'name' },
+      { path: 'roles' },
+      { path: 'leaveCount.leaveType' },
     ]);
   res.json(updatedUser);
 };
@@ -149,10 +158,14 @@ export const fetchDeptUsers = async (req, res) => {
   const { department } = req.params;
 
   try {
-    const users = await userModel.find({ department: department }).populate([
-      { path: 'department', select: 'name code' },
-      { path: 'roles', select: 'name' },
-    ]);
+    const users = await userModel
+      .find({ department: department })
+      .populate([
+        { path: 'department', select: 'name code' },
+        { path: 'roles', select: 'name' },
+        { path: 'leaveCount.leaveType' },
+      ])
+      .lean();
     res.status(200).json(users);
   } catch (error) {
     res.status(404).json({ message: error });

@@ -16,6 +16,7 @@ import {
   Col,
   Card,
   Typography,
+  Alert,
   Descriptions,
 } from 'antd';
 
@@ -30,12 +31,14 @@ import recharts, {
   Tooltip,
   Legend,
 } from 'recharts';
-import 'antd/dist/antd.css';
+
 import './TrainingHome.css';
 import { set } from 'lodash';
 import PageLoading from '../PageLoading/PageLoading';
+import useBreakpoint from 'antd/lib/grid/hooks/useBreakpoint';
 
 const TrainingHome = ({ socket, user }) => {
+  const screens = useBreakpoint();
   const [loading, setLoading] = useState(true);
   const { trainings, upcomingTraining, isLoading } = useSelector(
     (state) => state.trainings
@@ -44,10 +47,15 @@ const TrainingHome = ({ socket, user }) => {
   const dispatch = useDispatch();
   var count = 0;
 
+  var totalTraining = user.trainingHours,
+    completedTraining = user.completedHours;
+  var trainingNeeded = totalTraining - completedTraining;
+  var completionPercentage = completedTraining / totalTraining;
+  trainingNeeded = trainingNeeded < 0 ? '' : trainingNeeded;
+
   const data = [
-    //test example data
-    { name: 'Hours Completed', value: 15 },
-    { name: 'Hours Required', value: 5 },
+    { name: 'Hours Completed', value: completedTraining },
+    { name: 'Hours Required', value: trainingNeeded },
   ];
   const COLORS = ['#0088FE', '#de0b0b'];
 
@@ -60,7 +68,6 @@ const TrainingHome = ({ socket, user }) => {
   };
 
   useEffect(() => {
-    console.log(user);
     dispatch(fetchUpcomingTraining(user._id));
     if (user.roles.name != 'staff')
       dispatch(
@@ -72,8 +79,6 @@ const TrainingHome = ({ socket, user }) => {
     if (element.status == 'Pending') count++;
   }
 
-  console.log('trainings', trainings);
-  console.log('upcoming', upcomingTraining);
   if (isLoading) return <PageLoading />;
   return (
     <>
@@ -84,6 +89,7 @@ const TrainingHome = ({ socket, user }) => {
             <Descriptions
               title='Profile Details'
               bordered
+              layout={screens.md ? 'horizontal' : 'vertical'}
               column={{ sm: 2, xs: 1 }}
             >
               <Descriptions.Item label='Name' span={2}>
@@ -93,17 +99,43 @@ const TrainingHome = ({ socket, user }) => {
                 {user.department.name}
               </Descriptions.Item>
               <Descriptions.Item label='Total Training Hours Required' span={1}>
-                {20 /**temp data */}
+                {user.trainingHours}
               </Descriptions.Item>
               <Descriptions.Item label='Training Hours Completed' span={1}>
-                {15 /**temp data */}
+                {user.completedHours}
               </Descriptions.Item>
             </Descriptions>
+            <br />
+            {completionPercentage <= 0.25 ? (
+              <Alert
+                message='Low Training Hours Completed'
+                description='Please participate in more trainings in order to reach your quota!'
+                type='error'
+              />
+            ) : completionPercentage < 0.75 ? (
+              <Alert
+                message='Moderate Training Hours Completed'
+                description='Keep up the good work! Participate in more trainings to reach your quota.'
+                type='warning'
+              />
+            ) : completionPercentage < 1 ? (
+              <Alert
+                message='Great Training Hours Completed'
+                description='Almost there! Keep participating in trainings to reach your quota!'
+                type='success'
+              />
+            ) : (
+              <Alert
+                message='Training Quota Reached'
+                description='Congratulations! You have reached your training quota!'
+                type='success'
+              />
+            )}
           </Card>
         </Col>
         <Col className='gutter-row' xs={24} md={12} lg={8}>
           <Card bordered>
-            <ResponsiveContainer minWidth={200} minHeight={200}>
+            <ResponsiveContainer minWidth={200} minHeight={300}>
               <PieChart>
                 <Pie
                   data={data}
@@ -185,7 +217,7 @@ const TrainingHome = ({ socket, user }) => {
                       key='action'
                       render={(text, record) => (
                         <Space size='middle' key={record._id}>
-                          <Link to={`view/${record._id}`}>View</Link>
+                          <Link to={`/training/view/${record._id}`}>View</Link>
                         </Space>
                       )}
                     ></Table.Column>
@@ -193,7 +225,7 @@ const TrainingHome = ({ socket, user }) => {
                 </>
               ))}
             <Button type='danger'>
-              <Link to='/training/history'>To Trainings</Link>
+              <Link to='/training/history'>Training History</Link>
             </Button>
           </Card>
         </Col>

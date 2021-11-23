@@ -1,48 +1,103 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Form, Input, Button, Select, Typography, DatePicker } from 'antd';
-import { useDispatch } from 'react-redux';
-import { createHoliday } from '../../actions/holidays';
-import 'antd/dist/antd.css';
+import {
+  Form,
+  Input,
+  Button,
+  Select,
+  Typography,
+  DatePicker,
+  Modal,
+} from 'antd';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  createHoliday,
+  updateHoliday,
+  getHoliday,
+} from '../../actions/holidays';
+
 import './HolidayForm.css';
+import moment from 'moment';
+import PageLoading from '../PageLoading/PageLoading';
 const { Title } = Typography;
 const DeptForm = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { year, id } = useParams();
+  const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false);
+  const { holiday, isLoading, success, error } = useSelector(
+    (state) => state.holidays
+  );
+  useEffect(() => {
+    if (id) {
+      setLoading(true);
+      dispatch(getHoliday(year, id)).then((data) => {
+        setLoading(false);
+        const value = data[0];
+        form.setFieldsValue({
+          ...value,
+          'range-picker': [moment(value.startDate), moment(value.endDate)],
+        });
+      });
+      console.log(holiday);
+    }
+  }, [dispatch, id]);
+
   const onFinish = (values) => {
     console.log('Success:', values);
+
     const rangeValue = values['range-picker'];
     const startDate = rangeValue[0];
     const endDate = rangeValue[1];
-    dispatch(
-      createHoliday({
-        year: id,
-        holiday: {
+    if (id) {
+      dispatch(
+        updateHoliday(year, id, {
           title: values.title,
-          decription: values.description,
+          description: values.description,
           startDate,
           endDate,
+        })
+      );
+      Modal.success({
+        content: 'Holiday Updated',
+        onOk() {
+          navigate('/holidays');
         },
-      })
-    );
+      });
+    } else {
+      dispatch(
+        createHoliday({
+          year: year,
+          holiday: {
+            title: values.title,
+            description: values.description,
+            startDate,
+            endDate,
+          },
+        })
+      );
+      Modal.success({
+        content: 'Holiday created',
+        onOk() {
+          navigate('/holidays');
+        },
+      });
+    }
   };
 
   const onFinishFailed = (errorInfo) => {
     console.log('Failed:', errorInfo);
   };
-
+  if (loading) return <PageLoading />;
   return (
     <>
-      <Title level={2}> Create Department</Title>
+      <Title level={2}> {id ? 'Edit Holiday' : 'Create Holiday'}</Title>
       <Form
+        form={form}
         name='basic'
-        initialValues={{
-          remember: true,
-        }}
         onFinish={onFinish}
         onFinishFailed={onFinishFailed}
-        autoComplete='off'
       >
         <Form.Item
           label='Title'
@@ -81,9 +136,7 @@ const DeptForm = () => {
           <Button type='primary' htmlType='submit'>
             Submit
           </Button>
-          <Button>
-            <Link to='/holidays'>Back</Link>
-          </Button>
+          <Button onClick={() => navigate(-1)}>Back</Button>
         </Form.Item>
       </Form>
     </>

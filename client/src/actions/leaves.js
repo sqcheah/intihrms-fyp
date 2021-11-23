@@ -1,21 +1,20 @@
 import * as api from '../api/index.js';
-import { message } from 'antd';
 import {
   CREATE_LEAVE,
   FETCH_ALL_LEAVE,
   FETCH_LEAVE_BY_DATERANGE,
+  FETCH_LEAVE_BY_DATERANGE_PERSONAL,
+  FETCH_LEAVE_COUNT,
+  FETCH_LEAVE_HISTORY,
+  FETCH_LEAVE_REQUESTS,
   FETCH_ONE_LEAVE,
+  FETCH_TODAY_LEAVE,
+  FETCH_UPCOMING_LEAVE,
   LEAVE_END_LOADING,
   LEAVE_ERROR,
   LEAVE_START_LOADING,
   UPDATE_LEAVE,
-  FETCH_LEAVE_REQUESTS,
-  FETCH_UPCOMING_LEAVE,
-  FETCH_LEAVE_HISTORY,
-  FETCH_TODAY_LEAVE,
-  FETCH_LEAVE_COUNT,
 } from '../constants/actionTypes';
-import { handleError } from './error.js';
 
 export const fetchAllLeaves = () => async (dispatch) => {
   try {
@@ -24,7 +23,7 @@ export const fetchAllLeaves = () => async (dispatch) => {
     dispatch({ type: FETCH_ALL_LEAVE, payload: data });
     dispatch({ type: LEAVE_END_LOADING });
   } catch (error) {
-    handleError(error, LEAVE_ERROR);
+    dispatch({ type: LEAVE_ERROR, error });
   }
 };
 export const fetchLeaveById = (id) => async (dispatch) => {
@@ -37,7 +36,7 @@ export const fetchLeaveById = (id) => async (dispatch) => {
 
     return data;
   } catch (error) {
-    handleError(error, LEAVE_ERROR);
+    dispatch({ type: LEAVE_ERROR, error });
   }
 };
 
@@ -48,7 +47,7 @@ export const createLeave = (leave) => async (dispatch) => {
     dispatch({ type: CREATE_LEAVE, payload: data });
     dispatch({ type: LEAVE_END_LOADING });
   } catch (error) {
-    handleError(error, LEAVE_ERROR);
+    dispatch({ type: LEAVE_ERROR, error });
   }
 };
 export const updateLeave = (id, leave) => async (dispatch) => {
@@ -58,20 +57,33 @@ export const updateLeave = (id, leave) => async (dispatch) => {
     dispatch({ type: UPDATE_LEAVE, payload: data });
     dispatch({ type: LEAVE_END_LOADING });
   } catch (error) {
-    handleError(error, LEAVE_ERROR);
+    dispatch({ type: LEAVE_ERROR, error });
   }
 };
 export const fetchLeaveByDateRange = (dateRange) => async (dispatch) => {
   try {
     dispatch({ type: LEAVE_START_LOADING });
     const data = await api.fetchLeaveByDateRange(dateRange);
-    console.log(data);
+    //console.log(data);
     dispatch({ type: FETCH_LEAVE_BY_DATERANGE, payload: data });
     dispatch({ type: LEAVE_END_LOADING });
   } catch (error) {
-    handleError(error, LEAVE_ERROR);
+    dispatch({ type: LEAVE_ERROR, error });
   }
 };
+
+export const fetchLeaveByDateRangePersonal =
+  (dateRange) => async (dispatch) => {
+    try {
+      dispatch({ type: LEAVE_START_LOADING });
+      const data = await api.fetchLeaveByDateRangePersonal(dateRange);
+      //console.log(data);
+      dispatch({ type: FETCH_LEAVE_BY_DATERANGE_PERSONAL, payload: data });
+      dispatch({ type: LEAVE_END_LOADING });
+    } catch (error) {
+      dispatch({ type: LEAVE_ERROR, error });
+    }
+  };
 export const fetchLeaveRequests =
   (role, user, department) => async (dispatch) => {
     try {
@@ -80,7 +92,7 @@ export const fetchLeaveRequests =
       dispatch({ type: FETCH_LEAVE_REQUESTS, payload: data });
       dispatch({ type: LEAVE_END_LOADING });
     } catch (error) {
-      handleError(error, LEAVE_ERROR);
+      dispatch({ type: LEAVE_ERROR, error });
     }
   };
 export const fetchUpcomingLeaves = (id) => async (dispatch) => {
@@ -90,7 +102,7 @@ export const fetchUpcomingLeaves = (id) => async (dispatch) => {
     dispatch({ type: FETCH_UPCOMING_LEAVE, payload: data });
     dispatch({ type: LEAVE_END_LOADING });
   } catch (error) {
-    handleError(error, LEAVE_ERROR);
+    dispatch({ type: LEAVE_ERROR, error });
   }
 };
 export const fetchLeaveHistory = (id) => async (dispatch) => {
@@ -99,8 +111,9 @@ export const fetchLeaveHistory = (id) => async (dispatch) => {
     const { data } = await api.fetchLeaveHistory(id);
     dispatch({ type: FETCH_LEAVE_HISTORY, payload: data });
     dispatch({ type: LEAVE_END_LOADING });
+    console.log(data);
   } catch (error) {
-    handleError(error, LEAVE_ERROR);
+    dispatch({ type: LEAVE_ERROR, error });
   }
 };
 export const fetchTodayLeaves = () => async (dispatch) => {
@@ -110,7 +123,7 @@ export const fetchTodayLeaves = () => async (dispatch) => {
     dispatch({ type: FETCH_TODAY_LEAVE, payload: data });
     dispatch({ type: LEAVE_END_LOADING });
   } catch (error) {
-    handleError(error, LEAVE_ERROR);
+    dispatch({ type: LEAVE_ERROR, error });
   }
 };
 export const fetchLeaveCount = () => async (dispatch) => {
@@ -120,6 +133,6 @@ export const fetchLeaveCount = () => async (dispatch) => {
     dispatch({ type: FETCH_LEAVE_COUNT, payload: data });
     dispatch({ type: LEAVE_END_LOADING });
   } catch (error) {
-    handleError(error, LEAVE_ERROR);
+    dispatch({ type: LEAVE_ERROR, error });
   }
 };
