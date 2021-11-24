@@ -78,6 +78,10 @@ const TrainingProgressList = ({ user }) => {
     return string;
   };
 
+  const filterResult = trainingProgresses.filter(
+    (trainingProgresses) => trainingProgresses.user._id != user._id
+  );
+
   const columns = [
     {
       title: 'Employee Name',
@@ -182,12 +186,12 @@ const TrainingProgressList = ({ user }) => {
       }
     return ret;
   };
-  let temp = reverseArr(trainingProgresses);
+  let temp = reverseArr(filterResult);
   if (isLoading) return <PageLoading />;
   return (
     <>
-      <h2>Training Progress List</h2>
-      {!trainingProgresses.length ? (
+      <h2>Employee Training Completion</h2>
+      {!filterResult.length ? (
         <Empty></Empty>
       ) : (
         <>
@@ -264,6 +268,9 @@ const TrainingProgressList = ({ user }) => {
               pagination={{
                 pageSize: 10,
                 showQuickJumper: true,
+              }}
+              search={{
+                labelWidth: 'auto',
               }}
               dateFormatter='string'
               toolbar={{

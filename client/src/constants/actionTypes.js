@@ -32,6 +32,7 @@ export const USER_END_LOADING = 'USER_END_LOADING';
 export const USER_ERROR = 'USER_ERROR';
 export const USER_SUCCESS = 'USER_SUCCESS';
 export const FETCH_DEPT_USER = 'FETCH_DEPT_USER';
+export const RESET_PASSWORD = 'RESET_PASSWORD';
 
 export const CREATE_DEPT = 'CREATE_DEPT';
 export const UPDATE_DEPT = 'UPDATE_DEPT';

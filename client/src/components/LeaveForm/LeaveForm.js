@@ -31,7 +31,7 @@ const LeaveForm = ({ user }) => {
   const navigate = useNavigate();
   const { id } = useParams();
   const { leave } = useSelector((state) => state.leaves);
-
+  const [showRange, setShowRange] = useState(false);
   const { leaveTypes } = useSelector((state) => state.leaveTypes);
   const [form] = Form.useForm();
   const [error, setError] = useState(null);
@@ -48,7 +48,6 @@ const LeaveForm = ({ user }) => {
     return workingDays;
   };
   const onFinish = (values) => {
-    return;
     let existedFile = [];
     setError(null);
     console.log(values);
@@ -168,6 +167,43 @@ const LeaveForm = ({ user }) => {
       onSuccess('ok');
     }, 0);
   };
+  const disabledDate = (val) => {
+    console.log(val.format('YYYY-MM-DD'));
+    const ltVal = form.getFieldValue('leaveType');
+
+    if (!ltVal) return true;
+    const lt = leaveTypes.find((l) => l._id == ltVal);
+    const ltStart = lt.startDate;
+    const ltEnd = lt.endDate;
+    let start, end;
+    if (ltStart == 'year' || ltStart == 'month') {
+      start = moment().startOf(ltStart);
+    } else {
+      console.log(ltStart);
+      const operator = ltStart.charAt(0);
+      const day = parseInt(ltStart.substring(1));
+      if (operator == '+') {
+        start = moment().add(day, 'days');
+      } else {
+        start = moment().subtract(day, 'days');
+      }
+    }
+
+    if (ltEnd == 'year' || ltEnd == 'month') {
+      end = moment().endOf(ltEnd);
+    } else {
+      const operator = ltEnd.charAt(0);
+      const day = parseInt(ltEnd.substring(1));
+      if (operator == '+') {
+        end = moment().add(day, 'days');
+      } else {
+        end = moment().subtract(day, 'days');
+      }
+    }
+    console.log(end.format('YYYY-MM-DD'), start.format('YYYY-MM-DD'));
+    return val < start || val > end;
+  };
+
   if (loading) return <PageLoading />;
   return (
     <>
@@ -226,7 +262,7 @@ const LeaveForm = ({ user }) => {
             },
           ]}
         >
-          <RangePicker />
+          <RangePicker disabledDate={disabledDate} />
         </Form.Item>
         <Form.Item
           name='upload'

@@ -85,6 +85,11 @@ export default {
             name: 'Leave Requests',
             icon: <ExclamationCircleOutlined />,
           },
+          {
+            path: '/calendar/personal',
+            name: 'Calendar View',
+            icon: <CalendarOutlined />,
+          },
         ],
       },
       {
@@ -121,6 +126,16 @@ export default {
           {
             path: 'extList',
             name: 'External Requests List',
+            icon: <ExclamationCircleOutlined />,
+          },
+          {
+            path: '/trainingProgress/history',
+            name: 'Track Training Progress',
+            icon: <ExclamationCircleOutlined />,
+          },
+          {
+            path: '/trainingProgress/list',
+            name: 'Pending Training Completion',
             icon: <ExclamationCircleOutlined />,
           },
         ],

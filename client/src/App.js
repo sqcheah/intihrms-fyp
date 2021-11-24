@@ -86,6 +86,7 @@ import TrainingProgressForm from './components/TrainingProgressForm/TrainingProg
 import TrainingProgressDetail from './components/TrainingProgressDetails/TrainingProgressDetails';
 import TrainingProgressHistory from './components/TrainingProgressHistory/TrainingProgressHistory';
 import TrainingProgressList from './components/TrainingProgressList/TrainingProgressList';
+import ChangePasswordForm from './components/ChangePasswordForm/ChangePasswordForm';
 
 const { Header, Footer, Sider, Content } = Layout;
 const App = () => {
@@ -128,9 +129,9 @@ const App = () => {
   useEffect(() => {
     if (socket && user) {
       socket?.emit('newUser', user);
-      socket.emit('listUser');
+      socket?.emit('listUser');
 
-      socket?.on('newNotification', (data) => {
+      socket?.on('newNotifications', (data) => {
         let title = 'Notification';
         let icon = <InfoCircleOutlined />;
         if (data.content.type == 'leave') {
@@ -155,7 +156,8 @@ const App = () => {
       });
     }
     return () => {
-      socket?.off('newNotification');
+      socket?.off('newNotifications');
+      socket?.disconnect();
     };
   }, [socket, user]);
 
@@ -188,7 +190,7 @@ const App = () => {
         }}
         rightContentRender={() => (
           <Space size='large'>
-            {user && <NoticeIcon user={user} socket={socket} />}
+            {false && <NoticeIcon user={user} socket={socket} />}
             <Avatar user={user} logout={logout} />
           </Space>
         )}
@@ -327,6 +329,14 @@ const App = () => {
               element={
                 <PrivateRoute user={user}>
                   <Profile socket={socket} user={user} />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path='/profile/changePassword'
+              element={
+                <PrivateRoute user={user}>
+                  <ChangePasswordForm socket={socket} user={user} />
                 </PrivateRoute>
               }
             />

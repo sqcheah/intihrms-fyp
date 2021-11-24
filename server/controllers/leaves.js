@@ -164,28 +164,42 @@ export const updateLeave = async (req, res) => {
   if (!mongoose.Types.ObjectId.isValid(_id))
     return res.status(404).send('No leave with that id');
   //mongoose
-
-  let filesArray = [];
-  req.files.forEach((element) => {
-    const file = {
-      fileId: mongoose.Types.ObjectId(),
-      fileName: element.originalname,
-      filePath: element.path,
-      fileType: element.mimetype,
-      fileSize: fileSizeFormatter(element.size, 2),
-    };
-    // console.log('1', element);
-    filesArray.push(file);
-  });
-  const newFiles = JSON.parse(leave.attachments).concat(filesArray);
-  //console.log(newFiles);
-  const updatedLeave = await leaveModel
-    .findByIdAndUpdate(_id, { ...leave, attachments: newFiles }, { new: true })
-    .populate([
-      { path: 'user', select: 'first_name last_name' },
-      { path: 'department', select: 'name' },
-      { path: 'leaveType' },
-    ]);
+  let updatedLeave;
+  if (req.files) {
+    let filesArray = [];
+    req.files.forEach((element) => {
+      const file = {
+        fileId: mongoose.Types.ObjectId(),
+        fileName: element.originalname,
+        filePath: element.path,
+        fileType: element.mimetype,
+        fileSize: fileSizeFormatter(element.size, 2),
+      };
+      // console.log('1', element);
+      filesArray.push(file);
+    });
+    const newFiles = JSON.parse(leave.attachments).concat(filesArray);
+    //console.log(newFiles);
+    updatedLeave = await leaveModel
+      .findByIdAndUpdate(
+        _id,
+        { ...leave, attachments: newFiles },
+        { new: true }
+      )
+      .populate([
+        { path: 'user', select: 'first_name last_name' },
+        { path: 'department', select: 'name' },
+        { path: 'leaveType' },
+      ]);
+  } else {
+    updatedLeave = await leaveModel
+      .findByIdAndUpdate(_id, { ...leave }, { new: true })
+      .populate([
+        { path: 'user', select: 'first_name last_name' },
+        { path: 'department', select: 'name' },
+        { path: 'leaveType' },
+      ]);
+  }
   res.json(updatedLeave);
 };
 //https://github.com/Musawirkhann/Nodejs_Mongodb_Express_Multer/blob/main/serverproject/controllers/fileuploaderController.js

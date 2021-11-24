@@ -18,18 +18,21 @@ import ProForm, {
   ProFormText,
   ProFormDigit,
   ProFormColorPicker,
+  ProFormSelect,
+  ProFormRadio,
 } from '@ant-design/pro-form';
 import styles from './LeaveTypeForm.less';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import {
   createLeaveType,
   updateLeaveType,
   getLeaveType,
 } from '../../actions/leaveTypes';
 import enUSIntl from 'antd/lib/locale/en_US';
-
+import moment from 'moment';
 import { ChromePicker, SketchPicker } from 'react-color';
+
 import { PageLoading } from '@ant-design/pro-layout';
 const { TextArea } = Input;
 const { RangePicker } = DatePicker;
@@ -38,30 +41,88 @@ const isBlank = (str) => {
   return !!!str || /^\s*$/.test(str);
 };
 const LeaveTypeForm = () => {
+  const navigate = useNavigate();
   const { id } = useParams();
   const [color, setColor] = useState('#39f983');
   const { leaveType, isLoading, success, error } = useSelector(
     (state) => state.leaveTypes
   );
   const [loading, setLoading] = useState(false);
+  const [showStart, setShowStart] = useState(false);
+  const [showEnd, setShowEnd] = useState(false);
+
   const [colorState, setColorState] = useState({
     code: 'sample',
     color: 'blue',
   });
+
   const [form] = Form.useForm();
   const dispatch = useDispatch();
   const onFinish = async (values) => {
-    if (id) {
-      dispatch(updateLeaveType(id, values));
+    console.log(values);
+    let start, end;
+    const startValue =
+      values.startDate == 'custom' ? values.customStartDate : values.startDate;
+    const endValue =
+      values.endDate == 'custom' ? values.customEndDate : values.endDate;
+    if (startValue == 'year' || startValue == 'month') {
+      start = moment().startOf(startValue);
     } else {
-      dispatch(createLeaveType(values));
+      console.log(startValue);
+      const operator = startValue.charAt(0);
+      const day = parseInt(startValue.substring(1));
+      if (operator == '+') {
+        start = moment().add(day, 'days');
+      } else {
+        start = moment().subtract(day, 'days');
+      }
+    }
+    if (endValue == 'year' || endValue == 'month') {
+      end = moment().endOf(endValue);
+    } else {
+      const operator = endValue.charAt(0);
+      const day = parseInt(endValue.substring(1));
+      if (operator == '+') {
+        end = moment().add(day, 'days');
+      } else {
+        end = moment().subtract(day, 'days');
+      }
+    }
+
+    if (end.diff(start, 'days') < 0) {
+      Modal.error({
+        content: 'End date must be later than start date',
+      });
+    }
+    console.log(start.format('YYYY-MM-DD'), end.format('YYYY-MM-DD'));
+
+    if (id) {
+      dispatch(
+        updateLeaveType(id, {
+          ...values,
+          startDate: startValue,
+          endDate: endValue,
+        })
+      );
+      Modal.success({
+        content: 'Leave type updated',
+        onOk() {
+          navigate('/leaveTypes');
+        },
+      });
+    } else {
+      dispatch(
+        createLeaveType({ ...values, startDate: startValue, endDate: endValue })
+      );
+      Modal.success({
+        content: 'Leave type created',
+        onOk() {
+          navigate('/leaveTypes');
+        },
+      });
     }
   };
-  useEffect(() => {
-    console.log(isLoading);
-    if (success) Modal.success({ content: success });
-    else if (error) Modal.error({ content: error });
-  }, [isLoading]);
+
   useEffect(() => {
     if (id) {
       setLoading(true);
@@ -93,6 +154,22 @@ const LeaveTypeForm = () => {
     const autoCode = value.toLowerCase().split(' ')[0];
     form.setFieldsValue({ code: autoCode });
     setColorState({ ...colorState, code: autoCode });
+  };
+
+  const onStartChange = (e) => {
+    if (e.target.value == 'custom') {
+      setShowStart(true);
+    } else {
+      setShowStart(false);
+    }
+  };
+
+  const onEndChange = (e) => {
+    if (e.target.value == 'custom') {
+      setShowEnd(true);
+    } else {
+      setShowEnd(false);
+    }
   };
 
   if (loading) return <PageLoading />;
@@ -180,6 +257,72 @@ const LeaveTypeForm = () => {
               },
             ]}
           />
+
+          <ProFormRadio.Group
+            fieldProps={{ onChange: onStartChange }}
+            initialValue='year'
+            options={[
+              {
+                value: 'year',
+                label: 'Year',
+              },
+              {
+                value: 'month',
+                label: 'Month',
+              },
+              {
+                value: 'custom',
+                label: 'Custom',
+              },
+            ]}
+            name='startDate'
+            label={'Start Date'}
+          />
+          {showStart && (
+            <ProFormText
+              validate
+              name='customStartDate'
+              label='Start Date'
+              tooltip='Number of days from now. Format: +/- number Eg: -7'
+              placeholder='+ or - with numbers eg: -7'
+              rules={[
+                { required: true },
+                { pattern: '[+-][\\d]+', message: 'Invalid Format' },
+              ]}
+            />
+          )}
+          <ProFormRadio.Group
+            fieldProps={{ onChange: onEndChange }}
+            initialValue='year'
+            options={[
+              {
+                value: 'year',
+                label: 'Year',
+              },
+              {
+                value: 'month',
+                label: 'Month',
+              },
+              {
+                value: 'custom',
+                label: 'Custom',
+              },
+            ]}
+            name='endDate'
+            label={'End Date'}
+          />
+          {showEnd && (
+            <ProFormText
+              name='customEndDate'
+              label='End Date'
+              tooltip='Number of days from now. Format: +/- number Eg: +7'
+              placeholder='+ or - with numbers eg: +7'
+              rules={[
+                { required: true },
+                { pattern: '[+-][\\d]+', message: 'Invalid Format' },
+              ]}
+            />
+          )}
         </ProForm>
       </ConfigProvider>
       <Row>

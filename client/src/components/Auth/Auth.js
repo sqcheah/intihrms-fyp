@@ -1,16 +1,21 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Form, Input, Button, Select, Typography } from 'antd';
-import { useDispatch } from 'react-redux';
+import { Form, Input, Button, Select, Typography, Modal } from 'antd';
+import { useDispatch, useSelector } from 'react-redux';
 
 import './Auth.css';
 import { signIn } from '../../actions/auth';
 const { Title } = Typography;
 const Auth = () => {
+  const { error } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const onFinish = (values) => {
-    dispatch(signIn(values, navigate));
+    dispatch(signIn(values, navigate)).then(() => {
+      if (error) {
+        Modal.error({ content: error });
+      }
+    });
   };
 
   const onFinishFailed = (errorInfo) => {

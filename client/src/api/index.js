@@ -35,6 +35,9 @@ export const fetchLeaveCount = () => API.get('/leaves/count/dept');
 export const signIn = (formData) => API.post('/users/signIn', formData);
 export const signUp = (formData) => API.post('/users/signUp', formData);
 export const resetPassword = (email) => API.post('/users/resetPassword', email);
+export const changePassword = (id, password) =>
+  API.post(`/users/${id}/changePassword`, password);
+export const updateAuth = (id) => API.get(`/users/updateAuth/${id}`);
 
 export const getDepts = () => API.get('/depts');
 export const getDept = (id) => API.get(`depts/${id}`);

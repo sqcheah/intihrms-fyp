@@ -1,12 +1,16 @@
-import React from 'react';
-
-const ChangePasswordForm = () => {
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { changePassword, resetPassword } from '../../actions/auth';
+import { Typography, Form, Input, Button } from 'antd';
+const ChangePasswordForm = ({ user }) => {
   const [submitted, setSubmitted] = useState(false);
   const dispatch = useDispatch();
   const { isLoading, error } = useSelector((state) => state.users);
   const onFinish = async (values) => {
-    dispatch(resetPassword(values.email));
-    if (!error) setSubmitted(true);
+    console.log(values);
+
+    dispatch(changePassword(user._id, { password: values.password }));
+    //if (!error) setSubmitted(true);
     console.log('Success:', values);
     //  console.log(submitted && !isLoading && !error);
   };
@@ -17,7 +21,7 @@ const ChangePasswordForm = () => {
   return (
     <>
       <Typography.Title level={2} style={{ textAlign: 'center' }}>
-        Reset Password
+        Change Password
       </Typography.Title>
       <Form
         name='basic'
@@ -28,24 +32,61 @@ const ChangePasswordForm = () => {
         autoComplete='off'
       >
         <Form.Item
-          label='Email'
-          name='email'
-          initialValue='LarLex579@gmail.com'
-          rules={[{ required: true, message: 'Please input your email!' }]}
+          name='password'
+          label='Password'
+          rules={[
+            {
+              required: true,
+              message: 'Please input your password!',
+            },
+            {
+              pattern:
+                '^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-]).{8,}$',
+              message:
+                'Minimum eight characters, at least one upper case English letter, one lower case English letter, one number and one special character',
+            },
+          ]}
+          hasFeedback
         >
-          <Input />
+          <Input.Password />
         </Form.Item>
-        {submitted && !error && <Alert message='Email sent' type='success' />}
+
+        <Form.Item
+          name='confirm'
+          label='Confirm Password'
+          dependencies={['password']}
+          hasFeedback
+          rules={[
+            {
+              required: true,
+              message: 'Please confirm your password!',
+            },
+            {
+              pattern:
+                '^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-]).{8,}$',
+              message:
+                'Minimum eight characters, at least one upper case English letter, one lower case English letter, one number and one special character',
+            },
+            ({ getFieldValue }) => ({
+              validator(_, value) {
+                if (!value || getFieldValue('password') === value) {
+                  return Promise.resolve();
+                }
+                return Promise.reject(
+                  new Error('The two passwords that you entered do not match!')
+                );
+              },
+            }),
+          ]}
+        >
+          <Input.Password />
+        </Form.Item>
         <Form.Item wrapperCol={{ offset: 11 }}>
           <Button type='primary' htmlType='submit'>
             Submit
           </Button>
         </Form.Item>
       </Form>
-
-      <div style={{ textAlign: 'center' }}>
-        <Link to='/auth'>Back to Login</Link>
-      </div>
     </>
   );
 };

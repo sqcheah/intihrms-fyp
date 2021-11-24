@@ -201,7 +201,7 @@ const NoticeIconView = ({ user, socket }) => {
 
   useEffect(() => {
     if (user) {
-      socket?.on('newNotification', () => {
+      socket?.on('newNotifications', () => {
         dispatch(getNotificationsById(user._id)).then((data) => {
           setNotices(data);
         });

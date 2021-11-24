@@ -29,10 +29,10 @@ export const getTrainingProgresses = async (req, res) => {
         const filterItems = items.filter(
           (item) => item.training.toDate < currentDate
         );
-        res.status(200).json(filterItems);
+        return res.status(200).json(filterItems);
       });
   } catch (error) {
-    res.status(404).json({ message: error });
+    return res.status(404).json({ message: error });
   }
 };
 export const getTrainingProgress = async (req, res) => {
@@ -46,9 +46,9 @@ export const getTrainingProgress = async (req, res) => {
         { path: 'training' },
       ])
       .lean();
-    res.status(200).json(trainingProgress);
+    return res.status(200).json(trainingProgress);
   } catch (error) {
-    res.status(404).json({ message: error });
+    return res.status(404).json({ message: error });
   }
 };
 
@@ -68,11 +68,11 @@ export const getTrainingProgressUser = async (req, res) => {
         const filterItems = items.filter(
           (item) => item.training.toDate < currentDate
         );
-        res.status(200).json(filterItems);
+        return res.status(200).json(filterItems);
       });
-    res.status(200).json(trainingProgress);
+    //return res.status(200).json(trainingProgress);
   } catch (error) {
-    res.status(404).json({ message: error });
+    return res.status(404).json({ message: error });
   }
 };
 
@@ -101,10 +101,10 @@ export const getTrainingProgressDept = async (req, res) => {
         const filterItems = items.filter(
           (item) => item.training.toDate < currentDate
         );
-        res.status(200).json(filterItems);
+        return res.status(200).json(filterItems);
       });
   } catch (error) {
-    res.status(404).json({ message: error });
+    return res.status(404).json({ message: error });
   }
 };
 
@@ -150,7 +150,7 @@ export const updateTrainingProgress = async (req, res) => {
       ]);
   }
   console.log(updatedTrainingProgress);
-  res.json(updatedTrainingProgress);
+  return res.json(updatedTrainingProgress);
 };
 
 const fileSizeFormatter = (bytes, decimal) => {

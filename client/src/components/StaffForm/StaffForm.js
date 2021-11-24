@@ -32,7 +32,7 @@ const StaffForm = () => {
     last_name: '',
     email: '',
     employment_date: '',
-    password: 'test',
+    password: '',
     department: '',
     roles: '',
   });
@@ -62,7 +62,7 @@ const StaffForm = () => {
         last_name: values.last_name,
         email: values.email,
         employment_date: values['employment_date'].format('YYYY-MM-DD'),
-        password: 'test',
+        password: '',
         department: values.department,
         roles: values.roles,
         leaveCount: leaveCount,

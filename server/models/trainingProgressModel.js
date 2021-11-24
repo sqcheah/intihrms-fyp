@@ -8,7 +8,7 @@ const trainingProgressSchema = mongoose.Schema({
     required: true,
   },
   status: { type: String, default: 'Waiting Completion' },
-  attachments: { default: [] },
+  attachments: [],
 });
 
 const trainingProgressModel = mongoose.model(

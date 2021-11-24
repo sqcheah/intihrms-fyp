@@ -190,6 +190,9 @@ const TrainingProgressHistory = ({ user }) => {
                 pageSize: 10,
                 showQuickJumper: true,
               }}
+              search={{
+                labelWidth: 'auto',
+              }}
               dateFormatter='string'
               toolbar={{
                 title: 'Tips:',

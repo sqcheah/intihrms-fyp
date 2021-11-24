@@ -69,8 +69,11 @@ export const createUser = async (req, res) => {
     const existingUser = await userModel.findOne({ email: staff.email });
     if (existingUser)
       return res.status(400).json({ message: 'User already exist' });
-
-    const hashedPassword = await bcrypt.hash(staff.password, 12);
+    const newPassword = passwordGenerator.generate({
+      numbers: true,
+      symbols: true,
+    });
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
     const result = await userModel.create({
       ...staff,
       password: hashedPassword,
@@ -78,7 +81,7 @@ export const createUser = async (req, res) => {
     await sendMail({
       type: 'createUser',
       email: staff.email,
-      password: staff.password,
+      password: newPassword,
     });
     const token = jwt.sign(
       { email: result.email, id: result._id },
@@ -137,20 +140,21 @@ export const updateUser = async (req, res) => {
 };
 
 export const resetPassword = async (req, res) => {
-  const { email } = req.body;
+  const { email, password } = req.body;
   const newPassword = passwordGenerator.generate({
     numbers: true,
     symbols: true,
   });
-  await sendMail({ type: 'resetPassword', email, password: newPassword });
+  const hashedPassword = await bcrypt.hash(password, 12);
+  await sendMail({ type: 'resetPassword', email, password: password });
 
-  /* const updatedUser = await userModel.findOneAndUpdate(
+  const updatedUser = await userModel.findOneAndUpdate(
     { email },
-    { password: newPassword },
+    { password: hashedPassword },
     { new: true }
-  );*/
-  const updatedUser = await userModel.findOne({ email });
-  console.log(updatedUser);
+  );
+  //const updatedUser = await userModel.findOne({ email });
+  //console.log(updatedUser);
   res.json(updatedUser);
 };
 
@@ -170,4 +174,31 @@ export const fetchDeptUsers = async (req, res) => {
   } catch (error) {
     res.status(404).json({ message: error });
   }
+};
+
+export const changePassword = async (req, res) => {
+  const { id } = req.params;
+  const { password } = req.body;
+
+  // await sendMail({ type: 'resetPassword', email, password: newPassword });
+  const hashedPassword = await bcrypt.hash(password, 12);
+  const updatedUser = await userModel.findOneAndUpdate(
+    { _id: mongoose.Types.ObjectId(id) },
+    { password: hashedPassword },
+    { new: true }
+  );
+  //const updatedUser = await userModel.findOne({ email });
+  //console.log(updatedUser);
+  res.json(updatedUser);
+};
+
+export const updateAuth = async (req, res) => {
+  const { id } = req.params;
+
+  // await sendMail({ type: 'resetPassword', email, password: newPassword });
+
+  const user = await userModel.findOne({ _id: mongoose.Types.ObjectId(id) });
+  //const updatedUser = await userModel.findOne({ email });
+  //console.log(updatedUser);
+  res.json(user);
 };

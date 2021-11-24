@@ -5,6 +5,7 @@ import {
   AUTH_START_LOADING,
   AUTH_ERROR,
   AUTH_SUCCESS,
+  RESET_PASSWORD,
 } from '../constants/actionTypes';
 import { handleError } from './error.js';
 const authReducer = (

@@ -67,9 +67,14 @@ const Profile = ({ user }) => {
           </Descriptions.Item>
         ))}
       </Descriptions>
-      <Button>
-        <Link to='/'>Back to Home</Link>
-      </Button>
+      <Space>
+        <Button>
+          <Link to='/'>Back to Home</Link>
+        </Button>
+        <Button>
+          <Link to='/profile/changePassword'>Change Password</Link>
+        </Button>
+      </Space>
     </>
   );
 };

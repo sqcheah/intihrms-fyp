@@ -129,9 +129,6 @@ const TrainingProgressDetail = ({ user: curUser }) => {
               >
                 Approve
               </Button>
-              <Button danger onClick={() => setStatus('Rejected')}>
-                Reject
-              </Button>
             </>
           )}
       </Space>
