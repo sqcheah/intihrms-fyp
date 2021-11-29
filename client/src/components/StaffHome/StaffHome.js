@@ -24,7 +24,7 @@ const StaffHome = ({ user }) => {
   };
   const screens = useBreakpoint();
   if (isLoading) return <PageLoading />;
-  console.log(users);
+
   return (
     <>
       {user.roles.name == 'admin' && (
@@ -67,6 +67,9 @@ const StaffHome = ({ user }) => {
                 <Space size='middle'>
                   <Button>
                     <Link to={`/users/view/${record._id}`}>View</Link>
+                  </Button>
+                  <Button>
+                    <Link to={`/users/edit/${record._id}`}>Edit</Link>
                   </Button>
                 </Space>
               )}

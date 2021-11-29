@@ -69,6 +69,21 @@ const TrainingProgressHistory = ({ user }) => {
         moment(record.training.fromDate).format('YYYY-MM-DD'),
     },
     {
+      title: 'Start Date to End Date',
+      dataIndex: 'fromDate',
+      valueType: 'dateRange',
+      key: 'somehtin',
+      hideInTable: true,
+      search: {
+        transform: (value) => {
+          return {
+            startTime: value[0],
+            endTime: value[1],
+          };
+        },
+      },
+    },
+    {
       title: 'End Date',
       dataIndex: ['training', 'toDate'],
       key: 'toDate',
@@ -82,6 +97,7 @@ const TrainingProgressHistory = ({ user }) => {
       dataIndex: 'status',
       key: 'status',
       filters: statusFilter,
+      hideInSearch: true,
       onFilter: (value, record) => record.status.indexOf(value) === 0,
       render: (text, record) => (
         <Badge
@@ -163,6 +179,19 @@ const TrainingProgressHistory = ({ user }) => {
                           val = `${item.user.first_name} ${item.user.last_name}`;
                         } else if (key == 'department') {
                           val = `${item.department.name}`;
+                        } else if (key == 'startTime') {
+                          return (
+                            moment(item['training']['fromDate']).diff(
+                              moment(params[key])
+                            ) >= 0
+                          );
+                        } else if (key == 'endTime') {
+                          return (
+                            moment(item['training']['toDate']).diff(
+                              moment(params[key]),
+                              'days'
+                            ) <= 0
+                          );
                         }
                         if (!val) {
                           return true;

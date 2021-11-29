@@ -13,7 +13,7 @@ const DeptHome = () => {
   };
   const { depts } = useSelector((state) => state.depts);
   const dispatch = useDispatch();
-  console.log(depts);
+
   useEffect(() => {
     dispatch(getDepts());
   }, [dispatch]);
@@ -35,7 +35,6 @@ const DeptHome = () => {
       ) : (
         <>
           <Table dataSource={depts} rowKey='_id'>
-            <Column title='Code' dataIndex='code' key='code' />
             <Column title='Name' dataIndex='name' key='name' />
             <Column
               title='Action'

@@ -19,7 +19,11 @@ export default (
     case DEPT_END_LOADING:
       return { ...state, isLoading: false };
     case DEPT_ERROR: {
-      return { ...state, error: handleError(action.error), isLoading: false };
+      return {
+        ...state,
+        error: handleError(action.error) || '',
+        isLoading: false,
+      };
     }
     case DEPT_SUCCESS: {
       return { ...state, success: action.payload.success };

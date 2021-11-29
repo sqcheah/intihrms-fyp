@@ -27,10 +27,12 @@ import {
 } from '@ant-design/icons';
 import ProTable, { TableDropdown } from '@ant-design/pro-table';
 import enUSIntl from 'antd/lib/locale/en_US';
+import { fetchHolidaysByYear } from '../../actions/holidays';
 
 const LeaveHistory = () => {
   const { leaveHistory, isLoading } = useSelector((state) => state.leaves);
   const { leaveTypes } = useSelector((state) => state.leaveTypes);
+  const { holidays } = useSelector((state) => state.holidays);
   const user = JSON.parse(localStorage.getItem('profile')).result;
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -44,6 +46,7 @@ const LeaveHistory = () => {
   useEffect(() => {
     dispatch(fetchLeaveHistory(user._id));
     dispatch(getLeaveTypes());
+    dispatch(fetchHolidaysByYear(moment().format('YYYY')));
   }, [dispatch]);
 
   leaveTypes.map((element) => {
@@ -54,18 +57,41 @@ const LeaveHistory = () => {
     navigate('/leaves/create');
   };
 
+  const calcWorkingDays = (startDate, endDate) => {
+    let day = moment(startDate);
+    let workingDays = 0;
+    ///https://stackoverflow.com/a/45483646
+    while (day.isSameOrBefore(endDate, 'day')) {
+      if (![0, 6].includes(day.day())) workingDays++;
+      day.add(1, 'd');
+    }
+
+    holidays.lists.forEach((holiday) => {
+      if (startDate >= holiday.startDate && endDate <= holiday.endDate) {
+        const holidayCount = moment(holiday.endDate).diff(
+          moment(holiday.startDate),
+          'days'
+        );
+
+        workingDays -= holidayCount;
+      }
+    });
+    return workingDays;
+  };
+
   const capitalizeFirstLetter = (string) => {
     return string.charAt(0).toUpperCase() + string.slice(1);
   };
 
   const actionRef = useRef();
-  console.log(leaveHistory);
+
   const columns = [
     {
       title: 'Leave Type',
       dataIndex: 'leaveType',
       key: 'leaveType',
       filters: typeFilter,
+      hideInSearch: true,
       onFilter: (value, record) => record.leaveType.code.indexOf(value) === 0,
       render: (text, record) => (
         <Tag color={text.color}>{capitalizeFirstLetter(text.code)}</Tag>
@@ -80,6 +106,21 @@ const LeaveHistory = () => {
       render: (text, record) => moment(record.fromDate).format('YYYY-MM-DD'),
     },
     {
+      title: 'Start Date to End Date',
+      dataIndex: 'fromDate',
+      valueType: 'dateRange',
+      key: 'somehtin',
+      hideInTable: true,
+      search: {
+        transform: (value) => {
+          return {
+            startTime: value[0],
+            endTime: value[1],
+          };
+        },
+      },
+    },
+    {
       title: 'End Date',
       dataIndex: 'toDate',
       key: 'toDate',
@@ -88,10 +129,18 @@ const LeaveHistory = () => {
       render: (text, record) => moment(record.toDate).format('YYYY-MM-DD'),
     },
     {
+      title: 'Total Days',
+      hideInSearch: true,
+      dataIndex: 'toDate',
+      key: 'totalDays',
+      render: (text, record) => calcWorkingDays(record.fromDate, record.toDate),
+    },
+    {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
       filters: statusFilter,
+      hideInSearch: true,
       onFilter: (value, record) => record.status.indexOf(value) === 0,
       render: (text, record) => (
         <Badge
@@ -171,6 +220,19 @@ const LeaveHistory = () => {
                           val = `${item.user.first_name} ${item.user.last_name}`;
                         } else if (key == 'department') {
                           val = `${item.department.name}`;
+                        } else if (key == 'startTime') {
+                          return (
+                            moment(item['fromDate']).diff(
+                              moment(params[key])
+                            ) >= 0
+                          );
+                        } else if (key == 'endTime') {
+                          return (
+                            moment(item['toDate']).diff(
+                              moment(params[key]),
+                              'days'
+                            ) <= 0
+                          );
                         }
                         if (!val) {
                           return true;
@@ -208,8 +270,8 @@ const LeaveHistory = () => {
                   'Use the search bar above or filter icons on the columns for easy record finding',
               }}
               toolBarRender={() => [
-                <Button type='primary' key='primary'>
-                  <Link to='/leaves/create'>Apply Leave</Link>
+                <Button type='primary' key='primary' shape='round'>
+                  <Link to='/leaves/create'>To Leave Application</Link>
                 </Button>,
               ]}
             />
@@ -221,71 +283,3 @@ const LeaveHistory = () => {
 };
 
 export default LeaveHistory;
-
-/**<Table
-            dataSource={leaves}
-            rowKey='_id'
-            style={{ overflowX: 'scroll' }}
-          >
-            <Table.Column
-              title='Employee Name'
-              dataIndex='user'
-              key='user._id'
-              render={(text, record) =>
-                `${text?.first_name} ${text?.last_name}`
-              }
-            ></Table.Column>
-            <Table.Column
-              title='Department ID'
-              dataIndex='department'
-              key='department._id'
-              render={(text, record) => `${text?.name}`}
-            ></Table.Column>
-            <Table.Column
-              title='Leave Type'
-              dataIndex='leaveType'
-              key='leaveType'
-              render={(text, record) => <Tag color='red'>{text}</Tag>}
-            ></Table.Column>
-            <Table.Column
-              title='Start Date'
-              dataIndex='fromDate'
-              key='fromDate'
-              render={(text, record) => moment(text).format('YYYY-MM-DD')}
-            ></Table.Column>
-            <Table.Column
-              title='End Date'
-              dataIndex='toDate'
-              key='toDate'
-              render={(text, record) => moment(text).format('YYYY-MM-DD')}
-            ></Table.Column>
-            <Table.Column
-              title='Status'
-              dataIndex='status'
-              key='status'
-              render={(text, record) => (
-                <Badge
-                  status={
-                    record.status == 'pending'
-                      ? 'processing'
-                      : record.status == 'approve'
-                      ? 'success'
-                      : 'error'
-                  }
-                  text={record.status}
-                />
-              )}
-            ></Table.Column>
-            <Table.Column
-              title='Action'
-              key='action'
-              render={(text, record) => (
-                <Space size='middle' key={record._id}>
-                  <Link to={`view/${record._id}`}>View</Link>
-                  {record.status == 'pending' && (
-                    <Link to={`/leaves/edit/${record._id}`}>Edit</Link>
-                  )}
-                </Space>
-              )}
-            ></Table.Column>
-          </Table> */

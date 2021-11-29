@@ -68,8 +68,6 @@ const LeaveHome = () => {
       dispatch(
         fetchLeaveRequests(user.roles.name, user._id, user.department.name)
       );
-
-    console.log(user);
   }, [dispatch]);
 
   for (var element of leaves) {
@@ -96,7 +94,11 @@ const LeaveHome = () => {
                 {user.department.name}
               </Descriptions.Item>
               {user.leaveCount.map((entry, index) => (
-                <Descriptions.Item label={entry.leaveType.name} span={1}>
+                <Descriptions.Item
+                  label={entry.leaveType.name}
+                  span={1}
+                  key={entry.leaveType._id}
+                >
                   {entry.count}
                 </Descriptions.Item>
               ))}
@@ -136,6 +138,14 @@ const LeaveHome = () => {
       <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
         <Col className='gutter-row' xs={24} sm={12}>
           <Card bordered>
+            <div style={{ textAlign: 'right' }}>
+              <Button type='primary' shape='round' style={{ margin: '10px' }}>
+                <Link to='/leaves/create'>To Leave Application</Link>
+              </Button>
+              <Button type='primary' shape='round' style={{ margin: '10px' }}>
+                <Link to='/leaves/history'>To Leave History</Link>
+              </Button>
+            </div>
             <b>Upcoming Leaves:</b>
             {upcomingLeave &&
               (!upcomingLeave.length ? (
@@ -173,23 +183,24 @@ const LeaveHome = () => {
                 </>
               ))}
             <br />
-            <Space>
-              <Button type='danger'>
-                <Link to='/leaves/create'>Apply Leave</Link>
-              </Button>
-              <Button type='danger'>
-                <Link to='/leaves/history'>Leave History</Link>
-              </Button>
-            </Space>
           </Card>
         </Col>
         {user.roles.name != 'staff' && (
           <Col className='gutter-row' xs={24} sm={12}>
             <Card bordered>
-              Pending Leave Requests:{` ${count}`}
-              <Button className='right-button' type='danger'>
-                <Link to='/leaves/list'>To Requests</Link>
-              </Button>
+              <Space
+                wrap
+                align='baseline'
+                style={{ display: 'flex', justifyContent: 'space-between' }}
+              >
+                <Typography.Text>
+                  Pending Leave Requests:{` ${count}`}
+                </Typography.Text>
+
+                <Button type='primary' shape='round'>
+                  <Link to='/leaves/list'>To Requests</Link>
+                </Button>
+              </Space>
             </Card>
           </Col>
         )}

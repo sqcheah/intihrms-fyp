@@ -40,13 +40,10 @@ const DeptForm = () => {
           'range-picker': [moment(value.startDate), moment(value.endDate)],
         });
       });
-      console.log(holiday);
     }
   }, [dispatch, id]);
 
   const onFinish = (values) => {
-    console.log('Success:', values);
-
     const rangeValue = values['range-picker'];
     const startDate = rangeValue[0];
     const endDate = rangeValue[1];
@@ -86,18 +83,22 @@ const DeptForm = () => {
     }
   };
 
-  const onFinishFailed = (errorInfo) => {
-    console.log('Failed:', errorInfo);
-  };
   if (loading) return <PageLoading />;
   return (
     <>
-      <Title level={2}> {id ? 'Edit Holiday' : 'Create Holiday'}</Title>
+      <Title level={2} style={{ textAlign: 'center' }}>
+        {id ? 'Edit Holiday' : 'Create Holiday'}
+      </Title>
       <Form
+        labelCol={{
+          sm: { span: 8 },
+        }}
+        wrapperCol={{
+          sm: { span: 8 },
+        }}
         form={form}
         name='basic'
         onFinish={onFinish}
-        onFinishFailed={onFinishFailed}
       >
         <Form.Item
           label='Title'
@@ -105,14 +106,21 @@ const DeptForm = () => {
           rules={[
             {
               required: true,
-              message: 'Please input your title!',
+              whitespace: true,
             },
           ]}
         >
-          <Input />
+          <Input placeholder='Please enter title' />
         </Form.Item>
-        <Form.Item label='description' name='description'>
-          <Input.TextArea rows={4} />
+        <Form.Item
+          label='Description'
+          name='description'
+          rules={[{ whitespace: true }]}
+        >
+          <Input.TextArea
+            rows={4}
+            placeholder='Please enter description (optional)'
+          />
         </Form.Item>
         <Form.Item
           label='Date'
@@ -120,7 +128,6 @@ const DeptForm = () => {
           rules={[
             {
               required: true,
-              message: 'Please input your date!',
             },
           ]}
         >
@@ -129,8 +136,7 @@ const DeptForm = () => {
 
         <Form.Item
           wrapperCol={{
-            offset: 8,
-            span: 16,
+            sm: { offset: 8 },
           }}
         >
           <Button type='primary' htmlType='submit'>

@@ -1,5 +1,5 @@
 import axios from 'axios';
-const trueURl = 'https://intihrms.herokuapp.com/';
+const trueURl = 'http://localhost:5000/';
 
 const API = axios.create({ baseURL: 'http://localhost:5000' });
 API.interceptors.request.use((req) => {
@@ -38,6 +38,8 @@ export const resetPassword = (email) => API.post('/users/resetPassword', email);
 export const changePassword = (id, password) =>
   API.post(`/users/${id}/changePassword`, password);
 export const updateAuth = (id) => API.get(`/users/updateAuth/${id}`);
+export const updateSettings = (id, settings) =>
+  API.post(`/users/updateSettings/${id}`, settings);
 
 export const getDepts = () => API.get('/depts');
 export const getDept = (id) => API.get(`depts/${id}`);
@@ -96,11 +98,15 @@ export const fetchTrainingCount = () => API.get('/training/count/dept');
 
 export const createPolicy = (formData) => API.post('/policy', formData);
 export const getPolicies = () => API.get('/policy');
+export const getPoliciesByDept = (dept) => API.get(`/policy/dept/${dept}`);
 export const getPolicy = (id) => API.get(`/policy/${id}`);
 export const updatePolicy = (id, updatedPolicy) =>
   API.patch(`/policy/${id}`, updatedPolicy);
 
 export const getNotificationsById = (id) => API.get(`/notification/${id}`);
+export const clearNotificationsByType = (user, type) =>
+  API.post(`/notification/${user}`, type);
+export const setNotificationRead = (id) => API.post(`/notification/read/${id}`);
 
 export const getTrainingProgresses = () => API.get('/trainingProgress');
 export const getTrainingProgress = (id) => API.get(`trainingProgress/${id}`);

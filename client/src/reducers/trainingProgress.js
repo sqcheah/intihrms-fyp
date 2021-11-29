@@ -33,7 +33,11 @@ export default (
     case TRAININGPROGRESS_END_LOADING:
       return { ...state, isLoading: false };
     case TRAININGPROGRESS_ERROR: {
-      return { ...state, error: handleError(action.error), isLoading: false };
+      return {
+        ...state,
+        error: handleError(action.error) || '',
+        isLoading: false,
+      };
     }
 
     case FETCH_ONE_TRAININGPROGRESS:

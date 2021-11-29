@@ -42,10 +42,6 @@ const CalendarPersonal = ({ user }) => {
   const handleEventsss = async (info, success, error) => {
     const startDate = moment(info.start);
     const endDate = moment(info.end);
-    console.log(
-      dateRange.fromDate.diff(startDate) != 0 &&
-        dateRange.toDate.diff(endDate) != 0
-    );
 
     if (
       dateRange.fromDate.diff(startDate) != 0 &&
@@ -65,7 +61,6 @@ const CalendarPersonal = ({ user }) => {
     }
 
     success(calendar);
-    console.log('here');
   };
 
   const handleEventClick = (clickInfo) => {

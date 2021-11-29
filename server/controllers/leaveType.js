@@ -26,26 +26,10 @@ export const createLeaveType = async (req, res) => {
   const newLeaveType = new leaveTypeModel(leaveType);
   const exist = await leaveTypeModel.findOne({ code: leaveType.code });
   if (!exist) {
-    await newLeaveType
-      .save()
-      .then(async (result) => {
-        const leaveCount = {
-          leaveType: newLeaveType._id,
-          count: leaveType.count,
-        };
-        const user = await userModel.updateMany(
-          {},
-          { $push: { leaveCount: leaveCount } },
-          { upsert: true }
-        );
-        return res.status(201).json(newLeaveType);
-      })
-      .catch((error) => {
-        console.log(error);
-        return res.status(409).json({ message: error });
-      });
+    await newLeaveType.save();
+    return res.status(201).json(newLeaveType);
   } else {
-    console.log('?');
+    // console.log('?');
     return res.status(409).json({
       message: 'There is already another leave type with same short name',
     });

@@ -33,7 +33,11 @@ export default (
     case LEAVE_END_LOADING:
       return { ...state, isLoading: false };
     case LEAVE_ERROR: {
-      return { ...state, error: handleError(action.error), isLoading: false };
+      return {
+        ...state,
+        error: handleError(action.error) || '',
+        isLoading: false,
+      };
     }
     case LEAVE_SUCCESS: {
       return { ...state, success: action.payload.success };
@@ -50,11 +54,10 @@ export default (
       return { ...state, leave: action.payload };
 
     case FETCH_LEAVE_BY_DATERANGE: {
-      // console.log('Here', action.payload);
       const calLeaves =
         action.payload.data.leaves.map((leave) => {
           const leaveType = leave.leaveType;
-          console.log(leaveType);
+
           return {
             id: leave._id,
             title: `${leave.user.first_name} ${leave.user.last_name} (${leaveType.code})`,
@@ -85,11 +88,10 @@ export default (
       };
     }
     case FETCH_LEAVE_BY_DATERANGE_PERSONAL: {
-      // console.log('Here', action.payload);
       const calLeaves =
         action.payload.data.leaves.map((leave) => {
           const leaveType = leave.leaveType;
-          console.log(leaveType);
+
           return {
             id: leave._id,
             title: `${leave.user.first_name} ${leave.user.last_name} (${leaveType.code}) [${leave.status}]`,

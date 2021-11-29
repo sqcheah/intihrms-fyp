@@ -59,14 +59,11 @@ const TrainingProgressList = ({ user }) => {
     dispatch(getDepts());
     if (user.roles.name == 'admin') {
       dispatch(getTrainingProgresses()).then(() => setLoading(false));
-      console.log(trainingProgresses);
     } else {
       dispatch(getTrainingProgressDept(user.department._id)).then(() =>
         setLoading(false)
       );
     }
-
-    // console.log(leaves);
   }, [dispatch]);
   if (user.roles.name == 'admin')
     depts.map((element) => {
@@ -94,7 +91,7 @@ const TrainingProgressList = ({ user }) => {
       title: 'Department',
       dataIndex: ['user', 'department', 'name'],
       key: 'department',
-
+      hideInSearch: true,
       filters: deptFilters,
       onFilter: (value, record) =>
         record.user.department.name.indexOf(value) === 0,
@@ -108,6 +105,7 @@ const TrainingProgressList = ({ user }) => {
         { text: 'Internal', value: 'Internal' },
         { text: 'External', value: 'External' },
       ],
+      hideInSearch: true,
       onFilter: (value, record) =>
         record.training.trainingType.indexOf(value) === 0,
     },
@@ -149,6 +147,7 @@ const TrainingProgressList = ({ user }) => {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
+      hideInSearch: true,
       filters: statusFilter,
       onFilter: (value, record) => record.status.indexOf(value) === 0,
       render: (text, record) => (
@@ -205,7 +204,6 @@ const TrainingProgressList = ({ user }) => {
                   if (Object.keys(params).length > 0) {
                     dataSource = dataSource.filter((item) => {
                       return Object.keys(params).every((key) => {
-                        console.log(Object.keys(params));
                         if (!params[key]) {
                           return true;
                         }
@@ -220,24 +218,16 @@ const TrainingProgressList = ({ user }) => {
                         if (key == 'user') {
                           val = `${item.user.first_name} ${item.user.last_name}`;
                         } else if (key == 'department') {
-                          val = `${item.user.department.name}`;
+                          val = `${item.department.name}`;
                         } else if (key == 'startTime') {
-                          console.log(
-                            item['fromDate'],
-                            params[key],
-                            moment(item['fromDate']).diff(
-                              moment(params[key]),
-                              'days'
-                            )
-                          );
                           return (
-                            moment(item['fromDate']).diff(
+                            moment(item['training']['fromDate']).diff(
                               moment(params[key])
                             ) >= 0
                           );
                         } else if (key == 'endTime') {
                           return (
-                            moment(item['toDate']).diff(
+                            moment(item['training']['toDate']).diff(
                               moment(params[key]),
                               'days'
                             ) <= 0

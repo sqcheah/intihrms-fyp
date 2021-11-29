@@ -6,7 +6,7 @@ export const sendMail = async (content) => {
     case 'resetPassword': {
       emailTemplate = {
         subject: 'Reset Passsword!',
-        html: `<h2> Your new password is ${content.password}</h2><br>`,
+        html: `<p> Your new password is ${content.password}</p><br>`,
       };
       break;
     }
@@ -22,8 +22,48 @@ export const sendMail = async (content) => {
     case 'newLeave': {
       emailTemplate = {
         subject: 'New Leave Request',
-        html: `<p> Email: ${content.email}</p><br><p> Password: ${content.password}</p>
-        <br><a href="http://localhost:3000/auth">Click here to sign in</a>`,
+        html: `<p>${content.sender} sent a leave request</p>
+        <br><a href="http://localhost:3000/leaves/view/${content.leaveId}">Click here to view</a>`,
+      };
+      break;
+    }
+    case 'leaveApproval': {
+      emailTemplate = {
+        subject: 'Leave Approval',
+        html: `<p>${content.sender} ${content.status} your leave request</p>
+        <br><a href="http://localhost:3000/leaves/view/${content.leaveId}">Click here to view</a>`,
+      };
+      break;
+    }
+    case 'joinTraining': {
+      emailTemplate = {
+        subject: 'New Join Training Request',
+        html: `<p>${content.sender} sent a join training request</p>
+        <br><a href="http://localhost:3000/training/view/${content.trainingId}">Click here to view</a>`,
+      };
+      break;
+    }
+    case 'newExternalTraining': {
+      emailTemplate = {
+        subject: 'New External Training Request',
+        html: `<p>${content.sender} sent a external training request</p>
+        <br><a href="http://localhost:3000/training/view/${content.trainingId}">Click here to view</a>`,
+      };
+      break;
+    }
+    case 'joinTrainingApproval': {
+      emailTemplate = {
+        subject: 'Internal Training Approval',
+        html: `<p>${content.sender} ${content.status} your join training request</p>
+        <br><a href="http://localhost:3000/training/view/${content.trainingId}">Click here to view</a>`,
+      };
+      break;
+    }
+    case 'externalTrainingApproval': {
+      emailTemplate = {
+        subject: 'External Training Approval',
+        html: `<p>${content.sender} ${content.status} your external training request</p>
+        <br><a href="http://localhost:3000/training/view/${content.trainingId}">Click here to view</a>`,
       };
       break;
     }
@@ -37,7 +77,7 @@ export const sendMail = async (content) => {
   }
   console.log(emailTemplate);
   let body = {
-    from: 'test <csq3411@gmail.com>',
+    from: process.env.EMAIL_SENDER,
     to: 'shaoqi1688@gmail.com',
     subject: emailTemplate.subject,
     html: emailTemplate.html,

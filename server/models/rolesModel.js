@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const rolesSchema = mongoose.Schema({
-  code: { type: String, required: true },
+  // code: { type: String, required: true },
   name: { type: String, required: true },
   permissions: { type: [String] },
 });

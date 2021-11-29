@@ -136,6 +136,14 @@ const Home = () => {
       <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
         <Col className='gutter-row' xs={24} sm={24}>
           <Card bordered>
+            <div style={{ textAlign: 'right' }}>
+              <Button type='primary' shape='round' style={{ margin: '10px' }}>
+                <Link to='/calendar'>View on Calendar</Link>
+              </Button>
+              <Button type='primary' shape='round' style={{ margin: '10px' }}>
+                <Link to='/leaves/list'>More Details...</Link>
+              </Button>
+            </div>
             <h3>Leaves Taken by Month for All Employees</h3>
             <ResponsiveContainer minHeight={300}>
               <LineChart
@@ -163,15 +171,6 @@ const Home = () => {
                 ))}
               </LineChart>
             </ResponsiveContainer>
-            <br />
-            <row>
-              <Button className='right-button' type='primary'>
-                <Link to='/leaves/list'>More Details...</Link>
-              </Button>
-              <Button className='right-button' type='primary'>
-                <Link to='/calendar'>View on Calendar</Link>
-              </Button>
-            </row>
           </Card>
         </Col>
       </Row>

@@ -20,6 +20,14 @@ const UserSchema = mongoose.Schema({
     ref: 'department',
     required: true,
   },
+  settings: {
+    email: { type: Boolean, default: true },
+    notification: { type: Boolean, default: false },
+  },
+  policy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'policy',
+  },
   /*
   position: {
     type: mongoose.Schema.Types.ObjectId,

@@ -20,13 +20,7 @@ import './Test.css';
 const { Option } = Select;
 const Test = () => {
   //console.log(calcWorkingDays('2021-10-01', '2021-10-11'));
-  const normFile = (e) => {
-    console.log('Upload event:', e);
-    if (Array.isArray(e)) {
-      return e;
-    }
-    return e && e.fileList;
-  };
+
   const beforeUpload = () => {};
   const dummyRequest = ({ file, onSuccess }) => {
     setTimeout(() => {

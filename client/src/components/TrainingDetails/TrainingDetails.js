@@ -27,7 +27,12 @@ const TrainingDetails = ({ socket, user }) => {
   }, [id]);
 
   const joinTraining = (user_id) => {
-    dispatch(updateTraining(id, { user_id }));
+    dispatch(
+      updateTraining(id, {
+        user_id,
+        user_name: `${user.first_name} ${user.last_name}`,
+      })
+    );
   };
 
   const cancelAttendance = (user_id) => {
@@ -35,9 +40,21 @@ const TrainingDetails = ({ socket, user }) => {
   };
 
   const setStatus = (status) => {
-    dispatch(updateTrainingStatus(id, { ...training, status }));
+    dispatch(
+      updateTrainingStatus(id, {
+        ...training,
+        status,
+        approver: user._id,
+        user_name: `${user.first_name} ${user.last_name}`,
+      })
+    );
   };
-
+  const normFile = (e) => {
+    if (Array.isArray(e)) {
+      return e;
+    }
+    return e && e.fileList;
+  };
   const formatDuration = (data) => {
     if (moment.duration(data, 'hours').asDays() >= 1)
       return (
@@ -53,7 +70,7 @@ const TrainingDetails = ({ socket, user }) => {
   };
 
   const setAttendanceStatus = (attendant_id, newStatus) => {
-    console.log(attendant_id, newStatus);
+    //console.log(attendant_id, newStatus);
     const updatedAttendant = training.attendants.map((attendant) => {
       if (attendant.user._id === attendant_id)
         return { user: attendant_id, status: newStatus };
@@ -63,6 +80,8 @@ const TrainingDetails = ({ socket, user }) => {
     dispatch(
       updateTrainingStatus(id, {
         ...training,
+        approver: user._id,
+        user_name: `${user.first_name} ${user.last_name}`,
         attendants: updatedAttendant,
         extra: { user: attendant_id, status: newStatus },
       })
@@ -71,14 +90,14 @@ const TrainingDetails = ({ socket, user }) => {
 
   const defaultFile = () => {
     if (!!!id) return null;
-    console.log(training);
+
     return (
       training?.attachments?.map((file) => {
         return {
           uid: file.fileId,
           name: file.fileName,
           status: 'done',
-          url: `http://localhost:5000/${file.filePath}`,
+          url: file.filePath,
         };
       }) || []
     );
@@ -208,11 +227,7 @@ const TrainingDetails = ({ socket, user }) => {
                 defaultFileList={defaultFile}
                 showUploadList={{
                   showDownloadIcon: true,
-                  downloadIcon: (
-                    <StarOutlined
-                    //onClick={(e) => console.log(e, 'custom removeIcon event')}
-                    />
-                  ),
+
                   showRemoveIcon: false,
                 }}
               ></Upload>
@@ -236,23 +251,27 @@ const TrainingDetails = ({ socket, user }) => {
           </Descriptions.Item>
         )}
       </Descriptions>
+      <br />
+      <br />
+      <br />
       <Space>
         <Button onClick={() => navigate(-1)}>Back</Button>
         {!training.attendants.some((e) => e.user._id === user._id) &&
         training.trainingType == 'Internal' &&
         moment(training.fromDate) > moment() ? (
           <>
-            <Button
-              className='btn-success'
-              onClick={() => joinTraining(user._id)}
-            >
+            <Button type='success' onClick={() => joinTraining(user._id)}>
               Join Training
             </Button>
           </>
         ) : training.trainingType == 'Internal' &&
           moment(training.fromDate) > moment() ? (
           <>
-            <Button danger onClick={() => cancelAttendance(user._id)}>
+            <Button
+              type='primary'
+              danger
+              onClick={() => cancelAttendance(user._id)}
+            >
               Cancel Attendance
             </Button>
           </>
@@ -261,13 +280,14 @@ const TrainingDetails = ({ socket, user }) => {
           training.trainingType == 'External' &&
           training.status == 'Pending' && (
             <>
-              <Button
-                className='btn-success'
-                onClick={() => setStatus('Approved')}
-              >
+              <Button type='success' onClick={() => setStatus('Approved')}>
                 Approve
               </Button>
-              <Button danger onClick={() => setStatus('Rejected')}>
+              <Button
+                type='primary'
+                danger
+                onClick={() => setStatus('Rejected')}
+              >
                 Reject
               </Button>
             </>

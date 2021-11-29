@@ -41,7 +41,7 @@ const HolidayHome = ({ socket, user }) => {
       <Typography.Title level={1}>Holidays</Typography.Title>
       <DatePicker onChange={onChange} picker='year' defaultValue={today} />
       <Button>
-        <Link to={`/holidays/create/${year}`}>Add New Holiday</Link>
+        <Link to={`/holidays/create/${year}`}>Add New Holiday for {year}</Link>
       </Button>
       {holidays?.lists?.length ? (
         <>

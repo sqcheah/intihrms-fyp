@@ -6,10 +6,12 @@ import routes from './routes/index.js';
 import path from 'path';
 import { Server } from 'socket.io';
 import { createServer } from 'http';
+import PushNotifications from '@pusher/push-notifications-server';
 //https://pawelgrzybek.com/all-you-need-to-know-to-move-from-commonjs-to-ecmascript-modules-esm-in-node-js/
 //https://stackoverflow.com/a/68117993
 const app = express();
 dotenv.config();
+
 //https://stackoverflow.com/questions/23259168/what-are-express-json-and-express-urlencoded
 //{ limit: '30mb', extended: 'true' }
 app.use(express.urlencoded({ extended: true }));
@@ -39,7 +41,7 @@ mongoose
 //https://socket.io/docs/v3/server-initialization/#with-express
 //https://stackoverflow.com/a/41741696
 const httpServer = createServer(app);
-//https://competent-dijkstra-2b3714.netlify.app/
+//http://localhost:3000/
 //http://localhost:3000
 const io = new Server(httpServer, {
   cors: { origin: '*' },
@@ -118,6 +120,29 @@ io.on('connection', (socket) => {
 //https://stackoverflow.com/questions/65712319/getting-port-already-in-use-error-when-adding-socket-io-to-express-app-happe
 httpServer.listen(PORT);
 
+const beamsClient = new PushNotifications({
+  instanceId: '0b883b28-92f8-4afc-9f97-ffebaa950fc8',
+  secretKey: '76966C8AB6BF904848B930A5FD014278FC6893192DC0BFE735614F0D56E33641',
+});
+
+/* 
+beamsClient
+  .publishToInterests(['hello'], {
+    web: {
+      notification: {
+        title: 'Hello',
+        body: 'Hello, world!',
+        deep_link: 'http://localhost:3000',
+      },
+    },
+  })
+  .then((publishResponse) => {
+    console.log('Just published:', publishResponse.publishId);
+  })
+  .catch((error) => {
+    console.log('Error:', error);
+  });
+*/
 //https://stackoverflow.com/a/62438729
-export { io, getUser };
+export { io, getUser, beamsClient };
 //export { io };

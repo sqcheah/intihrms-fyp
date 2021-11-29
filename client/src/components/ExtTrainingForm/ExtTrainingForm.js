@@ -10,6 +10,7 @@ import {
   Typography,
   Upload,
   Modal,
+  Space,
 } from 'antd';
 
 import { useDispatch, useSelector } from 'react-redux';
@@ -27,7 +28,7 @@ const { RangePicker } = DatePicker;
 const { Option } = Select;
 const { Text } = Typography;
 
-const ExtTrainingForm = () => {
+const ExtTrainingForm = ({ user: curUser }) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('profile')).result;
@@ -35,7 +36,7 @@ const ExtTrainingForm = () => {
   const [form] = Form.useForm();
   const [error, setError] = useState(null);
   const dispatch = useDispatch();
-  const onFinish = (values) => {
+  const onFinish = async (values) => {
     setError(null);
 
     let formData = new FormData();
@@ -55,6 +56,7 @@ const ExtTrainingForm = () => {
     const endTime = timeRange[1];
 
     const trainingData = {
+      user_name: `${curUser.first_name} ${curUser.last_name}`,
       user: user._id,
       department: user.department._id,
       organizer: values.organizer,
@@ -75,7 +77,7 @@ const ExtTrainingForm = () => {
     Object.entries(trainingData).forEach(([key, value]) => {
       formData.append(key, value);
     });
-    dispatch(createTraining(formData));
+    await dispatch(createTraining(formData));
     Modal.success({
       content:
         'Request successfully submitted. You can check request status at Training History.',
@@ -92,27 +94,13 @@ const ExtTrainingForm = () => {
           uid: file.fileId,
           name: file.fileName,
           status: 'done',
-          url: `http://localhost:5000/${file.filePath}`,
+          url: file.filePath,
         };
       }) || []
     );
   };
-  const onFinishFailed = (errorInfo) => {
-    console.log('Failed:', errorInfo);
-  };
-
-  const normFile = (e) => {
-    console.log('Upload event:', e);
-
-    if (Array.isArray(e)) {
-      return e;
-    }
-
-    return e && e.fileList;
-  };
 
   const preventUpload = (file) => {
-    console.log('?????false', file);
     return false;
   };
   //https://stackoverflow.com/a/51519603/4858751
@@ -121,24 +109,28 @@ const ExtTrainingForm = () => {
       onSuccess('ok');
     }, 0);
   };
+  const normFile = (e) => {
+    if (Array.isArray(e)) {
+      return e;
+    }
+    return e && e.fileList;
+  };
 
   return (
     <>
-      <h2 className='form-header'>External Training Request</h2>
+      <Typography.Title level={2} style={{ textAlign: 'center' }}>
+        External Training Request
+      </Typography.Title>
       <Form
         form={form}
         name='basic'
         labelCol={{
-          span: 8,
+          sm: { span: 8 },
         }}
         wrapperCol={{
-          span: 16,
-        }}
-        initialValues={{
-          remember: true,
+          sm: { span: 8 },
         }}
         onFinish={onFinish}
-        onFinishFailed={onFinishFailed}
         autoComplete='off'
       >
         <Form.Item
@@ -147,11 +139,11 @@ const ExtTrainingForm = () => {
           rules={[
             {
               required: true,
-              message: 'Please enter a name!',
+              whitespace: true,
             },
           ]}
         >
-          <Input />
+          <Input placeholder='Please enter course name' />
         </Form.Item>
         <Form.Item
           label='Organizer'
@@ -159,11 +151,11 @@ const ExtTrainingForm = () => {
           rules={[
             {
               required: true,
-              message: 'Please enter an organizer!',
+              whitespace: true,
             },
           ]}
         >
-          <Input />
+          <Input placeholder='Please enter organizer' />
         </Form.Item>
 
         <Form.Item
@@ -172,11 +164,11 @@ const ExtTrainingForm = () => {
           rules={[
             {
               required: true,
-              message: 'Please input your training description!',
+              whitespace: true,
             },
           ]}
         >
-          <TextArea rows={4} />
+          <TextArea rows={4} placeholder='Please enter reason for attending' />
         </Form.Item>
 
         <Form.Item
@@ -185,11 +177,11 @@ const ExtTrainingForm = () => {
           rules={[
             {
               required: true,
-              message: 'Please input your date!',
             },
           ]}
         >
           <DatePicker.RangePicker
+            style={{ width: '100%' }}
             disabledDate={(current) => {
               return current && current < moment().endOf('day');
             }}
@@ -202,11 +194,11 @@ const ExtTrainingForm = () => {
           rules={[
             {
               required: true,
-              message: 'Please input your time!',
             },
           ]}
         >
           <TimePicker.RangePicker
+            style={{ width: '100%' }}
             format='HH:mm'
             minuteStep={15}
             defaultValue={moment('00:00:00', 'HH:mm:ss')}
@@ -219,17 +211,19 @@ const ExtTrainingForm = () => {
           rules={[
             {
               required: true,
-              message: 'Please enter the course fee!',
             },
           ]}
         >
-          <InputNumber min={0} />
+          <InputNumber
+            min={0}
+            style={{ width: '100%' }}
+            placeholder='Please enter course fee'
+          />
         </Form.Item>
         {/**https://github.com/ant-design/ant-design/tree/master/components/upload/UploadList */}
         <Form.Item
           name='upload'
           label='Supporting Documents'
-          valuePropName='fileList'
           getValueFromEvent={normFile}
           rules={[
             {
@@ -263,14 +257,9 @@ const ExtTrainingForm = () => {
 
         <Form.Item
           wrapperCol={{
-            offset: 8,
-            span: 16,
+            sm: { offset: 8 },
           }}
         >
-          {error && <Text type='danger'>{error}</Text>}
-          <br />
-          <br />
-          <br />
           <Button type='primary' htmlType='submit'>
             Submit
           </Button>

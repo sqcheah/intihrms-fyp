@@ -22,6 +22,7 @@ import {
 } from '@ant-design/icons';
 import moment from 'moment';
 import { PageLoading } from '@ant-design/pro-layout';
+import { fetchHolidaysByYear } from '../../actions/holidays';
 const { TextArea } = Input;
 const { RangePicker } = DatePicker;
 const { Option } = Select;
@@ -33,6 +34,7 @@ const LeaveForm = ({ user }) => {
   const { leave } = useSelector((state) => state.leaves);
   const [showRange, setShowRange] = useState(false);
   const { leaveTypes } = useSelector((state) => state.leaveTypes);
+  const { holidays } = useSelector((state) => state.holidays);
   const [form] = Form.useForm();
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -45,12 +47,42 @@ const LeaveForm = ({ user }) => {
       if (![0, 6].includes(day.day())) workingDays++;
       day.add(1, 'd');
     }
+
+    holidays.lists.forEach((holiday) => {
+      if (startDate >= holiday.startDate && endDate <= holiday.endDate) {
+        const holidayCount = moment(holiday.endDate).diff(
+          moment(holiday.startDate),
+          'days'
+        );
+
+        workingDays -= holidayCount;
+      }
+    });
     return workingDays;
   };
+  const normFile = (e) => {
+    if (Array.isArray(e)) {
+      return e;
+    }
+    return e && e.fileList;
+  };
   const onFinish = (values) => {
+    const rangeValue = values['range-picker'];
+    const startDate = rangeValue[0];
+    const endDate = rangeValue[1];
+    const dateDiff = calcWorkingDays(startDate, endDate);
+
+    if (dateDiff == 0) {
+      Modal.error({
+        content:
+          'Selected day is on holidays or weekend, do not need to apply!',
+      });
+      return;
+    }
+
     let existedFile = [];
     setError(null);
-    console.log(values);
+
     let formData = new FormData();
     if (values.upload) {
       for (let file of values.upload) {
@@ -66,17 +98,11 @@ const LeaveForm = ({ user }) => {
       }
     }
 
-    const rangeValue = values['range-picker'];
-    const startDate = rangeValue[0];
-    const endDate = rangeValue[1];
     const type = leaveTypes.find((rec) => rec._id === values['leaveType']);
-    console.log(user.leaveCount);
-    user.leaveCount.forEach((l) => console.log(l.leaveType));
+
     let { count: remainLeave } = user.leaveCount.find(
       (l) => l.leaveType._id == values['leaveType']
     );
-    console.log(remainLeave);
-    const dateDiff = calcWorkingDays(startDate, endDate);
 
     const leaveData = {
       user_name: `${user.first_name} ${user.last_name}`,
@@ -91,7 +117,7 @@ const LeaveForm = ({ user }) => {
       formData.append(key, value);
     });
     //  console.log(...formData);
-    console.log(remainLeave);
+
     if (remainLeave >= dateDiff) {
       if (id) {
         formData.append('attachments', JSON.stringify(existedFile));
@@ -123,14 +149,15 @@ const LeaveForm = ({ user }) => {
           uid: file.fileId,
           name: file.fileName,
           status: 'done',
-          url: `http://localhost:5000/${file.filePath}`,
+          url: file.filePath,
         };
       }) || []
     );
   };
   useEffect(() => {
+    dispatch(fetchHolidaysByYear(moment().format('YYYY')));
     dispatch(getLeaveTypes());
-    console.log(leaveTypes);
+
     if (id) {
       setLoading(true);
       dispatch(fetchLeaveById(id)).then((leave) => {
@@ -143,24 +170,7 @@ const LeaveForm = ({ user }) => {
       });
     }
   }, [dispatch, id]);
-  const onFinishFailed = (errorInfo) => {
-    console.log('Failed:', errorInfo);
-  };
 
-  const normFile = (e) => {
-    console.log('Upload event:', e);
-
-    if (Array.isArray(e)) {
-      return e;
-    }
-
-    return e && e.fileList;
-  };
-
-  const preventUpload = (file) => {
-    console.log('?????false', file);
-    return false;
-  };
   //https://stackoverflow.com/a/51519603/4858751
   const dummyRequest = ({ file, onSuccess }) => {
     setTimeout(() => {
@@ -168,7 +178,6 @@ const LeaveForm = ({ user }) => {
     }, 0);
   };
   const disabledDate = (val) => {
-    console.log(val.format('YYYY-MM-DD'));
     const ltVal = form.getFieldValue('leaveType');
 
     if (!ltVal) return true;
@@ -179,7 +188,6 @@ const LeaveForm = ({ user }) => {
     if (ltStart == 'year' || ltStart == 'month') {
       start = moment().startOf(ltStart);
     } else {
-      console.log(ltStart);
       const operator = ltStart.charAt(0);
       const day = parseInt(ltStart.substring(1));
       if (operator == '+') {
@@ -200,25 +208,26 @@ const LeaveForm = ({ user }) => {
         end = moment().subtract(day, 'days');
       }
     }
-    console.log(end.format('YYYY-MM-DD'), start.format('YYYY-MM-DD'));
+
     return val < start || val > end;
   };
 
   if (loading) return <PageLoading />;
   return (
     <>
-      <h2 className='form-header'>{id ? 'Edit Leave' : 'Apply for Leave'}</h2>
+      <Typography.Title level={2} style={{ textAlign: 'center' }}>
+        {id ? 'Edit Leave' : 'Apply for Leave'}
+      </Typography.Title>
+
       <Form
         form={form}
-        name='basic'
         labelCol={{
-          span: 8,
+          sm: { span: 8 },
         }}
         wrapperCol={{
-          span: 16,
+          sm: { span: 8 },
         }}
         onFinish={onFinish}
-        onFinishFailed={onFinishFailed}
         autoComplete='off'
       >
         <Form.Item
@@ -226,12 +235,11 @@ const LeaveForm = ({ user }) => {
           name='leaveType'
           rules={[
             {
-              required: false,
-              message: 'Please input your leaveType!',
+              required: true,
             },
           ]}
         >
-          <Select>
+          <Select placeholder='Please choose a leave type'>
             {user.leaveCount.map((leave) => (
               <Option key={leave.leaveType._id} value={leave.leaveType._id}>
                 {leave.leaveType.name}
@@ -243,13 +251,9 @@ const LeaveForm = ({ user }) => {
         <Form.Item
           label='Reason'
           name='reason'
-          rules={[
-            {
-              whitespace: true,
-            },
-          ]}
+          rules={[{ required: true, whitespace: true }]}
         >
-          <TextArea rows={4} />
+          <TextArea rows={4} placeholder='Please enter reason' />
         </Form.Item>
 
         <Form.Item
@@ -258,11 +262,10 @@ const LeaveForm = ({ user }) => {
           rules={[
             {
               required: true,
-              message: 'Please input your date!',
             },
           ]}
         >
-          <RangePicker disabledDate={disabledDate} />
+          <RangePicker style={{ width: '100%' }} disabledDate={disabledDate} />
         </Form.Item>
         <Form.Item
           name='upload'
@@ -273,7 +276,6 @@ const LeaveForm = ({ user }) => {
           <Upload.Dragger
             name='logo'
             listType='picture'
-            beforeUpload={preventUpload}
             customRequest={dummyRequest}
             defaultFileList={defaultFile}
             showUploadList={{
@@ -294,14 +296,9 @@ const LeaveForm = ({ user }) => {
         </Form.Item>
         <Form.Item
           wrapperCol={{
-            offset: 8,
-            span: 16,
+            sm: { offset: 8 },
           }}
         >
-          {error && <Text type='danger'>{error}</Text>}
-          <br />
-          <br />
-          <br />
           <Button type='primary' htmlType='submit'>
             Submit
           </Button>

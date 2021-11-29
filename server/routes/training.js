@@ -14,7 +14,7 @@ import {
   fetchTrainingCount,
 } from '../controllers/training.js';
 import auth from '../middleware/auth.js';
-import upload from '../middleware/filehelper.js';
+import upload from '../middleware/filehelpers3.cjs';
 const router = express.Router();
 
 router.get('/', auth, fetchAllTrainings);

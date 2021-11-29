@@ -7,28 +7,28 @@ import {
   message,
   Alert,
   Typography,
+  Modal,
 } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import { resetPassword } from '../../actions/auth';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const ResetPasswordForm = () => {
+  const navigate = useNavigate();
   const [submitted, setSubmitted] = useState(false);
   const dispatch = useDispatch();
-  const { isLoading, error } = useSelector((state) => state.users);
+  const { isLoading, error } = useSelector((state) => state.auth);
   const onFinish = async (values) => {
-    dispatch(resetPassword(values.email));
-    if (!isLoading && !error) {
-      message.success('Email sent');
-    }
-    setSubmitted(true);
-    console.log('Success:', values);
-    console.log(submitted && !isLoading && !error);
+    dispatch(resetPassword({ email: values.email })).then(() => {
+      Modal.success({
+        content: 'Email sent!',
+        onOk: () => {
+          navigate('/auth');
+        },
+      });
+    });
   };
 
-  const onFinishFailed = (errorInfo) => {
-    console.log('Failed:', errorInfo);
-  };
   return (
     <>
       <Typography.Title level={2} style={{ textAlign: 'center' }}>
@@ -36,32 +36,35 @@ const ResetPasswordForm = () => {
       </Typography.Title>
       <Form
         name='basic'
-        labelCol={{ span: 8 }}
-        wrapperCol={{ span: 8 }}
+        labelCol={{
+          sm: { span: 8 },
+        }}
+        wrapperCol={{
+          sm: { span: 8 },
+        }}
         onFinish={onFinish}
-        onFinishFailed={onFinishFailed}
         autoComplete='off'
       >
         <Form.Item
-          label='Password'
-          name='password'
+          label='Email'
+          name='email'
           initialValue=''
-          rules={[{ required: true, message: 'Please input your email!' }]}
+          rules={[
+            {
+              required: true,
+              type: 'email',
+              whitespace: true,
+            },
+          ]}
         >
-          <Input />
+          <Input placeholder='Please enter email' />
         </Form.Item>
+
         <Form.Item
-          label='Confirm Password'
-          name='confirmPassword'
-          initialValue=''
-          rules={[{ required: true, message: 'Please input your email!' }]}
+          wrapperCol={{
+            sm: { offset: 8 },
+          }}
         >
-          <Input />
-        </Form.Item>
-        {submitted && !isLoading && !error && (
-          <Alert message='Email sent' type='success' />
-        )}
-        <Form.Item wrapperCol={{ offset: 11 }}>
           <Button type='primary' htmlType='submit'>
             Submit
           </Button>

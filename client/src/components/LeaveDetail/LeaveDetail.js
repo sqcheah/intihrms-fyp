@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import './LeaveDetail.css';
+import './LeaveDetail.less';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchLeaveById, updateLeave } from '../../actions/leaves';
 import { Descriptions, Badge, Button, Space, Spin, Tag, Upload } from 'antd';
@@ -10,31 +10,61 @@ import { updateUser, getUser } from '../../actions/users';
 import PageLoading from '../PageLoading/PageLoading';
 import _ from 'lodash';
 import useBreakpoint from 'antd/lib/grid/hooks/useBreakpoint';
+import { fetchHolidaysByYear } from '../../actions/holidays';
 const LeaveDetail = ({ user: curUser }) => {
   const screens = useBreakpoint();
   const { leave, isLoading: leaveIsloading } = useSelector(
     (state) => state.leaves
   );
+  const { holidays } = useSelector((state) => state.holidays);
   const dispatch = useDispatch();
   const [loading, setIsloading] = useState(true);
   const navigate = useNavigate();
   const { id } = useParams();
   useEffect(() => {
+    dispatch(fetchHolidaysByYear(moment().format('YYYY')));
     dispatch(fetchLeaveById(id)).then(() => setIsloading(false));
   }, [dispatch, id]);
+
+  const calcWorkingDays = (startDate, endDate) => {
+    let day = moment(startDate);
+    let workingDays = 0;
+    ///https://stackoverflow.com/a/45483646
+    while (day.isSameOrBefore(endDate, 'day')) {
+      if (![0, 6].includes(day.day())) workingDays++;
+      day.add(1, 'd');
+    }
+
+    holidays?.lists.forEach((holiday) => {
+      if (startDate >= holiday.startDate && endDate <= holiday.endDate) {
+        const holidayCount = moment(holiday.endDate).diff(
+          moment(holiday.startDate),
+          'days'
+        );
+
+        workingDays -= holidayCount;
+      }
+    });
+    return workingDays;
+  };
+
   const setStatus = (status) => {
-    dispatch(updateLeave(id, { ...leave, status }));
+    dispatch(
+      updateLeave(id, {
+        ...leave,
+        status,
+        approver: curUser._id,
+        user_name: `${curUser.first_name} ${curUser.last_name}`,
+      })
+    );
     if (status == 'Approved') {
       dispatch(getUser(leave.user._id)).then((user) => {
-        console.log(user);
         const { count: remainLeave } = user.leaveCount.find(
           (l) => l.leaveType._id == leave.leaveType._id
         );
 
-        const dateDiff =
-          moment
-            .duration(moment(leave.toDate).diff(moment(leave.fromDate)))
-            .asDays() + 1;
+        const dateDiff = calcWorkingDays(leave.startDate, leave.endDate);
+
         const minDate = remainLeave - dateDiff;
         const newLeaveCount = user.leaveCount.map((l) =>
           l.leaveType._id == leave.leaveType._id ? { ...l, count: minDate } : l
@@ -59,7 +89,7 @@ const LeaveDetail = ({ user: curUser }) => {
           uid: file.fileId,
           name: file.fileName,
           status: 'done',
-          url: `http://localhost:5000/${file.filePath}`,
+          url: file.filePath,
         };
       }) || []
     );
@@ -127,12 +157,18 @@ const LeaveDetail = ({ user: curUser }) => {
           />
         </Descriptions.Item>
       </Descriptions>
+      <br />
+      <br />
+      <br />
       <Space size='middle'>
-        <Button onClick={() => navigate(-1)}>Back</Button>
+        <Button type='default' onClick={() => navigate(-1)}>
+          Back
+        </Button>
         {leave.status == 'Pending' && leave.user._id == curUser._id ? (
           <>
             <Button
-              className='btn-success'
+              type='primary'
+              danger
               onClick={() => setStatus('Cancelled')}
             >
               Cancel
@@ -142,13 +178,14 @@ const LeaveDetail = ({ user: curUser }) => {
           leave.user._id != curUser._id &&
           leave.status == 'Pending' && (
             <>
-              <Button
-                className='btn-success'
-                onClick={() => setStatus('Approved')}
-              >
+              <Button type='success' onClick={() => setStatus('Approved')}>
                 Approve
               </Button>
-              <Button danger onClick={() => setStatus('Rejected')}>
+              <Button
+                type='primary'
+                danger
+                onClick={() => setStatus('Rejected')}
+              >
                 Reject
               </Button>
             </>

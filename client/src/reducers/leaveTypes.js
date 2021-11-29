@@ -24,8 +24,11 @@ export default (
       return { ...state, success: action.payload.success };
     }
     case LEAVETYPE_ERROR: {
-      console.log('hre');
-      return { ...state, error: handleError(action.error), isLoading: false };
+      return {
+        ...state,
+        error: handleError(action.error) || '',
+        isLoading: false,
+      };
     }
 
     case UPDATE_LEAVETYPE:

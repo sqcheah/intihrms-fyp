@@ -28,7 +28,6 @@ export const fetchAllLeaves = () => async (dispatch) => {
 };
 export const fetchLeaveById = (id) => async (dispatch) => {
   try {
-    console.log('test');
     dispatch({ type: LEAVE_START_LOADING });
     const { data } = await api.fetchLeaveById(id);
     dispatch({ type: FETCH_ONE_LEAVE, payload: data });
@@ -64,7 +63,7 @@ export const fetchLeaveByDateRange = (dateRange) => async (dispatch) => {
   try {
     dispatch({ type: LEAVE_START_LOADING });
     const data = await api.fetchLeaveByDateRange(dateRange);
-    //console.log(data);
+
     dispatch({ type: FETCH_LEAVE_BY_DATERANGE, payload: data });
     dispatch({ type: LEAVE_END_LOADING });
   } catch (error) {
@@ -77,7 +76,7 @@ export const fetchLeaveByDateRangePersonal =
     try {
       dispatch({ type: LEAVE_START_LOADING });
       const data = await api.fetchLeaveByDateRangePersonal(dateRange);
-      //console.log(data);
+
       dispatch({ type: FETCH_LEAVE_BY_DATERANGE_PERSONAL, payload: data });
       dispatch({ type: LEAVE_END_LOADING });
     } catch (error) {
@@ -111,7 +110,6 @@ export const fetchLeaveHistory = (id) => async (dispatch) => {
     const { data } = await api.fetchLeaveHistory(id);
     dispatch({ type: FETCH_LEAVE_HISTORY, payload: data });
     dispatch({ type: LEAVE_END_LOADING });
-    console.log(data);
   } catch (error) {
     dispatch({ type: LEAVE_ERROR, error });
   }

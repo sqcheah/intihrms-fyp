@@ -54,10 +54,16 @@ const TrainingProgressForm = ({ user }) => {
     }
     return workingDays;
   };
+  const normFile = (e) => {
+    if (Array.isArray(e)) {
+      return e;
+    }
+    return e && e.fileList;
+  };
   const onFinish = (values) => {
     let existedFile = [];
     setError(null);
-    //  console.log(values);
+
     let formData = new FormData();
     if (values.upload) {
       for (let file of values.upload) {
@@ -93,7 +99,7 @@ const TrainingProgressForm = ({ user }) => {
           uid: file.fileId,
           name: file.fileName,
           status: 'done',
-          url: `http://localhost:5000/${file.filePath}`,
+          url: file.filePath,
         };
       }) || []
     );
@@ -106,22 +112,8 @@ const TrainingProgressForm = ({ user }) => {
       });
     }
   }, [dispatch, id]);
-  const onFinishFailed = (errorInfo) => {
-    console.log('Failed:', errorInfo);
-  };
-
-  const normFile = (e) => {
-    console.log('Upload event:', e);
-
-    if (Array.isArray(e)) {
-      return e;
-    }
-
-    return e && e.fileList;
-  };
 
   const preventUpload = (file) => {
-    console.log('?????false', file);
     return false;
   };
   //https://stackoverflow.com/a/51519603/4858751
@@ -133,7 +125,9 @@ const TrainingProgressForm = ({ user }) => {
   if (loading) return <PageLoading />;
   return (
     <>
-      <h2 className='form-header'>Training Progress Certification Upload</h2>
+      <Typography.Title level={2} style={{ textAlign: 'center' }}>
+        Training Progress Certification Upload
+      </Typography.Title>
 
       <Descriptions
         bordered
@@ -159,16 +153,20 @@ const TrainingProgressForm = ({ user }) => {
       <br />
 
       <Form
+        labelCol={{
+          sm: { span: 8 },
+        }}
+        wrapperCol={{
+          sm: { span: 8 },
+        }}
         form={form}
         name='basic'
         onFinish={onFinish}
-        onFinishFailed={onFinishFailed}
         autoComplete='off'
       >
         <Form.Item
           name='upload'
           label='Certifications'
-          valuePropName='fileList'
           getValueFromEvent={normFile}
           rules={[
             () => ({
@@ -179,9 +177,7 @@ const TrainingProgressForm = ({ user }) => {
                 ) {
                   return Promise.resolve();
                 }
-                return Promise.reject(
-                  new Error('The two passwords that you entered do not match!')
-                );
+                return Promise.reject(new Error('Upload cannot be empty'));
               },
             }),
           ]}
@@ -210,14 +206,9 @@ const TrainingProgressForm = ({ user }) => {
         </Form.Item>
         <Form.Item
           wrapperCol={{
-            offset: 8,
-            span: 16,
+            sm: { offset: 8 },
           }}
         >
-          {error && <Text type='danger'>{error}</Text>}
-          <br />
-          <br />
-          <br />
           <Button type='primary' htmlType='submit'>
             Submit
           </Button>

@@ -81,7 +81,12 @@ const TrainingForm = ({ socket, user }) => {
       },
     });
   };
-
+  const normFile = (e) => {
+    if (Array.isArray(e)) {
+      return e;
+    }
+    return e && e.fileList;
+  };
   const defaultFile = () => {
     if (!!!id) return null;
     return (
@@ -90,27 +95,13 @@ const TrainingForm = ({ socket, user }) => {
           uid: file.fileId,
           name: file.fileName,
           status: 'done',
-          url: `http://localhost:5000/${file.filePath}`,
+          url: file.filePath,
         };
       }) || []
     );
   };
-  const onFinishFailed = (errorInfo) => {
-    console.log('Failed:', errorInfo);
-  };
-
-  const normFile = (e) => {
-    console.log('Upload event:', e);
-
-    if (Array.isArray(e)) {
-      return e;
-    }
-
-    return e && e.fileList;
-  };
 
   const preventUpload = (file) => {
-    console.log('?????false', file);
     return false;
   };
   //https://stackoverflow.com/a/51519603/4858751
@@ -124,21 +115,19 @@ const TrainingForm = ({ socket, user }) => {
 
   return (
     <>
-      <h2 className='form-header'>Create Internal Training</h2>
+      <Typography.Title level={2} style={{ textAlign: 'center' }}>
+        Create Internal Training
+      </Typography.Title>
       <Form
         form={form}
         name='basic'
         labelCol={{
-          span: 8,
+          sm: { span: 8 },
         }}
         wrapperCol={{
-          span: 16,
-        }}
-        initialValues={{
-          remember: true,
+          sm: { span: 8 },
         }}
         onFinish={onFinish}
-        onFinishFailed={onFinishFailed}
         autoComplete='off'
       >
         <Form.Item
@@ -147,11 +136,12 @@ const TrainingForm = ({ socket, user }) => {
           rules={[
             {
               required: true,
+              whitespace: true,
               message: 'Please enter an organizer!',
             },
           ]}
         >
-          <Input />
+          <Input placeholder='Please enter organizer' />
         </Form.Item>
         <Form.Item
           label='Title'
@@ -159,11 +149,12 @@ const TrainingForm = ({ socket, user }) => {
           rules={[
             {
               required: true,
+              whitespace: true,
               message: 'Please insert a title!',
             },
           ]}
         >
-          <Input />
+          <Input placeholder='Please enter title' />
         </Form.Item>
 
         <Form.Item
@@ -176,7 +167,7 @@ const TrainingForm = ({ socket, user }) => {
             },
           ]}
         >
-          <TextArea rows={4} />
+          <TextArea rows={4} placeholder='Please enter training description' />
         </Form.Item>
 
         <Form.Item
@@ -190,6 +181,7 @@ const TrainingForm = ({ socket, user }) => {
           ]}
         >
           <DatePicker.RangePicker
+            style={{ width: '100%' }}
             disabledDate={(current) => {
               return current && current < moment().endOf('day');
             }}
@@ -207,6 +199,7 @@ const TrainingForm = ({ socket, user }) => {
           ]}
         >
           <TimePicker.RangePicker
+            style={{ width: '100%' }}
             format='HH:mm'
             minuteStep={15}
             defaultValue={moment('00:00:00', 'HH:mm:ss')}
@@ -216,7 +209,6 @@ const TrainingForm = ({ socket, user }) => {
         <Form.Item
           name='upload'
           label='Supporting Documents'
-          valuePropName='fileList'
           getValueFromEvent={normFile}
         >
           <Upload.Dragger
@@ -244,14 +236,9 @@ const TrainingForm = ({ socket, user }) => {
 
         <Form.Item
           wrapperCol={{
-            offset: 8,
-            span: 16,
+            sm: { offset: 8 },
           }}
         >
-          {error && <Text type='danger'>{error}</Text>}
-          <br />
-          <br />
-          <br />
           <Button type='primary' htmlType='submit'>
             Submit
           </Button>

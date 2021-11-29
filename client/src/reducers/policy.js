@@ -7,6 +7,7 @@ import {
   POLICY_ERROR,
   POLICY_START_LOADING,
   POLICY_SUCCESS,
+  FETCH_POLICY_BY_DEPT,
 } from '../constants/actionTypes';
 import { handleError } from './error.js';
 export default (
@@ -19,7 +20,11 @@ export default (
     case POLICY_END_LOADING:
       return { ...state, isLoading: false };
     case POLICY_ERROR: {
-      return { ...state, error: handleError(action.error), isLoading: false };
+      return {
+        ...state,
+        error: handleError(action.error) || '',
+        isLoading: false,
+      };
     }
     case POLICY_SUCCESS: {
       return { ...state, success: action.payload.success };
@@ -35,6 +40,7 @@ export default (
     case FETCH_ONE_POLICY:
       return { ...state, policy: action.payload };
     case FETCH_ALL_POLICY:
+    case FETCH_POLICY_BY_DEPT:
       return { ...state, policies: action.payload };
     case CREATE_POLICY:
       return { ...state, policies: [...state.policies, action.payload] };

@@ -44,17 +44,22 @@ const TrainingProgressDetail = ({ user: curUser }) => {
   const capitalizeFirstLetter = (string) => {
     return string.charAt(0).toUpperCase() + string.slice(1);
   };
-
+  const normFile = (e) => {
+    if (Array.isArray(e)) {
+      return e;
+    }
+    return e && e.fileList;
+  };
   const defaultFile = () => {
     if (!!!id) return null;
-    console.log(trainingProgress);
+
     return (
       trainingProgress?.attachments?.map((file) => {
         return {
           uid: file.fileId,
           name: file.fileName,
           status: 'done',
-          url: `http://localhost:5000/${file.filePath}`,
+          url: file.filePath,
         };
       }) || []
     );
@@ -117,16 +122,16 @@ const TrainingProgressDetail = ({ user: curUser }) => {
           />
         </Descriptions.Item>
       </Descriptions>
+      <br />
+      <br />
+      <br />
       <Space size='middle'>
         <Button onClick={() => navigate(-1)}>Back</Button>
 
         {trainingProgress.user._id != curUser._id &&
           trainingProgress.status == 'Pending Approval' && (
             <>
-              <Button
-                className='btn-success'
-                onClick={() => setStatus('Approved')}
-              >
+              <Button type='success' onClick={() => setStatus('Approved')}>
                 Approve
               </Button>
             </>

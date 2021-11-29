@@ -91,6 +91,21 @@ const TrainingHistory = ({ socket, user }) => {
       render: (text, record) => moment(record.fromDate).format('YYYY-MM-DD'),
     },
     {
+      title: 'Start Date to End Date',
+      dataIndex: 'fromDate',
+      valueType: 'dateRange',
+      key: 'somehtin',
+      hideInTable: true,
+      search: {
+        transform: (value) => {
+          return {
+            startTime: value[0],
+            endTime: value[1],
+          };
+        },
+      },
+    },
+    {
       title: 'End Date',
       dataIndex: 'toDate',
       key: 'toDate',
@@ -117,6 +132,7 @@ const TrainingHistory = ({ socket, user }) => {
       dataIndex: 'status',
       key: 'status',
       filters: statusFilter,
+      hideInSearch: true,
       onFilter: (value, record) => record.status.indexOf(value) === 0,
       render: (text, record) => (
         <Badge
@@ -158,6 +174,21 @@ const TrainingHistory = ({ socket, user }) => {
       valueType: 'date',
       sorter: (a, b) => moment(a.fromDate) - moment(b.fromDate),
       render: (text, record) => moment(record.fromDate).format('YYYY-MM-DD'),
+    },
+    {
+      title: 'Start Date to End Date',
+      dataIndex: 'fromDate',
+      valueType: 'dateRange',
+      key: 'somehtin',
+      hideInTable: true,
+      search: {
+        transform: (value) => {
+          return {
+            startTime: value[0],
+            endTime: value[1],
+          };
+        },
+      },
     },
     {
       title: 'End Date',
@@ -235,7 +266,6 @@ const TrainingHistory = ({ socket, user }) => {
                     if (Object.keys(params).length > 0) {
                       dataSource = dataSource.filter((item) => {
                         return Object.keys(params).every((key) => {
-                          //console.log(Object.keys(params));
                           if (!params[key]) {
                             return true;
                           }
@@ -251,6 +281,19 @@ const TrainingHistory = ({ socket, user }) => {
                             val = `${item.user.first_name} ${item.user.last_name}`;
                           } else if (key == 'department') {
                             val = `${item.department.name}`;
+                          } else if (key == 'startTime') {
+                            return (
+                              moment(item['fromDate']).diff(
+                                moment(params[key])
+                              ) >= 0
+                            );
+                          } else if (key == 'endTime') {
+                            return (
+                              moment(item['toDate']).diff(
+                                moment(params[key]),
+                                'days'
+                              ) <= 0
+                            );
                           }
                           if (!val) {
                             return true;
@@ -291,9 +334,9 @@ const TrainingHistory = ({ socket, user }) => {
                 }}
                 toolBarRender={() => [
                   <Space>
-                    <Button type='primary'>
+                    <Button type='primary' shape='round'>
                       <Link to='/training/submitExt'>
-                        Submit External Training Request
+                        To External Training Application
                       </Link>
                     </Button>
                   </Space>,
@@ -319,7 +362,6 @@ const TrainingHistory = ({ socket, user }) => {
                   if (Object.keys(params).length > 0) {
                     dataSource = dataSource.filter((item) => {
                       return Object.keys(params).every((key) => {
-                        //console.log(Object.keys(params));
                         if (!params[key]) {
                           return true;
                         }
@@ -335,6 +377,19 @@ const TrainingHistory = ({ socket, user }) => {
                           val = `${item.user.first_name} ${item.user.last_name}`;
                         } else if (key == 'department') {
                           val = `${item.department.name}`;
+                        } else if (key == 'startTime') {
+                          return (
+                            moment(item['fromDate']).diff(
+                              moment(params[key])
+                            ) >= 0
+                          );
+                        } else if (key == 'endTime') {
+                          return (
+                            moment(item['toDate']).diff(
+                              moment(params[key]),
+                              'days'
+                            ) <= 0
+                          );
                         }
                         if (!val) {
                           return true;

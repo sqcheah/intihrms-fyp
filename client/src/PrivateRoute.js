@@ -19,8 +19,6 @@ function PrivateRoute({
       hasAccess = requiredPermissions.every(
         (ai) => [LEAVE_APPROVE, ROLES_ASSIGN, LEAVE_VIEW_ALL].indexOf(ai) !== -1
       );
-
-      console.log(hasAccess);
     } else {
       hasAccess = [LEAVE_APPROVE, ROLES_ASSIGN, LEAVE_VIEW_ALL].some(
         (ai) => requiredPermissions.indexOf(ai) !== -1

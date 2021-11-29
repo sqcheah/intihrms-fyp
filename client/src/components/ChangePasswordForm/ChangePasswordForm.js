@@ -7,17 +7,9 @@ const ChangePasswordForm = ({ user }) => {
   const dispatch = useDispatch();
   const { isLoading, error } = useSelector((state) => state.users);
   const onFinish = async (values) => {
-    console.log(values);
-
     dispatch(changePassword(user._id, { password: values.password }));
-    //if (!error) setSubmitted(true);
-    console.log('Success:', values);
-    //  console.log(submitted && !isLoading && !error);
   };
 
-  const onFinishFailed = (errorInfo) => {
-    console.log('Failed:', errorInfo);
-  };
   return (
     <>
       <Typography.Title level={2} style={{ textAlign: 'center' }}>
@@ -25,10 +17,13 @@ const ChangePasswordForm = ({ user }) => {
       </Typography.Title>
       <Form
         name='basic'
-        labelCol={{ span: 8 }}
-        wrapperCol={{ span: 8 }}
+        labelCol={{
+          sm: { span: 8 },
+        }}
+        wrapperCol={{
+          sm: { span: 8 },
+        }}
         onFinish={onFinish}
-        onFinishFailed={onFinishFailed}
         autoComplete='off'
       >
         <Form.Item
@@ -37,7 +32,6 @@ const ChangePasswordForm = ({ user }) => {
           rules={[
             {
               required: true,
-              message: 'Please input your password!',
             },
             {
               pattern:
@@ -48,7 +42,7 @@ const ChangePasswordForm = ({ user }) => {
           ]}
           hasFeedback
         >
-          <Input.Password />
+          <Input.Password autoFocus placeholder='Please enter new password' />
         </Form.Item>
 
         <Form.Item
@@ -59,7 +53,6 @@ const ChangePasswordForm = ({ user }) => {
           rules={[
             {
               required: true,
-              message: 'Please confirm your password!',
             },
             {
               pattern:
@@ -79,9 +72,13 @@ const ChangePasswordForm = ({ user }) => {
             }),
           ]}
         >
-          <Input.Password />
+          <Input.Password placeholder='Please enter password again' />
         </Form.Item>
-        <Form.Item wrapperCol={{ offset: 11 }}>
+        <Form.Item
+          wrapperCol={{
+            sm: { offset: 8 },
+          }}
+        >
           <Button type='primary' htmlType='submit'>
             Submit
           </Button>

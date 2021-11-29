@@ -85,15 +85,25 @@ export const getTrainingProgressDept = async (req, res) => {
       .aggregate([
         {
           $lookup: {
-            from: 'user',
+            from: 'users',
             localField: 'user',
             foreignField: '_id',
             as: 'user',
           },
         },
+        { $unwind: '$user' },
+        {
+          $lookup: {
+            from: 'trainings',
+            localField: 'training',
+            foreignField: '_id',
+            as: 'training',
+          },
+        },
+        { $unwind: '$training' },
         {
           $match: {
-            'user.department': id,
+            'user.department': mongoose.Types.ObjectId(id),
           },
         },
       ])
@@ -121,11 +131,11 @@ export const updateTrainingProgress = async (req, res) => {
       const file = {
         fileId: mongoose.Types.ObjectId(),
         fileName: element.originalname,
-        filePath: element.path,
+        filePath: element.location,
         fileType: element.mimetype,
         fileSize: fileSizeFormatter(element.size, 2),
       };
-      // console.log('1', element);
+
       filesArray.push(file);
     });
     const newFiles = JSON.parse(trainingProgress.attachments).concat(

@@ -31,9 +31,11 @@ import enUSIntl from 'antd/lib/locale/en_US';
 
 import PageLoading from '../PageLoading/PageLoading';
 import { ProFormDateRangePicker } from '@ant-design/pro-form';
+import { fetchHolidaysByYear } from '../../actions/holidays';
 const { Text } = Typography;
 
 const LeaveList = () => {
+  const { holidays } = useSelector((state) => state.holidays);
   const { leaves, isLoading } = useSelector((state) => state.leaves);
   const { depts } = useSelector((state) => state.depts);
   const { leaveTypes } = useSelector((state) => state.leaveTypes);
@@ -49,12 +51,12 @@ const LeaveList = () => {
 
   const dispatch = useDispatch();
   useEffect(() => {
+    dispatch(fetchHolidaysByYear(moment().format('YYYY')));
     dispatch(
       fetchLeaveRequests(user.roles.name, user._id, user.department.name)
     );
     dispatch(getDepts());
     dispatch(getLeaveTypes());
-    console.log(leaves);
   }, [dispatch]);
   if (user.roles.name == 'admin')
     depts.map((element) => {
@@ -69,6 +71,28 @@ const LeaveList = () => {
     return string;
   };
 
+  const calcWorkingDays = (startDate, endDate) => {
+    let day = moment(startDate);
+    let workingDays = 0;
+    ///https://stackoverflow.com/a/45483646
+    while (day.isSameOrBefore(endDate, 'day')) {
+      if (![0, 6].includes(day.day())) workingDays++;
+      day.add(1, 'd');
+    }
+
+    holidays.lists.forEach((holiday) => {
+      if (startDate >= holiday.startDate && endDate <= holiday.endDate) {
+        const holidayCount = moment(holiday.endDate).diff(
+          moment(holiday.startDate),
+          'days'
+        );
+
+        workingDays -= holidayCount;
+      }
+    });
+    return workingDays;
+  };
+
   const columns = [
     {
       title: 'Employee Name',
@@ -81,7 +105,7 @@ const LeaveList = () => {
       title: 'Department',
       dataIndex: ['department', 'name'],
       key: 'department',
-
+      hideInSearch: true,
       filters: deptFilters,
       onFilter: (value, record) => record.department.name.indexOf(value) === 0,
       //  render: (text, record) => `${record.department.name}`,
@@ -98,6 +122,7 @@ const LeaveList = () => {
       dataIndex: 'leaveType',
       key: 'leaveType',
       filters: typeFilter,
+      hideInSearch: true,
       onFilter: (value, record) => record.leaveType.code.indexOf(value) === 0,
       render: (text, record) => (
         <Tag color={text.color}>{capitalizeFirstLetter(text.code)}</Tag>
@@ -135,10 +160,18 @@ const LeaveList = () => {
       render: (text, record) => moment(record.toDate).format('YYYY-MM-DD'),
     },
     {
+      title: 'Total Days',
+      hideInSearch: true,
+      dataIndex: 'toDate',
+      key: 'totalDays',
+      render: (text, record) => calcWorkingDays(record.fromDate, record.toDate),
+    },
+    {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
       filters: statusFilter,
+      hideInSearch: true,
       onFilter: (value, record) => record.status.indexOf(value) === 0,
       render: (text, record) => (
         <Badge
@@ -193,7 +226,6 @@ const LeaveList = () => {
                   if (Object.keys(params).length > 0) {
                     dataSource = dataSource.filter((item) => {
                       return Object.keys(params).every((key) => {
-                        console.log(Object.keys(params));
                         if (!params[key]) {
                           return true;
                         }
@@ -210,14 +242,6 @@ const LeaveList = () => {
                         } else if (key == 'department') {
                           val = `${item.department.name}`;
                         } else if (key == 'startTime') {
-                          console.log(
-                            item['fromDate'],
-                            params[key],
-                            moment(item['fromDate']).diff(
-                              moment(params[key]),
-                              'days'
-                            )
-                          );
                           return (
                             moment(item['fromDate']).diff(
                               moment(params[key])
@@ -268,8 +292,8 @@ const LeaveList = () => {
               }}
               toolBarRender={() => [
                 <Space>
-                  <Button type='primary'>
-                    <Link to='/leaves/create'>Apply Leave</Link>
+                  <Button type='primary' shape='round'>
+                    <Link to='/leaves/create'>To Leave Application</Link>
                   </Button>
                 </Space>,
               ]}
@@ -282,86 +306,3 @@ const LeaveList = () => {
 };
 
 export default LeaveList;
-/**<Table
-            dataSource={leaves}
-            rowKey='_id'
-            style={{ overflowX: 'scroll' }}
-          >
-            <Table.Column
-              title='Employee Name'
-              dataIndex='user'
-              key='user._id'
-              render={(text, record) => `${text.first_name} ${text.last_name}`}
-            ></Table.Column>
-            {user.roles.name === 'admin' && (
-              <Table.Column
-                title='Department ID'
-                dataIndex='department'
-                key='department._id'
-                filters={deptFilters}
-                onFilter={(value, record) =>
-                  record.department.name.indexOf(value) === 0
-                }
-                render={(text, record) => `${text.name}`}
-              ></Table.Column>
-            )}
-            <Table.Column
-              title='Title'
-              dataIndex='title'
-              key='title'
-            ></Table.Column>
-            <Table.Column
-              title='Leave Type'
-              dataIndex='leaveType'
-              key='leaveType'
-              filters={typeFilter}
-              onFilter={(value, record) =>
-                record.leaveType.indexOf(value) === 0
-              }
-              render={(text, record) => <Tag color='red'>{text}</Tag>}
-            ></Table.Column>
-            <Table.Column
-              title='Start Date'
-              dataIndex='fromDate'
-              key='fromDate'
-              defaultSortOrder='descend'
-              sorter={(a, b) => moment(a.fromDate) - moment(b.fromDate)}
-              render={(text, record) => moment(text).format('YYYY-MM-DD')}
-            ></Table.Column>
-            <Table.Column
-              title='End Date'
-              dataIndex='toDate'
-              key='toDate'
-              sorter={(a, b) => moment(a.toDate) - moment(b.toDate)}
-              render={(text, record) => moment(text).format('YYYY-MM-DD')}
-            ></Table.Column>
-            <Table.Column
-              title='Status'
-              dataIndex='status'
-              key='status'
-              filters={statusFilter}
-              onFilter={(value, record) => record.status.indexOf(value) === 0}
-              render={(text, record) => (
-                <Badge
-                  status={
-                    record.status == 'pending'
-                      ? 'processing'
-                      : record.status == 'approve'
-                      ? 'success'
-                      : 'error'
-                  }
-                  text={record.status}
-                />
-              )}
-            ></Table.Column>
-            <Table.Column
-              title='Action'
-              key='action'
-              render={(text, record) => (
-                <Space size='middle' key={record._id}>
-                  <Link to={`view/${record._id}`}>View</Link>
-                </Space>
-              )}
-            ></Table.Column>
-          </Table> 
-          */

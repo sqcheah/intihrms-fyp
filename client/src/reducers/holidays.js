@@ -21,10 +21,13 @@ export default (
     case HOLIDAY_END_LOADING:
       return { ...state, isLoading: false };
     case HOLIDAY_ERROR: {
-      return { ...state, error: handleError(action.error), isLoading: false };
+      return {
+        ...state,
+        error: handleError(action.error) || '',
+        isLoading: false,
+      };
     }
     case HOLIDAY_SUCCESS: {
-      console.log(action);
       return { ...state, success: action.payload.success };
     }
     case UPDATE_HOLIDAY:

@@ -19,7 +19,9 @@ import {
   LaptopOutlined,
   SettingOutlined,
   AuditOutlined,
+  TeamOutlined,
 } from '@ant-design/icons';
+import { HiUserGroup } from 'react-icons/hi';
 import Home from './components/Home/Home';
 import LeaveHome from './components/LeaveHome/LeaveHome';
 
@@ -28,7 +30,7 @@ export default {
     path: '/',
     routes: [
       {
-        path: '/',
+        path: '/dashboard',
         name: 'Dashboard',
         icon: <BarChartOutlined />,
         routes: [
@@ -141,18 +143,28 @@ export default {
         ],
       },
       {
-        path: '/',
+        path: '/settings',
         name: 'Settings',
         icon: <SettingOutlined />,
         routes: [
           {
-            path: 'holidays',
+            path: '/holidays',
             name: 'Holidays',
             icon: <CalendarOutlined />,
           },
           {
-            path: 'depts',
+            path: '/depts',
             name: 'Departments',
+            icon: <AuditOutlined />,
+          },
+          {
+            path: '/leaveTypes',
+            name: 'Leave Types',
+            icon: <AuditOutlined />,
+          },
+          {
+            path: '/policy',
+            name: 'Policy',
             icon: <AuditOutlined />,
           },
         ],
@@ -160,7 +172,7 @@ export default {
       {
         path: '/users',
         name: 'Employee',
-        icon: <BarChartOutlined />,
+        icon: <TeamOutlined />,
       },
     ],
   },

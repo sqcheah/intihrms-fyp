@@ -1,5 +1,5 @@
 const CracoLessPlugin = require('craco-less');
-const CracoAntDesignPlugin = require('craco-antd');
+
 module.exports = {
   /* disable warnings
   eslint: {
@@ -23,6 +23,7 @@ module.exports = {
 /**
 //https://github.com/ant-design/pro-table/issues/256#issuecomment-709516678
 //https://github.com/DocSpring/craco-antd/issues/49
+const CracoAntDesignPlugin = require('craco-antd');
 module.exports = {
   plugins: [
     {

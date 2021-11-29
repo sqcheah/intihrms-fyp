@@ -6,6 +6,9 @@ import mailer from 'nodemailer';
 import holidayModel from '../models/holidayModel.js';
 import moment from 'moment';
 import trainingProgressModel from '../models/trainingProgressModel.js';
+import { io } from '../index.js';
+import { sendMail } from '../service/email.js';
+import notificationModel from '../models/notificationModel.js';
 export const fetchAllTrainings = async (req, res) => {
   try {
     const trainings = await trainingModel
@@ -35,19 +38,19 @@ export const fetchTrainingById = async (req, res) => {
 
 export const createTraining = async (req, res) => {
   const training = req.body;
-  console.log(req.params, req.body);
-  console.log('files', req.files);
+  // console.log(req.params, req.body);
+  // console.log('files', req.files);
 
   let filesArray = [];
   req.files.forEach((element) => {
     const file = {
       fileId: mongoose.Types.ObjectId(),
       fileName: element.originalname,
-      filePath: element.path,
+      filePath: element.location,
       fileType: element.mimetype,
       fileSize: fileSizeFormatter(element.size, 2),
     };
-    console.log('1', element);
+
     filesArray.push(file);
   });
   const newTraining = new trainingModel({
@@ -56,7 +59,75 @@ export const createTraining = async (req, res) => {
   });
   newTraining
     .save()
-    .then((result) => {
+    .then(async (result) => {
+      if (training.trainingType == 'External') {
+        await userModel
+          .aggregate([
+            {
+              $lookup: {
+                from: 'roles',
+                localField: 'roles',
+                foreignField: '_id',
+                as: 'roles',
+              },
+            },
+            { $unwind: '$roles' },
+            {
+              $match: {
+                $and: [
+                  { _id: { $ne: mongoose.Types.ObjectId(training.user) } },
+                  {
+                    $or: [
+                      { 'roles.name': 'admin' },
+                      {
+                        $and: [
+                          { 'roles.name': 'supervisor' },
+                          {
+                            department: mongoose.Types.ObjectId(
+                              training.department
+                            ),
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
+            {
+              $project: { _id: 1, settings: 1 },
+            },
+          ])
+          .exec(async (err, result) => {
+            await result.forEach(async ({ _id: id, settings }) => {
+              const notification = {
+                sender: training.user,
+                recipient: id,
+                content: {
+                  id: newTraining._id,
+                  message: 'sent a request for external training',
+                  type: 'training',
+                  status: 'Pending',
+                },
+              };
+              await notificationModel.create(notification);
+
+              io.to(id.toString()).emit('newNotification', {
+                ...notification,
+                sender: training.user_name,
+              });
+
+              if (settings.email) {
+                sendMail({
+                  type: 'newExternalTraining',
+                  sender: training.user_name,
+                  trainingId: notification.content.id,
+                });
+              }
+            });
+          });
+      }
+
       return res.status(201).json(newTraining);
     })
     .catch((error) => {
@@ -66,7 +137,7 @@ export const createTraining = async (req, res) => {
 export const updateTraining = async (req, res) => {
   //add internal training attendance
   const { id: _id } = req.params;
-  const user_id = req.body.user_id;
+  const { user_id, user_name } = req.body;
   var status;
   if (!mongoose.Types.ObjectId.isValid(_id))
     return res.status(404).send('No training with that id');
@@ -91,6 +162,59 @@ export const updateTraining = async (req, res) => {
       training: _id,
     });
     await newTrainingProgress.save();
+  }
+  if (status == 'Pending') {
+    await userModel
+      .aggregate([
+        {
+          $lookup: {
+            from: 'roles',
+            localField: 'roles',
+            foreignField: '_id',
+            as: 'roles',
+          },
+        },
+        { $unwind: '$roles' },
+        {
+          $match: {
+            $and: [
+              { _id: { $ne: mongoose.Types.ObjectId(user_id) } },
+              { 'roles.name': 'admin' },
+            ],
+          },
+        },
+        {
+          $project: { _id: 1, settings: 1 },
+        },
+      ])
+      .exec(async (err, result) => {
+        await result.forEach(async ({ _id: id, settings }) => {
+          const notification = {
+            sender: user_id,
+            recipient: id,
+            content: {
+              id: updatedTraining._id,
+              message: 'sent a request to join training',
+              type: 'training',
+              status: 'Pending',
+            },
+          };
+          await notificationModel.create(notification);
+
+          io.to(id.toString()).emit('newNotification', {
+            ...notification,
+            sender: user_name,
+          });
+
+          if (settings.email) {
+            sendMail({
+              type: 'joinTraining',
+              sender: user_name,
+              trainingId: notification.content.id,
+            });
+          }
+        });
+      });
   }
 
   res.json(updatedTraining);
@@ -119,7 +243,7 @@ export const leaveTraining = async (req, res) => {
     user: user_id,
     training: _id,
   });
-  // console.log(del);
+
   res.json(updatedTraining);
 };
 export const fetchExtTraining = async (req, res) => {
@@ -184,15 +308,87 @@ export const updateTrainingStatus = async (req, res) => {
       { path: 'attendants.user', select: 'first_name last_name' },
       { path: 'department', select: 'name' },
     ]);
-  if (training.extra && training.extra.status == 'Approved') {
-    const newTrainingProgress = new trainingProgressModel({
-      user: training.extra.user,
-      training: _id,
-    });
-    await newTrainingProgress.save();
+  //internal
+  if (training.extra) {
+    if (training.extra.status == 'Approved') {
+      const newTrainingProgress = new trainingProgressModel({
+        user: training.extra.user,
+        training: _id,
+      });
+      await newTrainingProgress.save();
+    }
+    console.log(training.extra.status);
+    try {
+      await userModel
+        .findById(training.extra.user)
+        .lean()
+        .exec(async (err, result) => {
+          const notification = {
+            sender: training.approver,
+            recipient: training.extra.user,
+            content: {
+              id: _id,
+              message: `${training.extra.status} your join training request`,
+              type: 'training',
+              status: training.extra.status,
+            },
+          };
+          await notificationModel.create(notification);
+          io.to(training.extra.user.toString()).emit('newNotification', {
+            ...notification,
+            sender: training.user_name,
+          });
+
+          if (result.settings.email) {
+            sendMail({
+              type: 'joinTrainingApproval',
+              sender: training.user_name,
+              trainingId: notification.content.id,
+              status: training.extra.status,
+            });
+          }
+        });
+    } catch (err) {
+      console.log(err);
+    }
+  } else {
+    //external
+    try {
+      await userModel
+        .findById(updatedTraining.user._id)
+        .lean()
+        .exec(async (err, result) => {
+          const notification = {
+            sender: training.approver,
+            recipient: updatedTraining.user._id,
+            content: {
+              id: _id,
+              message: `${training.status} your training request`,
+              type: 'training',
+              status: training.status,
+            },
+          };
+          await notificationModel.create(notification);
+          io.to(updatedTraining.user._id.toString()).emit('newNotification', {
+            ...notification,
+            sender: training.user_name,
+          });
+
+          if (result.settings.email) {
+            sendMail({
+              type: 'externalTrainingApproval',
+              sender: training.user_name,
+              leaveId: notification.content.id,
+              status: training.status,
+            });
+          }
+        });
+    } catch (err) {
+      console.log(err);
+    }
   }
 
-  res.json(updatedTraining);
+  return res.json(updatedTraining);
 };
 export const fetchExtTrainingHistory = async (req, res) => {
   const { id } = req.params;

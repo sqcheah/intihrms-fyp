@@ -43,9 +43,9 @@ import recharts, {
 import PageLoading from '../PageLoading/PageLoading';
 import useBreakpoint from 'antd/lib/grid/hooks/useBreakpoint';
 
-const Home = () => {
+const Home = ({ user }) => {
   const screens = useBreakpoint();
-  const user = JSON.parse(localStorage.getItem('profile')).result;
+
   const { leaves, isLoading, todayLeaves } = useSelector(
     (state) => state.leaves
   );
@@ -74,7 +74,7 @@ const Home = () => {
   }, [dispatch]);
   const onFinish = (values) => {
     dispatch(fetchDeptUsers(values.department));
-    console.log(users);
+
     setIsModalVisible(false);
   };
 
@@ -165,11 +165,10 @@ const Home = () => {
             rules={[
               {
                 required: true,
-                message: 'Please select a department!',
               },
             ]}
           >
-            <Select>
+            <Select placeholder='Please choose a department'>
               {depts.map((depts) => (
                 <Option key={depts._id} value={depts._id}>
                   {depts.name}
@@ -190,12 +189,10 @@ const Home = () => {
               contentStyle={{ wordBreak: 'keep-all' }}
               column={{ sm: 3, xs: 1 }}
             >
-              <Descriptions.Item label='Name' span={2}>
+              <Descriptions.Item label='Name' span={3}>
                 {users[0].department.name}
               </Descriptions.Item>
-              <Descriptions.Item label='Code' span={1}>
-                {users[0].department.code}
-              </Descriptions.Item>
+
               <Descriptions.Item label='Supervisors' span={3}>
                 <List
                   dataSource={supervisorNames}
@@ -222,6 +219,11 @@ const Home = () => {
         </Col>
         <Col className='gutter-row' xs={24} sm={12}>
           <Card bordered>
+            <div style={{ textAlign: 'right' }}>
+              <Button type='primary' shape='round'>
+                <Link to='/leaves/list'>To Leaves</Link>
+              </Button>
+            </div>
             <h4>Leaves Taken by Month for Employees in Department</h4>
             <ResponsiveContainer minHeight={300}>
               <LineChart
@@ -249,9 +251,6 @@ const Home = () => {
                 ))}
               </LineChart>
             </ResponsiveContainer>
-            <Button type='primary'>
-              <Link to='/leaves/list'>To Leaves</Link>
-            </Button>
           </Card>
         </Col>
       </Row>

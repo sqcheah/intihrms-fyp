@@ -27,14 +27,14 @@ export const createHoliday = async (req, res) => {
     { $push: { lists: { ...holiday, _id: mongoose.Types.ObjectId() } } },
     { upsert: true, new: true }
   );
-  console.log(updatedHolidays);
+  // console.log(updatedHolidays);
   res.status(200).json(updatedHolidays);
 };
 
 export const updateHoliday = async (req, res) => {
   const { year, id: _id } = req.params;
   const holiday = req.body;
-  console.log(holiday);
+  // console.log(holiday);
   if (!mongoose.Types.ObjectId.isValid(_id))
     return res.status(404).send('No holiday with that id');
   const updatedHoliday = await holidayModel.findOneAndUpdate(
@@ -49,14 +49,14 @@ export const updateHoliday = async (req, res) => {
     },
     { new: true }
   );
-  console.log(updatedHoliday);
+  // console.log(updatedHoliday);
   res.json(updatedHoliday);
 };
 
 export const deleteHoliday = async (req, res) => {
   const { year, id: _id } = req.params;
-  console.log(year, _id);
-  console.log('here');
+  // console.log(year, _id);
+  // console.log('here');
   await holidayModel
     .updateOne(
       { year },
@@ -65,7 +65,7 @@ export const deleteHoliday = async (req, res) => {
     )
     .exec(async (err, result) => {
       const newHolidays = await holidayModel.findOne({ year });
-      console.log(newHolidays);
+      //  console.log(newHolidays);
       res.json(newHolidays);
     });
 };

@@ -27,7 +27,11 @@ export default (
     case TRAINING_END_LOADING:
       return { ...state, isLoading: false };
     case TRAINING_ERROR: {
-      return { ...state, error: handleError(action.error), isLoading: false };
+      return {
+        ...state,
+        error: handleError(action.error) || '',
+        isLoading: false,
+      };
     }
     case TRAINING_SUCCESS: {
       return { ...state, success: action.payload.success };

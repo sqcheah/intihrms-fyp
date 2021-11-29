@@ -2,10 +2,20 @@ import { message } from 'antd';
 import * as api from '../api/index.js';
 import {
   CREATE_TRAINING,
-  FETCH_ALL_TRAINING, FETCH_EXT_TRAINING, FETCH_EXT_TRAINING_HISTORY, FETCH_ONE_TRAINING, FETCH_TODAY_TRAINING,
-  FETCH_TRAINING_COUNT, FETCH_TRAINING_HISTORY,
-  FETCH_UPCOMING_TRAINING, LEAVE_TRAINING, TRAINING_END_LOADING,
-  TRAINING_ERROR, TRAINING_START_LOADING, UPDATE_TRAINING, UPDATE_TRAINING_STATUS
+  FETCH_ALL_TRAINING,
+  FETCH_EXT_TRAINING,
+  FETCH_EXT_TRAINING_HISTORY,
+  FETCH_ONE_TRAINING,
+  FETCH_TODAY_TRAINING,
+  FETCH_TRAINING_COUNT,
+  FETCH_TRAINING_HISTORY,
+  FETCH_UPCOMING_TRAINING,
+  LEAVE_TRAINING,
+  TRAINING_END_LOADING,
+  TRAINING_ERROR,
+  TRAINING_START_LOADING,
+  UPDATE_TRAINING,
+  UPDATE_TRAINING_STATUS,
 } from '../constants/actionTypes';
 
 export const fetchAllTrainings = () => async (dispatch) => {
@@ -15,28 +25,7 @@ export const fetchAllTrainings = () => async (dispatch) => {
     dispatch({ type: FETCH_ALL_TRAINING, payload: data });
     dispatch({ type: TRAINING_END_LOADING });
   } catch (error) {
-    if (error.response) {
-      // Request made and server responded
-      dispatch({
-        type: TRAINING_ERROR,
-        error: error.response.data.message,
-      });
-      message.error(error.response.data.message.toString());
-    } else if (error.request) {
-      // The request was made but no response was received
-      dispatch({
-        type: TRAINING_ERROR,
-        error: error.request,
-      });
-      message.error(error.request.toString());
-    } else {
-      // Something happened in setting up the request that triggered an Error
-      dispatch({
-        type: TRAINING_ERROR,
-        error: error.message,
-      });
-      message.error(error.message.toString());
-    }
+    dispatch({ type: TRAINING_ERROR, error });
   }
 };
 export const fetchTrainingById = (id) => async (dispatch) => {
@@ -46,28 +35,7 @@ export const fetchTrainingById = (id) => async (dispatch) => {
     dispatch({ type: FETCH_ONE_TRAINING, payload: data });
     dispatch({ type: TRAINING_END_LOADING });
   } catch (error) {
-    if (error.response) {
-      // Request made and server responded
-      dispatch({
-        type: TRAINING_ERROR,
-        error: error.response.data.message,
-      });
-      message.error(error.response.data.message.toString());
-    } else if (error.request) {
-      // The request was made but no response was received
-      dispatch({
-        type: TRAINING_ERROR,
-        error: error.request,
-      });
-      message.error(error.request.toString());
-    } else {
-      // Something happened in setting up the request that triggered an Error
-      dispatch({
-        type: TRAINING_ERROR,
-        error: error.message,
-      });
-      message.error(error.message.toString());
-    }
+    dispatch({ type: TRAINING_ERROR, error });
   }
 };
 export const createTraining = (training) => async (dispatch) => {

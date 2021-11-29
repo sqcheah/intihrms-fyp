@@ -55,8 +55,6 @@ const Home = ({ user }) => {
     dispatch(getLeaveTypes());
   }, [dispatch]);
 
-  console.log(user);
-
   const leaveData = [];
 
   user.leaveCount.forEach((element) => {
@@ -116,7 +114,11 @@ const Home = ({ user }) => {
                 {user.department.name}
               </Descriptions.Item>
               {user.leaveCount.map((entry, index) => (
-                <Descriptions.Item label={entry.leaveType.name} span={2}>
+                <Descriptions.Item
+                  label={entry.leaveType.name}
+                  span={2}
+                  key={entry.leaveType._id}
+                >
                   {entry.count}
                 </Descriptions.Item>
               ))}
@@ -221,6 +223,11 @@ const Home = ({ user }) => {
       <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
         <Col className='gutter-row' xs={24} sm={12}>
           <Card bordered>
+            <div style={{ textAlign: 'right' }}>
+              <Button type='primary' shape='round'>
+                <Link to='/leaves/home'>Leaves Dashboard</Link>
+              </Button>
+            </div>
             <b>Currently on Leave:</b>
             {todayLeaves &&
               (!todayLeaves.length ? (
@@ -258,13 +265,15 @@ const Home = ({ user }) => {
                   </Table>
                 </>
               ))}
-            <Button type='danger'>
-              <Link to='/leaves/home'>Leaves Dashboard</Link>
-            </Button>
           </Card>
         </Col>
         <Col className='gutter-row' xs={24} sm={12}>
           <Card bordered>
+            <div style={{ textAlign: 'right' }}>
+              <Button type='primary' shape='round'>
+                <Link to='/training/home'>Training Dashboard</Link>
+              </Button>
+            </div>
             <b>Internal Trainings Today:</b>
             {trainings &&
               (!trainings.length ? (
@@ -294,9 +303,6 @@ const Home = ({ user }) => {
                   </Table>
                 </>
               ))}
-            <Button type='danger'>
-              <Link to='/training/home'>Training Dashboard</Link>
-            </Button>
           </Card>
         </Col>
       </Row>

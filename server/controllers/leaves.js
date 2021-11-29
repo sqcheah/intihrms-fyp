@@ -5,7 +5,8 @@ import holidayModel from '../models/holidayModel.js';
 import moment from 'moment';
 import userModel from '../models/userModel.js';
 import notificationModel from '../models/notificationModel.js';
-import { io } from '../index.js';
+import { beamsClient, io } from '../index.js';
+import { sendMail } from '../service/email.js';
 export const fetchAllLeaves = async (req, res) => {
   try {
     const leaves = await leaveModel
@@ -30,7 +31,7 @@ export const fetchLeaveById = async (req, res) => {
         { path: 'department', select: 'name' },
         { path: 'leaveType' },
       ]);
-    console.log(leave);
+    //   console.log(leave);
     res.status(200).json(leave);
   } catch (error) {
     console.log(error);
@@ -41,36 +42,15 @@ export const fetchLeaveById = async (req, res) => {
 export const createLeave = async (req, res) => {
   const leave = req.body;
 
-  console.log(req.body.extra);
   // console.log('files', req.files);
   let filesArray = [];
-  /**
-   * {
-    fieldname: 'files',
-    originalname: 'Capture1.PNG',
-    encoding: '7bit',
-    mimetype: 'image/png',
-    size: 155376,
-    bucket: 'intihrmsbucket',
-    key: '2021-11-18T15-30-11.754Z-Capture1.PNG',
-    acl: 'private',
-    contentType: 'image/png',
-    contentDisposition: null,
-    contentEncoding: null,
-    storageClass: 'STANDARD',
-    serverSideEncryption: null,
-    metadata: { fieldName: 'files' },
-    location: 'https://intihrmsbucket.s3.amazonaws.com/2021-11-18T15-30-11.754Z-Capture1.PNG',
-    etag: '"1783936d33c5cc2001c400a9a9c6f3e5"',
-    versionId: undefined
-  }
-   */
+
   try {
     req.files.forEach((element) => {
       const file = {
         fileId: mongoose.Types.ObjectId(),
         fileName: element.originalname,
-        filePath: element.path,
+        filePath: element.location,
         fileType: element.mimetype,
         fileSize: fileSizeFormatter(element.size, 2),
       };
@@ -86,7 +66,6 @@ export const createLeave = async (req, res) => {
     await newLeave
       .save()
       .then(async (result) => {
-        res.status(201).json(newLeave);
         await userModel
           .aggregate([
             {
@@ -97,25 +76,35 @@ export const createLeave = async (req, res) => {
                 as: 'roles',
               },
             },
+            { $unwind: '$roles' },
             {
               $match: {
-                $or: [
-                  { 'roles.name': 'admin' },
+                $and: [
+                  { _id: { $ne: mongoose.Types.ObjectId(leave.user) } },
                   {
-                    $and: [
-                      { 'roles.name': 'supervisor' },
-                      { department: mongoose.Types.ObjectId(leave.department) },
+                    $or: [
+                      { 'roles.name': 'admin' },
+                      {
+                        $and: [
+                          { 'roles.name': 'supervisor' },
+                          {
+                            department: mongoose.Types.ObjectId(
+                              leave.department
+                            ),
+                          },
+                        ],
+                      },
                     ],
                   },
                 ],
               },
             },
             {
-              $project: { _id: 1 },
+              $project: { _id: 1, settings: 1 },
             },
           ])
           .exec(async (err, result) => {
-            await result.forEach(async ({ _id: id }) => {
+            await result.forEach(async ({ _id: id, settings }) => {
               const notification = {
                 sender: leave.user,
                 recipient: id,
@@ -127,28 +116,25 @@ export const createLeave = async (req, res) => {
                 },
               };
               await notificationModel.create(notification);
-              console.log(id);
-              /** 
-              const receiver = getUser(id.toString());
-              console.log(receiver?.email);
-              if (receiver) {
-                io.to(receiver.socketId).emit('newNotification', {
-                  ...notification,
-                  sender: leave.user_name,
-                });
-              }
-              */
 
               io.to(id.toString()).emit('newNotification', {
                 ...notification,
                 sender: leave.user_name,
               });
-            });
 
-            //console.log(err, result);
+              if (settings.email) {
+                sendMail({
+                  type: 'newLeave',
+                  sender: leave.user_name,
+                  leaveId: notification.content.id,
+                });
+              }
+            });
           });
+        return res.status(201).json(newLeave);
       })
       .catch((error) => {
+        console.log(error);
         return res.status(409).json({ message: error });
       });
   } catch (error) {
@@ -171,7 +157,7 @@ export const updateLeave = async (req, res) => {
       const file = {
         fileId: mongoose.Types.ObjectId(),
         fileName: element.originalname,
-        filePath: element.path,
+        filePath: element.location,
         fileType: element.mimetype,
         fileSize: fileSizeFormatter(element.size, 2),
       };
@@ -200,6 +186,41 @@ export const updateLeave = async (req, res) => {
         { path: 'leaveType' },
       ]);
   }
+  if (leave.status == 'Approved' || leave.status == 'Rejected') {
+    try {
+      await userModel
+        .findById(updatedLeave.user._id)
+        .lean()
+        .exec(async (err, result) => {
+          const notification = {
+            sender: leave.approver,
+            recipient: updatedLeave.user._id,
+            content: {
+              id: _id,
+              message: `${leave.status} your leave request`,
+              type: 'leave',
+              status: leave.status,
+            },
+          };
+          await notificationModel.create(notification);
+          io.to(updatedLeave.user._id.toString()).emit('newNotification', {
+            ...notification,
+            sender: leave.user_name,
+          });
+
+          if (result.settings.email) {
+            sendMail({
+              type: 'leaveApproval',
+              sender: leave.user_name,
+              leaveId: notification.content.id,
+              status: leave.status,
+            });
+          }
+        });
+    } catch (err) {
+      console.log(err);
+    }
+  }
   res.json(updatedLeave);
 };
 //https://github.com/Musawirkhann/Nodejs_Mongodb_Express_Multer/blob/main/serverproject/controllers/fileuploaderController.js
@@ -216,7 +237,7 @@ const fileSizeFormatter = (bytes, decimal) => {
 };
 
 export const fetchLeaveByDateRange = async (req, res) => {
-  console.log('here');
+  // console.log('here');
   const { fromDate, toDate } = req.body;
   try {
     const leaves = await leaveModel
@@ -248,8 +269,8 @@ export const fetchLeaveByDateRange = async (req, res) => {
         },
       ])
       .exec();
-    console.log(leaves);
-    console.log(holidays);
+    //  console.log(leaves);
+    //   console.log(holidays);
 
     res.status(200).json({ leaves, holidays });
   } catch (error) {
@@ -260,7 +281,7 @@ export const fetchLeaveByDateRange = async (req, res) => {
 
 export const fetchLeaveByDateRangePersonal = async (req, res) => {
   const { fromDate, toDate, id } = req.body;
-  console.log(id);
+  // console.log(id);
   try {
     const leaves = await leaveModel
       .find({
@@ -291,8 +312,8 @@ export const fetchLeaveByDateRangePersonal = async (req, res) => {
         },
       ])
       .exec();
-    console.log(leaves);
-    console.log(holidays);
+    //  console.log(leaves);
+    //  console.log(holidays);
 
     res.status(200).json({ leaves, holidays });
   } catch (error) {
@@ -490,7 +511,7 @@ export const fetchLeaveCount = async (req, res) => {
         path: 'department',
       },
       (err, result) => {
-        console.log(result);
+        // console.log(result);
         res.status(200).json(result);
       }
     );

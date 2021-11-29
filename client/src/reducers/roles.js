@@ -19,7 +19,11 @@ export default (
     case ROLE_END_LOADING:
       return { ...state, isLoading: false };
     case ROLE_ERROR: {
-      return { ...state, error: handleError(action.error), isLoading: false };
+      return {
+        ...state,
+        error: handleError(action.error) || '',
+        isLoading: false,
+      };
     }
     case ROLE_SUCCESS: {
       return { ...state, success: action.payload.success };

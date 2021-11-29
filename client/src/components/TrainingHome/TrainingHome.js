@@ -165,21 +165,18 @@ const TrainingHome = ({ socket, user }) => {
       </Row>
       <br />
       <Typography.Title level={2}>Quick Overview</Typography.Title>
-      {user.roles.name != 'staff' && (
-        <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
-          <Col className='gutter-row' xs={24} sm={12}>
-            <Card bordered>
-              <b>Pending External Training Requests:{` ${count}`}</b>
-              <Button className='right-button' type='danger'>
-                <Link to='/training/extList'>To Requests</Link>
-              </Button>
-            </Card>
-          </Col>
-        </Row>
-      )}
       <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
-        <Col className='gutter-row' xs={24} sm={24}>
+        <Col
+          className='gutter-row'
+          xs={24}
+          sm={user.roles.name != 'staff' ? 12 : 24}
+        >
           <Card bordered>
+            <div style={{ textAlign: 'right' }}>
+              <Button type='primary' shape='round'>
+                <Link to='/training/history'>To Training History</Link>
+              </Button>
+            </div>
             <b>Upcoming Trainings:</b>
             {upcomingTraining &&
               (!upcomingTraining.length ? (
@@ -224,11 +221,27 @@ const TrainingHome = ({ socket, user }) => {
                   </Table>
                 </>
               ))}
-            <Button type='danger'>
-              <Link to='/training/history'>Training History</Link>
-            </Button>
           </Card>
         </Col>
+        {user.roles.name != 'staff' && (
+          <Col className='gutter-row' xs={24} sm={12}>
+            <Card bordered>
+              <Space
+                wrap
+                align='baseline'
+                style={{ display: 'flex', justifyContent: 'space-between' }}
+              >
+                <Typography.Text strong>
+                  Pending External Training Requests:{` ${count}`}
+                </Typography.Text>
+
+                <Button type='primary' shape='round'>
+                  <Link to='/training/extList'>To Requests</Link>
+                </Button>
+              </Space>
+            </Card>
+          </Col>
+        )}
       </Row>
     </>
   );

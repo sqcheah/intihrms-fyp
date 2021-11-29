@@ -55,7 +55,7 @@ export const updateDept = (id, formData) => async (dispatch) => {
   try {
     dispatch({ type: DEPT_START_LOADING });
     const { data } = await api.updateDept(id, formData);
-    console.log(data);
+
     dispatch({ type: DELETE_DEPT, payload: data });
     dispatch({ type: DEPT_END_LOADING });
   } catch (error) {

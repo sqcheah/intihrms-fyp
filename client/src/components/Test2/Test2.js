@@ -255,8 +255,6 @@ export default () => {
             }
           }
 
-          // console.log('nani', dataSource);
-
           return Promise.resolve({
             data: dataSource,
             success: true,

@@ -11,17 +11,21 @@ import useBreakpoint from 'antd/lib/grid/hooks/useBreakpoint';
 import PageLoading from '../PageLoading/PageLoading';
 const StaffDetail = () => {
   const screens = useBreakpoint();
-  const { user, isLoading } = useSelector((state) => state.users);
+  const { user: u, isLoading } = useSelector((state) => state.users);
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { id } = useParams();
   useEffect(() => {
+    fetchData();
+  }, []);
+  const fetchData = async () => {
     setLoading(true);
-    dispatch(getUser(id)).then(() => setLoading(false));
-  }, [dispatch]);
+    await dispatch(getUser(id));
+    setLoading(false);
+  };
+  if (loading) return <PageLoading />;
 
-  if (loading||!user) return <PageLoading />;
   return (
     <>
       <Descriptions
@@ -30,32 +34,31 @@ const StaffDetail = () => {
         layout={screens.md ? 'horizontal' : 'vertical'}
         column={{ xxl: 4, xl: 3, lg: 3, md: 3, sm: 2, xs: 1 }}
       >
-        <Descriptions.Item label='Employee ID'>{user.emp_id}</Descriptions.Item>
-        <Descriptions.Item label='First Name'>
-          {user.first_name}
-        </Descriptions.Item>
-        <Descriptions.Item label='Last Name'>
-          {user.last_name}
-        </Descriptions.Item>
+        <Descriptions.Item label='Employee ID'>{u.emp_id}</Descriptions.Item>
+        <Descriptions.Item label='First Name'>{u.first_name}</Descriptions.Item>
+        <Descriptions.Item label='Last Name'>{u.last_name}</Descriptions.Item>
 
-        <Descriptions.Item label='Email'>{user.email}</Descriptions.Item>
+        <Descriptions.Item label='Email'>{u.email}</Descriptions.Item>
         <Descriptions.Item label='Department'>
-          {user.department?.name}
+          {u.department?.name}
         </Descriptions.Item>
         <Descriptions.Item label='Employment Date'>
-          {moment(user.employment_date).format('YYYY-MM-DD')}
+          {moment(u.employment_date).format('YYYY-MM-DD')}
         </Descriptions.Item>
       </Descriptions>
       <Descriptions title='Leave Balance' bordered>
-        {user?.leaveCount?.map((leave) => (
+        {u?.leaveCount?.map((leave) => (
           <Descriptions.Item
             key={leave.leaveType._id}
             label={leave.leaveType.name}
           >
-            {leave.leaveType.count}
+            {leave.count}
           </Descriptions.Item>
         ))}
       </Descriptions>
+      <br />
+      <br />
+      <br />
       <Button>
         <Link to='/users'>Back</Link>
       </Button>

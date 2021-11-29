@@ -16,6 +16,7 @@ import {
   ApartmentOutlined,
   CalendarOutlined,
   ExclamationCircleOutlined,
+  TeamOutlined,
 } from '@ant-design/icons';
 import Home from './components/Home/Home';
 import LeaveHome from './components/LeaveHome/LeaveHome';
@@ -123,7 +124,7 @@ export default {
       {
         path: '/users/dept',
         name: 'Employee',
-        icon: <BarChartOutlined />,
+        icon: <TeamOutlined />,
       },
     ],
   },

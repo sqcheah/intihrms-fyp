@@ -9,7 +9,7 @@ const { Column } = Table;
 const LeaveTypeHome = () => {
   const { leaveTypes } = useSelector((state) => state.leaveTypes);
   const dispatch = useDispatch();
-  console.log(leaveTypes);
+
   useEffect(() => {
     dispatch(getLeaveTypes());
   }, [dispatch]);

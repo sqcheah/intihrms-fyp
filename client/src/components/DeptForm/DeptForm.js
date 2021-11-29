@@ -16,7 +16,6 @@ const DeptForm = ({ user }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const onFinish = (values) => {
-    console.log('Success:', values);
     if (id) {
       dispatch(updateDept(id, values));
       Modal.success({
@@ -35,58 +34,58 @@ const DeptForm = ({ user }) => {
       dispatch(getDept(id)).then((data) => {
         form.setFieldsValue(data);
         setLoading(false);
-        console.log(data);
       });
     }
   }, [dispatch, id]);
 
-  const onFinishFailed = (errorInfo) => {
-    console.log('Failed:', errorInfo);
-  };
   if (loading) return <PageLoading />;
   return (
     <>
-      <Title level={2}> Create Department</Title>
+      <Title level={2} style={{ textAlign: 'center' }}>
+        Create Department
+      </Title>
       <Form
+        labelCol={{
+          sm: { span: 8 },
+        }}
+        wrapperCol={{
+          sm: { span: 8 },
+        }}
         form={form}
         name='basic'
-        initialValues={{
-          remember: true,
-        }}
         onFinish={onFinish}
-        onFinishFailed={onFinishFailed}
         autoComplete='off'
       >
+        {/** 
         <Form.Item
           label='Code'
           name='code'
           rules={[
             {
               required: true,
-              message: 'Please insert your code',
+              whitespace: true,
             },
           ]}
         >
-          <Input autoFocus />
+          <Input autoFocus placeholder='Please enter code' />
         </Form.Item>
-
+*/}
         <Form.Item
           label='Name'
           name='name'
           rules={[
             {
               required: true,
-              message: 'Please input your name!',
+              whitespace: true,
             },
           ]}
         >
-          <Input />
+          <Input placeholder='Please enter name' />
         </Form.Item>
 
         <Form.Item
           wrapperCol={{
-            offset: 8,
-            span: 16,
+            sm: { offset: 8 },
           }}
         >
           <Button type='primary' htmlType='submit'>

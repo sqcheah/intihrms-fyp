@@ -6,7 +6,6 @@ import policyModel from '../models/policyModel.js';
 export const createPolicy = async (req, res) => {
   const policy = req.body;
   const newPolicy = new policyModel(policy);
-  console.log(policy);
   newPolicy
     .save()
     .then((result) => {
@@ -18,9 +17,27 @@ export const createPolicy = async (req, res) => {
 };
 export const getPolicies = async (req, res) => {
   try {
-    const policies = await policyModel.find();
+    const policies = await policyModel
+      .find()
+      .populate('departments lists.leavetype')
+      .lean();
+
     res.status(200).json(policies);
   } catch (error) {
+    res.status(404).json({ message: error });
+  }
+};
+export const getPoliciesByDept = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const policies = await policyModel
+      .find({ departments: mongoose.Types.ObjectId(id) })
+      .populate('lists.leavetype')
+      .lean();
+
+    res.status(200).json(policies);
+  } catch (error) {
+    console.log(error);
     res.status(404).json({ message: error });
   }
 };
@@ -29,7 +46,7 @@ export const getPolicy = async (req, res) => {
 
   try {
     const policy = await policyModel.findById(id);
-    console.log(policy);
+
     res.status(200).json(policy);
   } catch (error) {
     res.status(404).json({ message: error });

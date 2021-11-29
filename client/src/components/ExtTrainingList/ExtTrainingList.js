@@ -75,7 +75,7 @@ const ExtTrainingList = () => {
       title: 'Requester Department',
       dataIndex: ['department', 'name'],
       key: 'department',
-
+      hideInSearch: true,
       filters: deptFilters,
       onFilter: (value, record) => record.department.name.indexOf(value) === 0,
     },
@@ -93,6 +93,21 @@ const ExtTrainingList = () => {
       valueType: 'date',
       sorter: (a, b) => moment(a.fromDate) - moment(b.fromDate),
       render: (text, record) => moment(record.fromDate).format('YYYY-MM-DD'),
+    },
+    {
+      title: 'Start Date to End Date',
+      dataIndex: 'fromDate',
+      valueType: 'dateRange',
+      key: 'somehtin',
+      hideInTable: true,
+      search: {
+        transform: (value) => {
+          return {
+            startTime: value[0],
+            endTime: value[1],
+          };
+        },
+      },
     },
     {
       title: 'End Date',
@@ -120,6 +135,7 @@ const ExtTrainingList = () => {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
+      hideInSearch: true,
       filters: statusFilter,
       onFilter: (value, record) => record.status.indexOf(value) === 0,
       render: (text, record) => (
@@ -177,7 +193,6 @@ const ExtTrainingList = () => {
                   if (Object.keys(params).length > 0) {
                     dataSource = dataSource.filter((item) => {
                       return Object.keys(params).every((key) => {
-                        console.log(Object.keys(params));
                         if (!params[key]) {
                           return true;
                         }
@@ -193,6 +208,19 @@ const ExtTrainingList = () => {
                           val = `${item.user.first_name} ${item.user.last_name}`;
                         } else if (key == 'department') {
                           val = `${item.department.name}`;
+                        } else if (key == 'startTime') {
+                          return (
+                            moment(item['fromDate']).diff(
+                              moment(params[key])
+                            ) >= 0
+                          );
+                        } else if (key == 'endTime') {
+                          return (
+                            moment(item['toDate']).diff(
+                              moment(params[key]),
+                              'days'
+                            ) <= 0
+                          );
                         }
                         if (!val) {
                           return true;

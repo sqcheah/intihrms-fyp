@@ -1,10 +1,11 @@
 import { Avatar, List } from 'antd';
+
 import React from 'react';
 import classNames from 'classnames';
-import styles from './NoticeList.less';
+import './NoticeList.less';
 
 const NoticeList = ({
-  data = [],
+  list = [],
   onClick,
   onClear,
   title,
@@ -15,9 +16,9 @@ const NoticeList = ({
   viewMoreText,
   showViewMore = false,
 }) => {
-  if (!data || data.length === 0) {
+  if (!list || list.length === 0) {
     return (
-      <div className={styles.notFound}>
+      <div className={`notFound`}>
         <img
           src='https://gw.alipayobjects.com/zos/rmsportal/sAuJeJzSKbUmHfBQRzmZ.svg'
           alt='not found'
@@ -26,24 +27,24 @@ const NoticeList = ({
       </div>
     );
   }
-
   return (
     <div>
       <List
-        className={styles.list}
-        dataSource={data}
+        className={`list`}
+        dataSource={list}
         renderItem={(item, i) => {
-          const itemCls = classNames(styles.item, {
-            [styles.read]: item.read,
-          }); // eslint-disable-next-line no-nested-ternary
-
+          const itemCls = classNames(`item`, {
+            [`read`]: item.read,
+          });
+          // eslint-disable-next-line no-nested-ternary
           const leftIcon = item.avatar ? (
             typeof item.avatar === 'string' ? (
-              <Avatar className={styles.avatar} src={item.avatar} />
+              <Avatar className={`avatar`} src={item.avatar} />
             ) : (
-              <span className={styles.iconElement}>{item.avatar}</span>
+              <span className={`iconElement`}>{item.avatar}</span>
             )
           ) : null;
+
           return (
             <List.Item
               className={itemCls}
@@ -53,18 +54,20 @@ const NoticeList = ({
               }}
             >
               <List.Item.Meta
-                className={styles.meta}
+                className={`meta`}
                 avatar={leftIcon}
                 title={
-                  <div className={styles.title}>
+                  <div className={`title`}>
                     {item.title}
-                    <div className={styles.extra}>{item.extra}</div>
+                    <div className={`extra`}>{item.extra}</div>
                   </div>
                 }
                 description={
                   <div>
-                    <div className={styles.description}>{item.description}</div>
-                    <div className={styles.datetime}>{item.datetime}</div>
+                    <div
+                      className={`description`}
+                    >{`${item.sender.first_name} ${item.sender.last_name} ${item.content.message}`}</div>
+                    <div className={`datetime`}>{item.createdAt}</div>
                   </div>
                 }
               />
@@ -72,7 +75,7 @@ const NoticeList = ({
           );
         }}
       />
-      <div className={styles.bottomBar}>
+      <div className={`bottomBar`}>
         {showClear ? (
           <div onClick={onClear}>
             {clearText} {title}

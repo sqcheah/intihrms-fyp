@@ -9,6 +9,7 @@ import {
   Image,
   message,
   notification,
+  Modal,
 } from 'antd';
 import {
   CheckCircleOutlined,
@@ -17,7 +18,6 @@ import {
   LikeOutlined,
   UserOutlined,
 } from '@ant-design/icons';
-import RightContent from './components/GlobalHeader/RightContent';
 import ProLayout, {
   PageContainer,
   SettingDrawer,
@@ -25,12 +25,11 @@ import ProLayout, {
 import defaultProps from './_defaultProps';
 import supervisorProps from './_supervisorProps';
 import adminProps from './_adminProps';
-import NoticeIcon from './components/backup/NoticeIcon/';
-import Avatar from './components/GlobalHeader/AvatarDropdown';
+import NoticeIcon from './components/NoticeIcon';
+import Avatar from './components/AvatarDropdown/AvatarDropdown';
 import './App.less';
 
 import LeaveHome from './components/LeaveHome/LeaveHome';
-import Navbar from './components/Navbar/Navbar';
 import Auth from './components/Auth/Auth';
 import Home from './components/Home/Home';
 import LeaveForm from './components/LeaveForm/LeaveForm';
@@ -89,8 +88,10 @@ import TrainingProgressList from './components/TrainingProgressList/TrainingProg
 import ChangePasswordForm from './components/ChangePasswordForm/ChangePasswordForm';
 
 const { Header, Footer, Sider, Content } = Layout;
+
 const App = () => {
   const dispatch = useDispatch();
+  const [showLogo, setShowLogo] = useState(true);
   const [settings, setSetting] = useState({
     fixSiderbar: true,
     navTheme: 'light',
@@ -103,6 +104,7 @@ const App = () => {
   const [socket, setSocket] = useState(null);
   const { authData } = useSelector((state) => state.auth);
   const user = authData?.result;
+
   const location = useLocation();
   var temp = defaultProps;
   const navigate = useNavigate();
@@ -127,36 +129,67 @@ const App = () => {
     setSocket(io('http://localhost:5000'));
   }, []);
   useEffect(() => {
-    if (socket && user) {
-      socket?.emit('newUser', user);
-      socket?.emit('listUser');
-
-      socket?.on('newNotifications', (data) => {
-        let title = 'Notification';
-        let icon = <InfoCircleOutlined />;
-        if (data.content.type == 'leave') {
-          if (data.content.status == 'Pending') {
-            title = 'Leave Request';
-          } else if (data.content.status == 'Approved') {
-            title = 'Leave Approval';
-            icon = <CheckCircleOutlined />;
-          } else if (data.content.status == 'Rejected') {
-            title = 'Leave Approval';
-            icon = <CloseCircleOutlined />;
+    if (socket) {
+      if (user) {
+        socket?.emit('newUser', user);
+        socket?.emit('listUser');
+        /** 
+      beamsClient
+        .start()
+        .then((beamsClient) => beamsClient.getDeviceId())
+        .then((deviceId) =>
+          console.log(
+            'Successfully registered with Beams. Device ID:',
+            deviceId
+          )
+        )
+        .then(() => beamsClient.addDeviceInterest('hello'));
+*/
+        socket?.on('newNotification', (data) => {
+          let title = 'Notification';
+          let url = '';
+          let icon = <InfoCircleOutlined />;
+          if (data.content.type == 'leave') {
+            url += '/leaves/view';
+            if (data.content.status == 'Pending') {
+              title = 'Leave Request';
+            } else if (data.content.status == 'Approved') {
+              title = 'Leave Approval';
+              icon = <CheckCircleOutlined />;
+            } else if (data.content.status == 'Rejected') {
+              title = 'Leave Approval';
+              icon = <CloseCircleOutlined />;
+            }
+          } else if (data.content.type == 'training') {
+            url += '/training/view';
+            if (data.content.status == 'Pending') {
+              title = 'Training Request';
+            } else if (data.content.status == 'Approved') {
+              title = 'Training Approval';
+              icon = <CheckCircleOutlined />;
+            } else if (data.content.status == 'Rejected') {
+              title = 'Training Approval';
+              icon = <CloseCircleOutlined />;
+            }
           }
-        }
 
-        notification.open({
-          message: title,
-          description: `${data.sender} ${data.content.message}`,
-          icon: icon,
-          placement: 'bottomRight',
-          duration: 300,
+          notification.open({
+            message: title,
+            description: `${data.sender} ${data.content.message}`,
+            icon: icon,
+            placement: 'bottomRight',
+            duration: 300,
+            onClick: () => {
+              navigate(`${url}/${data.content.id}`);
+
+              notification.destroy();
+            },
+          });
         });
-      });
+      }
     }
     return () => {
-      socket?.off('newNotifications');
+      socket?.off('newNotification');
       socket?.disconnect();
     };
   }, [socket, user]);
@@ -169,13 +202,19 @@ const App = () => {
       id='test-pro-layout'
       style={{
         height: '100vh',
+        background: 'black',
       }}
     >
       <ProLayout
         title={false}
-        logo={() => (
-          <Image className='logo' src='/INTI_Logo.png' preview={false} />
-        )}
+        logo={() =>
+          showLogo ? (
+            <Image className='logo' src='/INTI_Logo.png' preview={false} />
+          ) : (
+            false
+          )
+        }
+        onCollapse={(collapsed) => setShowLogo(!collapsed)}
         {...temp}
         location={{
           pathname,
@@ -183,14 +222,13 @@ const App = () => {
         menuRender={(props, defaultDom) => {
           return user ? defaultDom : false;
         }}
-        onMenuHeaderClick={(e) => console.log(e)}
         menuItemRender={(item, dom) => {
           // let path = item.path.split('/./')[0];
           return <Link to={item.path || '/'}>{dom}</Link>;
         }}
         rightContentRender={() => (
           <Space size='large'>
-            {false && <NoticeIcon user={user} socket={socket} />}
+            {user && <NoticeIcon user={user} socket={socket} />}
             <Avatar user={user} logout={logout} />
           </Space>
         )}
@@ -358,6 +396,14 @@ const App = () => {
             />
             <Route
               path='/users/create'
+              element={
+                <PrivateRoute user={user}>
+                  <StaffForm socket={socket} user={user} />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path='/users/edit/:id'
               element={
                 <PrivateRoute user={user}>
                   <StaffForm socket={socket} user={user} />
