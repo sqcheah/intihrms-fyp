@@ -15,7 +15,7 @@ export const sendMail = async (content) => {
       emailTemplate = {
         subject: 'New user!',
         html: `<p> Email: ${content.email}</p><br><p> Password: ${content.password}</p>
-        <br><a href="https://competent-dijkstra-2b3714.netlify.app/auth">Click here to sign in</a>`,
+        <br><a href="http://localhost:3000/auth">Click here to sign in</a>`,
       };
       break;
     }
@@ -23,7 +23,7 @@ export const sendMail = async (content) => {
       emailTemplate = {
         subject: 'New Leave Request',
         html: `<p>${content.sender} sent a leave request</p>
-        <br><a href="https://competent-dijkstra-2b3714.netlify.app/leaves/view/${content.leaveId}">Click here to view</a>`,
+        <br><a href="http://localhost:3000/leaves/view/${content.leaveId}">Click here to view</a>`,
       };
       break;
     }
@@ -31,7 +31,7 @@ export const sendMail = async (content) => {
       emailTemplate = {
         subject: 'Leave Approval',
         html: `<p>${content.sender} ${content.status} your leave request</p>
-        <br><a href="https://competent-dijkstra-2b3714.netlify.app/leaves/view/${content.leaveId}">Click here to view</a>`,
+        <br><a href="http://localhost:3000/leaves/view/${content.leaveId}">Click here to view</a>`,
       };
       break;
     }
@@ -39,7 +39,7 @@ export const sendMail = async (content) => {
       emailTemplate = {
         subject: 'New Join Training Request',
         html: `<p>${content.sender} sent a join training request</p>
-        <br><a href="https://competent-dijkstra-2b3714.netlify.app/training/view/${content.trainingId}">Click here to view</a>`,
+        <br><a href="http://localhost:3000/training/view/${content.trainingId}">Click here to view</a>`,
       };
       break;
     }
@@ -47,7 +47,7 @@ export const sendMail = async (content) => {
       emailTemplate = {
         subject: 'New External Training Request',
         html: `<p>${content.sender} sent a external training request</p>
-        <br><a href="https://competent-dijkstra-2b3714.netlify.app/training/view/${content.trainingId}">Click here to view</a>`,
+        <br><a href="http://localhost:3000/training/view/${content.trainingId}">Click here to view</a>`,
       };
       break;
     }
@@ -55,7 +55,7 @@ export const sendMail = async (content) => {
       emailTemplate = {
         subject: 'Internal Training Approval',
         html: `<p>${content.sender} ${content.status} your join training request</p>
-        <br><a href="https://competent-dijkstra-2b3714.netlify.app/training/view/${content.trainingId}">Click here to view</a>`,
+        <br><a href="http://localhost:3000/training/view/${content.trainingId}">Click here to view</a>`,
       };
       break;
     }
@@ -63,7 +63,7 @@ export const sendMail = async (content) => {
       emailTemplate = {
         subject: 'External Training Approval',
         html: `<p>${content.sender} ${content.status} your external training request</p>
-        <br><a href="https://competent-dijkstra-2b3714.netlify.app/training/view/${content.trainingId}">Click here to view</a>`,
+        <br><a href="http://localhost:3000/training/view/${content.trainingId}">Click here to view</a>`,
       };
       break;
     }
@@ -75,10 +75,12 @@ export const sendMail = async (content) => {
       break;
     }
   }
-  console.log(emailTemplate);
+  //console.log(emailTemplate);
+  //console.log(content.email);
   let body = {
     from: process.env.EMAIL_SENDER,
-    to: 'shaoqi1688@gmail.com',
+    to: 'shaoqi1688@gmail.com', //comment this line by adding // in front of the line
+    //to: content.email, //uncomment this line to send to seperate email accounts
     subject: emailTemplate.subject,
     html: emailTemplate.html,
   };

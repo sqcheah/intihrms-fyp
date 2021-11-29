@@ -68,9 +68,11 @@ const StaffHome = ({ user }) => {
                   <Button>
                     <Link to={`/users/view/${record._id}`}>View</Link>
                   </Button>
-                  <Button>
-                    <Link to={`/users/edit/${record._id}`}>Edit</Link>
-                  </Button>
+                  {user.roles.name == 'admin' && (
+                    <Button>
+                      <Link to={`/users/edit/${record._id}`}>Edit</Link>
+                    </Button>
+                  )}
                 </Space>
               )}
             />

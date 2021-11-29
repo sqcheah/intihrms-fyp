@@ -2,7 +2,7 @@
   "name": "client",
   "version": "0.1.0",
   "private": true,
-  "proxy": "https://intihrms.herokuapp.com",
+  "proxy": "http://localhost:5000",
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
     "@ant-design/pro-card": "^1.18.2",

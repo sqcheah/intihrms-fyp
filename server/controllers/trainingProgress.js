@@ -65,9 +65,11 @@ export const getTrainingProgressUser = async (req, res) => {
       ])
       .lean()
       .exec((err, items) => {
+        console.log(items);
         const filterItems = items.filter(
           (item) => item.training.toDate < currentDate
         );
+        console.log(filterItems);
         return res.status(200).json(filterItems);
       });
     //return res.status(200).json(trainingProgress);

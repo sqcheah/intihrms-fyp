@@ -13,6 +13,7 @@ import {
   HistoryOutlined,
   FormOutlined,
   CalendarOutlined,
+  ExclamationCircleOutlined,
 } from '@ant-design/icons';
 import Home from './components/Home/Home';
 import LeaveHome from './components/LeaveHome/LeaveHome';
@@ -77,10 +78,16 @@ export default {
             name: 'Training History',
             icon: <HistoryOutlined />,
           },
+
           {
             path: '/training/submitExt',
             name: 'External Training Request',
             icon: <FormOutlined />,
+          },
+          {
+            path: '/trainingProgress/history',
+            name: 'Track Training Progress',
+            icon: <ExclamationCircleOutlined />,
           },
         ],
       },

@@ -95,11 +95,11 @@ export const createTraining = async (req, res) => {
               },
             },
             {
-              $project: { _id: 1, settings: 1 },
+              $project: { _id: 1, settings: 1, email: 1 },
             },
           ])
           .exec(async (err, result) => {
-            await result.forEach(async ({ _id: id, settings }) => {
+            await result.forEach(async ({ _id: id, settings, email }) => {
               const notification = {
                 sender: training.user,
                 recipient: id,
@@ -121,6 +121,7 @@ export const createTraining = async (req, res) => {
                 sendMail({
                   type: 'newExternalTraining',
                   sender: training.user_name,
+                  email: email,
                   trainingId: notification.content.id,
                 });
               }
@@ -184,7 +185,7 @@ export const updateTraining = async (req, res) => {
           },
         },
         {
-          $project: { _id: 1, settings: 1 },
+          $project: { _id: 1, settings: 1, email: 1 },
         },
       ])
       .exec(async (err, result) => {
@@ -210,6 +211,7 @@ export const updateTraining = async (req, res) => {
             sendMail({
               type: 'joinTraining',
               sender: user_name,
+              email: email,
               trainingId: notification.content.id,
             });
           }
@@ -343,6 +345,7 @@ export const updateTrainingStatus = async (req, res) => {
             sendMail({
               type: 'joinTrainingApproval',
               sender: training.user_name,
+              email: result.email,
               trainingId: notification.content.id,
               status: training.extra.status,
             });
@@ -379,6 +382,7 @@ export const updateTrainingStatus = async (req, res) => {
               type: 'externalTrainingApproval',
               sender: training.user_name,
               leaveId: notification.content.id,
+              email: result.email,
               status: training.status,
             });
           }

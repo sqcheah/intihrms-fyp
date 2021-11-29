@@ -126,7 +126,7 @@ const App = () => {
   }, [location]);
 
   useEffect(() => {
-    setSocket(io('https://intihrms.herokuapp.com'));
+    setSocket(io('http://localhost:5000'));
   }, []);
   useEffect(() => {
     if (socket) {

@@ -100,11 +100,11 @@ export const createLeave = async (req, res) => {
               },
             },
             {
-              $project: { _id: 1, settings: 1 },
+              $project: { _id: 1, settings: 1, email: 1 },
             },
           ])
           .exec(async (err, result) => {
-            await result.forEach(async ({ _id: id, settings }) => {
+            await result.forEach(async ({ _id: id, settings, email }) => {
               const notification = {
                 sender: leave.user,
                 recipient: id,
@@ -126,6 +126,7 @@ export const createLeave = async (req, res) => {
                 sendMail({
                   type: 'newLeave',
                   sender: leave.user_name,
+                  email: email,
                   leaveId: notification.content.id,
                 });
               }
@@ -212,6 +213,7 @@ export const updateLeave = async (req, res) => {
             sendMail({
               type: 'leaveApproval',
               sender: leave.user_name,
+              email: result.email,
               leaveId: notification.content.id,
               status: leave.status,
             });
