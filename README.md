@@ -1,5 +1,5 @@
 # FYP PROJECT 2021 - INTI HRMS
-This project is built with MERN and file storage hosting by AWS.
+This project is built with MERN and file storage hosting by AWS and frontend using Ant Design.
 
 This project is about leave and training management for hr.
 
