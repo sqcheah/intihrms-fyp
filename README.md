@@ -8,6 +8,8 @@ Demo Video Link:https://youtu.be/dOBj-gx7H5s
 Pitch Video Link: https://youtu.be/3-eXh13_tmI
 
 **Feature:**
+Real Time Notification with Socket.io
+
 - Staff
   1. Login
   2. Overall Dashboard, Leave Dashboard, Training Dashboard
