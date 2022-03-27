@@ -3,9 +3,9 @@ This project is built with MERN and file storage hosting by AWS and frontend usi
 
 This project is about leave and training management for hr.
 
-Demo Video Link:https://youtu.be/dOBj-gx7H5s
+Demo Video Link: https://youtu.be/LiqcY8TcveU
 
-Pitch Video Link: https://youtu.be/3-eXh13_tmI
+Pitch Video Link: https://youtu.be/QP4rFNVVGis
 
 **Feature:**
 
