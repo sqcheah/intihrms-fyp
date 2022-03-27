@@ -11,7 +11,7 @@ Pitch Video Link: https://youtu.be/3-eXh13_tmI
 
 Real Time Notification with Socket.io
 
-- Staff
+- **Staff**
   1. Login
   2. Overall Dashboard, Leave Dashboard, Training Dashboard
   3. Apply Leave
@@ -22,14 +22,14 @@ Real Time Notification with Socket.io
   8. View Leave Balance and Training Hours Required
   9. Personal Calendar for a better view of the leave taken
 
-- Supervisor
+- **Supervisor**
   1. Included Feature Above
   2. Overall Dashboard, Leave Dashboard, Training Dashboard for Specific Department 
   3. Manage Leave Request
   4. Manage External Training Request
   5. View staff details in that particular department
  
-- Admin
+- **Admin**
   1. Admin Dahsboard - Overall Dashboard, Leave Dashboard, Training Dashboard for All Department 
   2. Create Internal Training
   3. Holiday Setting
